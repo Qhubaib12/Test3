@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gravity Flip</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0a;
+            font-family: 'Orbitron', monospace;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            color: #00ff88;
+        }
+        
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(180deg, #000428 0%, #004e92 50%, #000428 100%);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        #gameHeader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10vh;
+            background: linear-gradient(to bottom, rgba(0, 255, 136, 0.3), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 3vw;
+            z-index: 10;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.3);
+        }
+        
+        #gameTitle {
+            font-size: clamp(18px, 4vw, 28px);
+            font-weight: 900;
+            color: #00ff88;
+            text-shadow: 0 0 15px #00ff88;
+            letter-spacing: 2px;
+        }
+        
+        #gameStats {
+            display: flex;
+            gap: clamp(15px, 3vw, 25px);
+            font-size: clamp(10px, 2vw, 14px);
+            font-weight: 700;
+        }
+        
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: clamp(8px, 1.5vw, 10px);
+            opacity: 0.7;
+            margin-bottom: 2px;
+        }
+        
+        .stat-value {
+            font-size: clamp(12px, 2.5vw, 16px);
+            color: #fff;
+            text-shadow: 0 0 8px #00ff88;
+        }
+        
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #00ff88;
+            background: rgba(0, 20, 40, 0.95);
+            padding: clamp(20px, 5vw, 40px);
+            border: 2px solid #00ff88;
+            box-shadow: 
+                0 0 30px #00ff88,
+                inset 0 0 20px rgba(0, 255, 136, 0.1);
+            display: none;
+            z-index: 20;
+            border-radius: 12px;
+            min-width: 320px;
+            backdrop-filter: blur(10px);
+        }
+        
+        #gameOver h2 {
+            font-size: clamp(24px, 6vw, 32px);
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #00ff88;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        .score-display {
+            margin: 15px 0;
+            font-size: clamp(14px, 3vw, 18px);
+        }
+        
+        .high-score {
+            color: #ffd700;
+            text-shadow: 0 0 12px #ffd700;
+        }
+        
+        .restart-hint {
+            margin-top: 20px;
+            font-size: clamp(10px, 2vw, 12px);
+            opacity: 0.8;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 3vh;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ff88;
+            text-align: center;
+            font-size: clamp(9px, 2vw, 12px);
+            opacity: 0.8;
+            background: rgba(0, 255, 136, 0.1);
+            padding: clamp(8px, 1.5vh, 12px) clamp(15px, 3vw, 25px);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .gravity-indicator {
+            position: absolute;
+            left: 3vw;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+        
+        .gravity-arrow {
+            width: clamp(20px, 4vw, 30px);
+            height: clamp(40px, 8vw, 60px);
+            background: linear-gradient(180deg, transparent, #00ff88, transparent);
+            border-radius: 4px;
+            position: relative;
+            animation: gravityPulse 1.5s ease-in-out infinite;
+        }
+        
+        .gravity-arrow::before {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 12px solid #00ff88;
+        }
+        
+        .gravity-indicator.flipped {
+            transform: translateY(-50%) rotate(180deg);
+        }
+        
+        .color-indicator {
+            position: absolute;
+            bottom: 15vh;
+            left: 3vw;
+            display: flex;
+            gap: clamp(8px, 1.5vw, 12px);
+            z-index: 10;
+        }
+        
+        .color-dot {
+            width: clamp(18px, 3.5vw, 26px);
+            height: clamp(18px, 3.5vw, 26px);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .color-dot.active {
+            border-color: #fff;
+            box-shadow: 
+                0 0 20px currentColor,
+                inset 0 0 10px rgba(255, 255, 255, 0.2);
+            transform: scale(1.3);
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #00ff88; }
+            to { text-shadow: 0 0 30px #00ff88, 0 0 40px #00ff88; }
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 0.8; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        @keyframes gravityPulse {
+            0%, 100% { opacity: 0.7; transform: scaleY(1); }
+            50% { opacity: 1; transform: scaleY(1.1); }
+        }
+        
+        .new-high-score {
+            animation: celebrate 0.8s ease-out;
+        }
+        
+        @keyframes celebrate {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        /* Space effect */
+        #gameContainer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.6), transparent);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+            animation: stars 20s linear infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        @keyframes stars {
+            from { transform: translateX(0); }
+            to { transform: translateX(-200px); }
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            #gameStats {
+                gap: clamp(10px, 2vw, 20px);
+            }
+            
+            #gameOver {
+                margin: 0 5vw;
+                max-width: 90vw;
+            }
+            
+            .color-indicator {
+                bottom: 12vh;
+            }
+            
+            .gravity-indicator {
+                left: 2vw;
+            }
+            
+            #instructions {
+                font-size: clamp(8px, 2.5vw, 10px);
+                padding: 8px 15px;
+                bottom: 2vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="gameHeader">
+            <div id="gameTitle">GRAVITY FLIP</div>
+            <div id="gameStats">
+                <div class="stat">
+                    <div class="stat-label">SCORE</div>
+                    <div class="stat-value" id="score">00000</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">HI-SCORE</div>
+                    <div class="stat-value high-score" id="highScore">00000</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">SPEED</div>
+                    <div class="stat-value" id="speed">1.0x</div>
+                </div>
+            </div>
+        </div>
+        
+        <canvas id="gameCanvas"></canvas>
+        
+        <div class="gravity-indicator" id="gravityIndicator">
+            <div class="gravity-arrow"></div>
+        </div>
+        
+        <div class="color-indicator">
+            <div class="color-dot active" id="dot0" style="background-color: #ff4757;"></div>
+            <div class="color-dot" id="dot1" style="background-color: #2ed573;"></div>
+            <div class="color-dot" id="dot2" style="background-color: #3742fa;"></div>
+            <div class="color-dot" id="dot3" style="background-color: #ffa502;"></div>
+        </div>
+        
+        <div id="gameOver">
+            <h2>GRAVITY COLLAPSED</h2>
+            <div class="score-display">FINAL SCORE: <span id="finalScore">00000</span></div>
+            <div class="score-display" id="highScoreDisplay" style="display: none;">
+                🚀 NEW HIGH SCORE! 🚀
+            </div>
+            <div class="score-display">BEST: <span id="bestScore" class="high-score">00000</span></div>
+            <div class="restart-hint">TAP OR PRESS [SPACE] TO RESTART</div>
+        </div>
+        
+        <div id="instructions">
+            TAP OR [SPACE] TO FLIP GRAVITY + CHANGE COLOR • MATCH BARRIER COLOR
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Game state
+        let gameRunning = true;
+        let score = 0;
+        let highScore = 0;
+        let gameSpeed = 4;
+        let speedMultiplier = 1.0;
+        
+        // Colors
+        const colors = ['#ff4757', '#2ed573', '#3742fa', '#ffa502'];
+        
+        // Physics
+        let gravity = 0.6;
+        let gravityDirection = 1; // 1 = down, -1 = up
+        let gravityFlipTimer = 0;
+        let nextGravityFlip = 180; // frames until next flip
+        
+        // Player
+        const player = {
+            x: 100,
+            y: 0,
+            width: 24,
+            height: 24,
+            colorIndex: 0,
+            velocityY: 0,
+            get color() { return colors[this.colorIndex]; }
+        };
+        
+        // Barriers
+        let barriers = [];
+        let barrierTimer = 0;
+        const barrierInterval = 140;
+        
+        // Particles
+        let particles = [];
+        
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            player.x = canvas.width * 0.12;
+            player.y = canvas.height / 2;
+            player.width = Math.max(20, canvas.width * 0.022);
+            player.height = Math.max(20, canvas.width * 0.022);
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        
+        // High score management
+        function loadHighScore() {
+            const saved = Math.floor(Math.random() * 5000); // Simulated for demo
+            highScore = saved;
+            updateHighScoreDisplay();
+        }
+        
+        function saveHighScore() {
+            // Would save to localStorage in real implementation
+        }
+        
+        function updateHighScoreDisplay() {
+            document.getElementById('highScore').textContent = highScore.toString().padStart(5, '0');
+        }
+        
+        function formatScore(num) {
+            return num.toString().padStart(5, '0');
+        }
+        
+        function updateColorIndicator() {
+            document.querySelectorAll('.color-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === player.colorIndex);
+            });
+        }
+        
+        function updateGravityIndicator() {
+            const indicator = document.getElementById('gravityIndicator');
+            indicator.classList.toggle('flipped', gravityDirection === -1);
+        }
+        
+        function createBarrier() {
+            const colorIndex = Math.floor(Math.random() * colors.length);
+            const gapHeight = canvas.height * 0.35;
+            const headerHeight = canvas.height * 0.1;
+            const availableHeight = canvas.height - headerHeight - gapHeight;
+            const gapY = headerHeight + Math.random() * availableHeight;
+            
+            barriers.push({
+                x: canvas.width,
+                topY: headerHeight,
+                topHeight: gapY - headerHeight,
+                bottomY: gapY + gapHeight,
+                bottomHeight: canvas.height - (gapY + gapHeight),
+                width: Math.max(25, canvas.width * 0.03),
+                colorIndex: colorIndex,
+                passed: false,
+                get color() { return colors[this.colorIndex]; }
+            });
+        }
+        
+        function createParticle(x, y, color, count = 8) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 15,
+                    vy: (Math.random() - 0.5) * 15,
+                    color: color,
+                    life: 50,
+                    maxLife: 50,
+                    size: Math.random() * 4 + 2
+                });
+            }
+        }
+        
+        function createGravityFlipEffect() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            for (let i = 0; i < 20; i++) {
+                particles.push({
+                    x: centerX + (Math.random() - 0.5) * canvas.width * 0.8,
+                    y: centerY + (Math.random() - 0.5) * canvas.height * 0.8,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8,
+                    color: '#00ff88',
+                    life: 40,
+                    maxLife: 40,
+                    size: Math.random() * 6 + 3
+                });
+            }
+        }
+        
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vx *= 0.96;
+                p.vy *= 0.96;
+                p.life--;
+                
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+        
+        function drawParticles() {
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.life / p.maxLife;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 8;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+        
+        function changePlayerColor() {
+            player.colorIndex = (player.colorIndex + 1) % colors.length;
+            updateColorIndicator();
+            createParticle(player.x + player.width/2, player.y + player.height/2, player.color, 6);
+        }
+        
+        function flipGravity() {
+            gravityDirection *= -1;
+            updateGravityIndicator();
+            createGravityFlipEffect();
+            
+            // Add screen shake effect
+            document.getElementById('gameContainer').style.transform = 'translateY(3px)';
+            setTimeout(() => {
+                document.getElementById('gameContainer').style.transform = '';
+            }, 100);
+        }
+        
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+        
+        function drawPlayer() {
+            ctx.save();
+            
+            // Draw trail effect
+            ctx.globalAlpha = 0.3;
+            ctx.shadowColor = player.color;
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x - 3, player.y, player.width + 6, player.height);
+            
+            // Draw main player
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 15;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // Inner glow
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            const coreSize = Math.max(4, player.width - 8);
+            const offset = (player.width - coreSize) / 2;
+            ctx.fillRect(player.x + offset, player.y + offset, coreSize, coreSize);
+            
+            // Gravity direction indicator on player
+            ctx.fillStyle = '#fff';
+            const dotSize = 3;
+            if (gravityDirection === 1) {
+                ctx.fillRect(player.x + player.width/2 - 1, player.y + player.height - 6, dotSize, dotSize);
+            } else {
+                ctx.fillRect(player.x + player.width/2 - 1, player.y + 2, dotSize, dotSize);
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawBarriers() {
+            barriers.forEach(barrier => {
+                ctx.save();
+                ctx.shadowColor = barrier.color;
+                ctx.shadowBlur = 15;
+                ctx.fillStyle = barrier.color;
+                
+                // Top barrier
+                if (barrier.topHeight > 0) {
+                    ctx.fillRect(barrier.x, barrier.topY, barrier.width, barrier.topHeight);
+                    
+                    // Edge highlight
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.fillRect(barrier.x, barrier.topY, 2, barrier.topHeight);
+                }
+                
+                // Bottom barrier
+                ctx.shadowColor = barrier.color;
+                ctx.shadowBlur = 15;
+                ctx.fillStyle = barrier.color;
+                if (barrier.bottomHeight > 0) {
+                    ctx.fillRect(barrier.x, barrier.bottomY, barrier.width, barrier.bottomHeight);
+                    
+                    // Edge highlight
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.fillRect(barrier.x, barrier.bottomY, 2, barrier.bottomHeight);
+                }
+                
+                ctx.restore();
+            });
+        }
+        
+        function drawBackground() {
+            // Animated background effect
+            const time = Date.now() * 0.002;
+            const headerHeight = canvas.height * 0.1;
+            
+            // Moving grid
+            ctx.strokeStyle = 'rgba(0, 255, 136, 0.15)';
+            ctx.lineWidth = 1;
+            
+            const gridSize = 40;
+            const offsetX = (score * gameSpeed * 0.5) % gridSize;
+            
+            for (let x = -offsetX; x < canvas.width + gridSize; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, headerHeight);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            // Gravity field visualization
+            if (gravityDirection === -1) {
+                ctx.fillStyle = 'rgba(0, 255, 136, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
+            } else {
+                ctx.fillStyle = 'rgba(0, 100, 255, 0.05)';
+                ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
+            }
+        }
+        
+        function update() {
+            if (!gameRunning) return;
+            
+            // Update speed
+            speedMultiplier = 1 + (score * 0.001);
+            gameSpeed = (canvas.width * 0.004) * speedMultiplier;
+            
+            // Update score
+            score += 1;
+            
+            // Handle gravity flips
+            gravityFlipTimer++;
+            const dynamicFlipInterval = Math.max(nextGravityFlip - (score * 0.05), 90);
+            if (gravityFlipTimer >= dynamicFlipInterval) {
+                flipGravity();
+                gravityFlipTimer = 0;
+                nextGravityFlip = 120 + Math.random() * 120; // Random interval
+            }
+            
+            // Apply gravity to player
+            player.velocityY += gravity * gravityDirection;
+            player.velocityY = Math.max(-15, Math.min(15, player.velocityY)); // Terminal velocity
+            player.y += player.velocityY;
+            
+            // Keep player in bounds
+            if (player.y < canvas.height * 0.1) {
+                player.y = canvas.height * 0.1;
+                player.velocityY = Math.max(0, player.velocityY);
+            }
+            if (player.y + player.height > canvas.height) {
+                player.y = canvas.height - player.height;
+                player.velocityY = Math.min(0, player.velocityY);
+            }
+            
+            // Create barriers
+            barrierTimer++;
+            if (barrierTimer >= Math.max(barrierInterval - (score * 0.04), 80)) {
+                createBarrier();
+                barrierTimer = 0;
+            }
+            
+            // Update barriers
+            for (let i = barriers.length - 1; i >= 0; i--) {
+                const barrier = barriers[i];
+                barrier.x -= gameSpeed;
+                
+                // Collision detection
+                if (barrier.topHeight > 0) {
+                    const topBarrier = {
+                        x: barrier.x,
+                        y: barrier.topY,
+                        width: barrier.width,
+                        height: barrier.topHeight
+                    };
+                    if (checkCollision(player, topBarrier)) {
+                        if (player.colorIndex !== barrier.colorIndex) {
+                            gameOver();
+                            return;
+                        }
+                    }
+                }
+                
+                if (barrier.bottomHeight > 0) {
+                    const bottomBarrier = {
+                        x: barrier.x,
+                        y: barrier.bottomY,
+                        width: barrier.width,
+                        height: barrier.bottomHeight
+                    };
+                    if (checkCollision(player, bottomBarrier)) {
+                        if (player.colorIndex !== barrier.colorIndex) {
+                            gameOver();
+                            return;
+                        }
+                    }
+                }
+                
+                // Score points
+                if (!barrier.passed && barrier.x + barrier.width < player.x) {
+                    barrier.passed = true;
+                    score += 100;
+                    createParticle(player.x, player.y + player.height/2, player.color, 4);
+                }
+                
+                // Remove off-screen barriers
+                if (barrier.x + barrier.width < 0) {
+                    barriers.splice(i, 1);
+                }
+            }
+            
+            updateParticles();
+        }
+        
+        function draw() {
+            // Clear with gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#000428');
+            gradient.addColorStop(0.5, '#004e92');
+            gradient.addColorStop(1, '#000428');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawBackground();
+            drawPlayer();
+            drawBarriers();
+            drawParticles();
+            
+            // Update UI
+            document.getElementById('score').textContent = formatScore(score);
+            document.getElementById('speed').textContent = speedMultiplier.toFixed(1) + 'x';
+        }
+        
+        function gameOver() {
+            gameRunning = false;
+            
+            let isNewHighScore = false;
+            if (score > highScore) {
+                highScore = score;
+                isNewHighScore = true;
+                saveHighScore();
+                updateHighScoreDisplay();
+                document.getElementById('highScoreDisplay').style.display = 'block';
+                document.getElementById('gameOver').classList.add('new-high-score');
+            } else {
+                document.getElementById('highScoreDisplay').style.display = 'none';
+                document.getElementById('gameOver').classList.remove('new-high-score');
+            }
+            
+            document.getElementById('finalScore').textContent = formatScore(score);
+            document.getElementById('bestScore').textContent = formatScore(highScore);
+            document.getElementById('gameOver').style.display = 'block';
+        }
+        
+        function restart() {
+            gameRunning = true;
+            score = 0;
+            gameSpeed = canvas.width * 0.004;
+            speedMultiplier = 1.0;
+            barriers = [];
+            particles = [];
+            barrierTimer = 0;
+            gravityFlipTimer = 0;
+            nextGravityFlip = 180;
+            gravityDirection = 1;
+            
+            player.colorIndex = 0;
+            player.x = canvas.width * 0.12;
+            player.y = canvas.height / 2;
+            player.velocityY = 0;
+            
+            updateColorIndicator();
+            updateGravityIndicator();
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('gameOver').classList.remove('new-high-score');
+        }
+        
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function handleInput() {
+            if (gameRunning) {
+                changePlayerColor();
+                // Small upward boost when changing color
+                player.velocityY += -2 * gravityDirection;
+            } else {
+                restart();
+            }
+        }
+        
+        // Input handling
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                handleInput();
+            }
+        });
+
+        // Touch controls
+        let touchStartTime = 0;
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            touchStartTime = Date.now();
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const touchDuration = Date.now() - touchStartTime;
+            if (touchDuration < 500) {
+                handleInput();
+            }
+        });
+
+        // Prevent scrolling
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
+        // Initialize
+        resizeCanvas();
+        loadHighScore();
+        updateColorIndicator();
+        updateGravityIndicator();
+        gameLoop();
+    </script>
+</body>
+</html>
