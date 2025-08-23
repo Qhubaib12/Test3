@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PixelVault - Retro Browser Games</title>
+    <title>PixelAddict - Retro Browser Games</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         * {
@@ -376,7 +376,7 @@
     
     <header>
         <nav class="container">
-            <div class="logo">PIXELVAULT</div>
+            <div class="logo">PIXELADDICT</div>
             <ul class="nav-links">
                 <li><a href="#games">GAMES</a></li>
                 <li><a href="#about">ABOUT</a></li>
@@ -491,7 +491,7 @@
     <footer>
         <div class="container">
             <div class="footer-content">
-                <p>&copy; 2024 PIXELVAULT - RETRO GAMING EXPERIENCE</p>
+                <p>&copy; 2024 PIXELADDICT - RETRO GAMING EXPERIENCE</p>
                 <p class="blinking">PRESS START TO CONTINUE</p>
             </div>
         </div>
@@ -526,14 +526,28 @@
                 gameCard.style.filter = '';
             }, 150);
             
-            // Simulate loading screen
-            const originalContent = gameCard.innerHTML;
-            gameCard.innerHTML = '<div style="padding: 50px; text-align: center; color: #00ff00; font-size: 12px;">LOADING...<br><br>████████████</div>';
+            // Game file paths - Update these paths to match your folder structure
+            const gamePaths = {
+                'puzzle-quest': './games/puzzle-quest/index.html',
+                'neon-runner': './games/neon-runner/index.html',
+                'space-blaster': './games/space-blaster/index.html',
+                'word-dungeon': './games/word-dungeon/index.html'
+            };
             
-            setTimeout(() => {
-                gameCard.innerHTML = originalContent;
-                alert(`GAME LOADED: ${gameId.toUpperCase()}\n\n[In real implementation, this would launch the game]`);
-            }, 1500);
+            // Open the game in a new window/tab
+            if (gamePaths[gameId]) {
+                // Show loading effect
+                const originalContent = gameCard.innerHTML;
+                gameCard.innerHTML = '<div style="padding: 50px; text-align: center; color: #00ff00; font-size: 12px;">LOADING...<br><br>████████████</div>';
+                
+                setTimeout(() => {
+                    gameCard.innerHTML = originalContent;
+                    // Open game in new tab
+                    window.open(gamePaths[gameId], '_blank');
+                }, 1000);
+            } else {
+                alert(`GAME FILE NOT FOUND: ${gameId.toUpperCase()}\n\nPlease add the game file to: ./games/${gameId}/index.html`);
+            }
         }
 
         // Add retro sound effects (placeholder)
