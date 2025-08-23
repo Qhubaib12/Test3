@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Dash</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0a;
+            font-family: 'Orbitron', monospace;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #00ff88;
+        }
+        
+        #gameContainer {
+            width: 900px;
+            height: 500px;
+            background: #000;
+            position: relative;
+            border: 2px solid #00ff88;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 
+                0 0 20px #00ff88,
+                inset 0 0 20px rgba(0, 255, 136, 0.1);
+        }
+        
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: block;
+        }
+        
+        #gameHeader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(to bottom, rgba(0, 255, 136, 0.2), transparent);
+            border-bottom: 1px solid #00ff88;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 10;
+        }
+        
+        #gameTitle {
+            font-size: 24px;
+            font-weight: 900;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+            letter-spacing: 2px;
+        }
+        
+        #gameStats {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-bottom: 2px;
+        }
+        
+        .stat-value {
+            font-size: 16px;
+            color: #fff;
+            text-shadow: 0 0 5px #00ff88;
+        }
+        
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #00ff88;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 40px;
+            border: 2px solid #00ff88;
+            box-shadow: 
+                0 0 30px #00ff88,
+                inset 0 0 20px rgba(0, 255, 136, 0.1);
+            display: none;
+            z-index: 20;
+        }
+        
+        #gameOver h2 {
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px #00ff88;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        .score-display {
+            margin: 15px 0;
+            font-size: 18px;
+        }
+        
+        .high-score {
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffd700;
+        }
+        
+        .restart-hint {
+            margin-top: 20px;
+            font-size: 12px;
+            opacity: 0.8;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ff88;
+            text-align: center;
+            font-size: 11px;
+            opacity: 0.7;
+            background: rgba(0, 255, 136, 0.1);
+            padding: 8px 15px;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+        
+        .color-indicator {
+            position: absolute;
+            bottom: 80px;
+            left: 20px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        
+        .color-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.2s ease;
+        }
+        
+        .color-dot.active {
+            border-color: #fff;
+            box-shadow: 0 0 15px currentColor;
+            transform: scale(1.2);
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 15px #00ff88; }
+            to { text-shadow: 0 0 25px #00ff88, 0 0 35px #00ff88; }
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 0.8; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .new-high-score {
+            animation: celebrate 0.6s ease-out;
+        }
+        
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Retro scanlines effect */
+        #gameContainer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                transparent 50%, 
+                rgba(0, 255, 136, 0.03) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 15;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="gameHeader">
+            <div id="gameTitle">COLOR DASH</div>
+            <div id="gameStats">
+                <div class="stat">
+                    <div class="stat-label">SCORE</div>
+                    <div class="stat-value" id="score">00000</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">HI-SCORE</div>
+                    <div class="stat-value high-score" id="highScore">00000</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">SPEED</div>
+                    <div class="stat-value" id="speed">1.0x</div>
+                </div>
+            </div>
+        </div>
+        
+        <canvas id="gameCanvas" width="900" height="440"></canvas>
+        
+        <div class="color-indicator">
+            <div class="color-dot active" id="dot0" style="background-color: #ff4757;"></div>
+            <div class="color-dot" id="dot1" style="background-color: #2ed573;"></div>
+            <div class="color-dot" id="dot2" style="background-color: #3742fa;"></div>
+            <div class="color-dot" id="dot3" style="background-color: #ffa502;"></div>
+        </div>
+        
+        <div id="gameOver">
+            <h2>GAME OVER</h2>
+            <div class="score-display">FINAL SCORE: <span id="finalScore">00000</span></div>
+            <div class="score-display" id="highScoreDisplay" style="display: none;">
+                🏆 NEW HIGH SCORE! 🏆
+            </div>
+            <div class="score-display">BEST: <span id="bestScore" class="high-score">00000</span></div>
+            <div class="restart-hint">PRESS [SPACE] TO RESTART</div>
+        </div>
+        
+        <div id="instructions">
+            PRESS [SPACE] TO CHANGE COLOR • MATCH BARRIER COLOR TO SURVIVE
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Game state
+        let gameRunning = true;
+        let score = 0;
+        let highScore = 0;
+        let gameSpeed = 3;
+        let speedMultiplier = 1.0;
+        
+        // Colors
+        const colors = ['#ff4757', '#2ed573', '#3742fa', '#ffa502'];
+        const colorNames = ['RED', 'GREEN', 'BLUE', 'ORANGE'];
+        
+        // Player
+        const player = {
+            x: 120,
+            y: 220,
+            width: 35,
+            height: 35,
+            colorIndex: 0,
+            get color() { return colors[this.colorIndex]; }
+        };
+        
+        // Barriers
+        let barriers = [];
+        let barrierTimer = 0;
+        const barrierInterval = 130; // frames between barriers
+        
+        // Particles for effects
+        let particles = [];
+        
+        // Load high score from browser storage
+        function loadHighScore() {
+            const saved = localStorage.getItem('colorDashHighScore');
+            highScore = saved ? parseInt(saved) : 0;
+            updateHighScoreDisplay();
+        }
+        
+        // Save high score to browser storage
+        function saveHighScore() {
+            localStorage.setItem('colorDashHighScore', highScore.toString());
+        }
+        
+        // Update high score display with padding
+        function updateHighScoreDisplay() {
+            document.getElementById('highScore').textContent = highScore.toString().padStart(5, '0');
+        }
+        
+        function formatScore(num) {
+            return num.toString().padStart(5, '0');
+        }
+        
+        function updateColorIndicator() {
+            document.querySelectorAll('.color-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index === player.colorIndex);
+            });
+        }
+        
+        function createBarrier() {
+            const colorIndex = Math.floor(Math.random() * colors.length);
+            const gapHeight = 120;
+            const barrierHeight = (canvas.height - 60 - gapHeight) / 2; // Account for header
+            const gapY = 60 + Math.random() * (canvas.height - 60 - gapHeight - barrierHeight);
+            
+            barriers.push({
+                x: canvas.width,
+                topY: 60,
+                topHeight: gapY - 60,
+                bottomY: gapY + gapHeight,
+                bottomHeight: canvas.height - (gapY + gapHeight),
+                width: 25,
+                colorIndex: colorIndex,
+                passed: false,
+                get color() { return colors[this.colorIndex]; }
+            });
+        }
+        
+        function createParticle(x, y, color) {
+            for (let i = 0; i < 8; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.5) * 12,
+                    color: color,
+                    life: 40,
+                    maxLife: 40,
+                    size: Math.random() * 3 + 2
+                });
+            }
+        }
+        
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vx *= 0.95;
+                p.vy *= 0.95;
+                p.life--;
+                
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+        
+        function drawParticles() {
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.life / p.maxLife;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 5;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+                ctx.restore();
+            });
+        }
+        
+        function changePlayerColor() {
+            player.colorIndex = (player.colorIndex + 1) % colors.length;
+            updateColorIndicator();
+            createParticle(player.x + player.width/2, player.y + player.height/2, player.color);
+        }
+        
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+        
+        function drawPlayer() {
+            // Draw player with retro glow effect
+            ctx.save();
+            ctx.shadowColor = player.color;
+            ctx.shadowBlur = 15;
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // Draw inner core
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.fillRect(player.x + 3, player.y + 3, player.width - 6, player.height - 6);
+            
+            // Draw center dot
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(player.x + player.width/2 - 2, player.y + player.height/2 - 2, 4, 4);
+            ctx.restore();
+        }
+        
+        function drawBarriers() {
+            barriers.forEach(barrier => {
+                ctx.save();
+                ctx.shadowColor = barrier.color;
+                ctx.shadowBlur = 10;
+                ctx.fillStyle = barrier.color;
+                
+                // Draw top barrier
+                if (barrier.topHeight > 0) {
+                    ctx.fillRect(barrier.x, barrier.topY, barrier.width, barrier.topHeight);
+                }
+                
+                // Draw bottom barrier
+                if (barrier.bottomHeight > 0) {
+                    ctx.fillRect(barrier.x, barrier.bottomY, barrier.width, barrier.bottomHeight);
+                }
+                
+                // Draw barrier edges
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.fillRect(barrier.x, barrier.topY, 2, barrier.topHeight);
+                ctx.fillRect(barrier.x, barrier.bottomY, 2, barrier.bottomHeight);
+                
+                ctx.restore();
+            });
+        }
+        
+        function drawBackground() {
+            // Draw grid pattern
+            ctx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
+            ctx.lineWidth = 0.5;
+            
+            const gridSize = 25;
+            const offsetX = (score * gameSpeed * 0.3) % gridSize;
+            
+            for (let x = -offsetX; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 60);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let y = 60; y < canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+        
+        function update() {
+            if (!gameRunning) return;
+            
+            // Increase speed gradually
+            speedMultiplier = 1 + (score * 0.0008);
+            gameSpeed = 3 * speedMultiplier;
+            
+            // Update score
+            score += 1;
+            
+            // Create barriers
+            barrierTimer++;
+            if (barrierTimer >= Math.max(barrierInterval - (score * 0.03), 60)) {
+                createBarrier();
+                barrierTimer = 0;
+            }
+            
+            // Update barriers
+            for (let i = barriers.length - 1; i >= 0; i--) {
+                const barrier = barriers[i];
+                barrier.x -= gameSpeed;
+                
+                // Check collision with top barrier
+                if (barrier.topHeight > 0) {
+                    const topBarrier = {
+                        x: barrier.x,
+                        y: barrier.topY,
+                        width: barrier.width,
+                        height: barrier.topHeight
+                    };
+                    if (checkCollision(player, topBarrier)) {
+                        if (player.colorIndex !== barrier.colorIndex) {
+                            gameOver();
+                            return;
+                        }
+                    }
+                }
+                
+                // Check collision with bottom barrier
+                if (barrier.bottomHeight > 0) {
+                    const bottomBarrier = {
+                        x: barrier.x,
+                        y: barrier.bottomY,
+                        width: barrier.width,
+                        height: barrier.bottomHeight
+                    };
+                    if (checkCollision(player, bottomBarrier)) {
+                        if (player.colorIndex !== barrier.colorIndex) {
+                            gameOver();
+                            return;
+                        }
+                    }
+                }
+                
+                // Award points for passing barrier
+                if (!barrier.passed && barrier.x + barrier.width < player.x) {
+                    barrier.passed = true;
+                    score += 50;
+                    createParticle(player.x, player.y + player.height/2, player.color);
+                }
+                
+                // Remove off-screen barriers
+                if (barrier.x + barrier.width < 0) {
+                    barriers.splice(i, 1);
+                }
+            }
+            
+            updateParticles();
+        }
+        
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawBackground();
+            drawPlayer();
+            drawBarriers();
+            drawParticles();
+            
+            // Update UI
+            document.getElementById('score').textContent = formatScore(score);
+            document.getElementById('speed').textContent = speedMultiplier.toFixed(1) + 'x';
+        }
+        
+        function gameOver() {
+            gameRunning = false;
+            
+            // Check for new high score
+            let isNewHighScore = false;
+            if (score > highScore) {
+                highScore = score;
+                isNewHighScore = true;
+                saveHighScore();
+                updateHighScoreDisplay();
+                document.getElementById('highScoreDisplay').style.display = 'block';
+                document.getElementById('gameOver').classList.add('new-high-score');
+            } else {
+                document.getElementById('highScoreDisplay').style.display = 'none';
+                document.getElementById('gameOver').classList.remove('new-high-score');
+            }
+            
+            document.getElementById('finalScore').textContent = formatScore(score);
+            document.getElementById('bestScore').textContent = formatScore(highScore);
+            document.getElementById('gameOver').style.display = 'block';
+        }
+        
+        function restart() {
+            gameRunning = true;
+            score = 0;
+            gameSpeed = 3;
+            speedMultiplier = 1.0;
+            barriers = [];
+            particles = [];
+            barrierTimer = 0;
+            player.colorIndex = 0;
+            updateColorIndicator();
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('gameOver').classList.remove('new-high-score');
+        }
+        
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Input handling
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (gameRunning) {
+                    changePlayerColor();
+                } else {
+                    restart();
+                }
+            }
+        });
+        
+        // Initialize game
+        loadHighScore();
+        updateColorIndicator();
+        gameLoop();
+    </script>
+</body>
+</html>
