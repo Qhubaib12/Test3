@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelVault - Retro Browser Games</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 0, 0.03) 2px,
+                rgba(0, 255, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: #1a1a1a;
+            border-bottom: 4px solid #00ff00;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            color: #00ff00;
+            text-shadow: 2px 2px 0px #000, 0 0 10px #00ff00;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 2px 2px 0px #000, 0 0 10px #00ff00; }
+            to { text-shadow: 2px 2px 0px #000, 0 0 20px #00ff00, 0 0 30px #00ff00; }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #00ff00;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            padding: 8px 12px;
+            border: 2px solid transparent;
+        }
+
+        .nav-links a:hover {
+            color: #ff6b00;
+            border: 2px solid #ff6b00;
+            box-shadow: 0 0 10px #ff6b00;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 107, 0, 0.1) 0%, transparent 50%);
+        }
+
+        .hero h1 {
+            font-size: clamp(16px, 4vw, 32px);
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 0px #000;
+            animation: pixelPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pixelPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .hero p {
+            font-size: 14px;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            color: #cccccc;
+            line-height: 1.8;
+        }
+
+        .crt-button {
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            text-transform: uppercase;
+        }
+
+        .crt-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.8);
+        }
+
+        /* Games Section */
+        .games-section {
+            padding: 60px 0;
+            background: #111111;
+        }
+
+        .section-title {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 50px;
+            color: #ff6b00;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .game-card {
+            background: #1a1a1a;
+            border: 3px solid #333333;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            border-color: #00ff00;
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.4);
+            transform: translateY(-5px);
+        }
+
+        .game-card.locked {
+            border-color: #666666;
+            opacity: 0.7;
+        }
+
+        .game-card.locked:hover {
+            border-color: #ff6b00;
+            box-shadow: 0 0 25px rgba(255, 107, 0, 0.4);
+        }
+
+        .lock-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 20px;
+            color: #ff6b00;
+        }
+
+        .game-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #2a2a2a, #1a1a1a);
+            border: 2px solid #555555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 32px;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-card:hover .game-icon {
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+        }
+
+        .game-card.locked:hover .game-icon {
+            border-color: #ff6b00;
+            box-shadow: 0 0 15px rgba(255, 107, 0, 0.3);
+        }
+
+        .game-title {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #00ff00;
+            text-shadow: 1px 1px 0px #000;
+        }
+
+        .game-description {
+            font-size: 10px;
+            color: #cccccc;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .game-status {
+            display: inline-block;
+            padding: 8px 15px;
+            font-size: 10px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .free {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .premium {
+            background: #ff6b00;
+            color: #000;
+            box-shadow: 0 0 10px rgba(255, 107, 0, 0.5);
+        }
+
+        .play-btn {
+            background: #333333;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            padding: 12px 20px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+        }
+
+        .play-btn:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .play-btn:disabled {
+            background: #222222;
+            color: #666666;
+            border-color: #666666;
+            cursor: not-allowed;
+        }
+
+        .play-btn.premium-btn {
+            border-color: #ff6b00;
+            color: #ff6b00;
+        }
+
+        .play-btn.premium-btn:hover {
+            background: #ff6b00;
+            color: #000;
+            box-shadow: 0 0 15px rgba(255, 107, 0, 0.5);
+        }
+
+        /* Pixel Grid Background */
+        .pixel-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Footer */
+        footer {
+            background: #0a0a0a;
+            border-top: 4px solid #00ff00;
+            padding: 40px 0;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            font-size: 10px;
+            color: #666666;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero {
+                padding: 60px 0;
+            }
+            
+            .hero h1 {
+                font-size: 20px;
+            }
+            
+            .hero p {
+                font-size: 12px;
+            }
+            
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+        }
+
+        /* Retro animations */
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .blinking {
+            animation: blink 1s infinite;
+        }
+
+        /* Game icons with retro colors */
+        .icon-puzzle { color: #ff6b00; }
+        .icon-runner { color: #00ff00; }
+        .icon-shooter { color: #ff0066; }
+        .icon-word { color: #66ff00; }
+        .icon-dragon { color: #ff3300; }
+        .icon-racing { color: #ffff00; }
+        .icon-kingdom { color: #9966ff; }
+        .icon-sniper { color: #00ffff; }
+    </style>
+</head>
+<body>
+    <div class="pixel-bg"></div>
+    <div class="scanlines"></div>
+    
+    <header>
+        <nav class="container">
+            <div class="logo">PIXELVAULT</div>
+            <ul class="nav-links">
+                <li><a href="#games">GAMES</a></li>
+                <li><a href="#about">ABOUT</a></li>
+                <li><a href="#premium">PREMIUM</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>RETRO BROWSER GAMING</h1>
+            <p>Experience the golden age of gaming with our collection of pixel-perfect browser games. No downloads required - just pure nostalgic fun!</p>
+            <button class="crt-button" onclick="document.getElementById('games').scrollIntoView({behavior: 'smooth'})">
+                START PLAYING
+            </button>
+        </div>
+    </section>
+
+    <section class="games-section" id="games">
+        <div class="container">
+            <h2 class="section-title">GAME COLLECTION</h2>
+            <div class="games-grid">
+                <!-- Free Games -->
+                <div class="game-card" onclick="playGame('puzzle-quest')">
+                    <div class="game-icon">
+                        <span class="icon-puzzle">🧩</span>
+                    </div>
+                    <h3 class="game-title">PUZZLE QUEST</h3>
+                    <p class="game-description">Classic block-matching puzzle with retro 8-bit graphics and chiptune soundtrack.</p>
+                    <span class="game-status free">FREE</span>
+                    <button class="play-btn">PLAY NOW</button>
+                </div>
+
+                <div class="game-card" onclick="playGame('neon-runner')">
+                    <div class="game-icon">
+                        <span class="icon-runner">🏃‍♂️</span>
+                    </div>
+                    <h3 class="game-title">NEON RUNNER</h3>
+                    <p class="game-description">High-speed pixel runner through neon-lit cyberpunk landscapes. Beat your best score!</p>
+                    <span class="game-status free">FREE</span>
+                    <button class="play-btn">PLAY NOW</button>
+                </div>
+
+                <div class="game-card" onclick="playGame('space-blaster')">
+                    <div class="game-icon">
+                        <span class="icon-shooter">🚀</span>
+                    </div>
+                    <h3 class="game-title">SPACE BLASTER</h3>
+                    <p class="game-description">Classic arcade-style space shooter with power-ups and boss battles.</p>
+                    <span class="game-status free">FREE</span>
+                    <button class="play-btn">PLAY NOW</button>
+                </div>
+
+                <div class="game-card" onclick="playGame('word-dungeon')">
+                    <div class="game-icon">
+                        <span class="icon-word">📝</span>
+                    </div>
+                    <h3 class="game-title">WORD DUNGEON</h3>
+                    <p class="game-description">RPG-style word game where vocabulary is your weapon against pixel monsters.</p>
+                    <span class="game-status free">FREE</span>
+                    <button class="play-btn">PLAY NOW</button>
+                </div>
+
+                <!-- Premium Games -->
+                <div class="game-card locked">
+                    <div class="lock-icon">🔒</div>
+                    <div class="game-icon">
+                        <span class="icon-dragon">🐲</span>
+                    </div>
+                    <h3 class="game-title">DRAGON LEGENDS</h3>
+                    <p class="game-description">Epic 16-bit RPG adventure with dragons, magic spells, and legendary quests to complete.</p>
+                    <span class="game-status premium">PREMIUM</span>
+                    <button class="play-btn premium-btn" disabled>UNLOCK $4.99</button>
+                </div>
+
+                <div class="game-card locked">
+                    <div class="lock-icon">🔒</div>
+                    <div class="game-icon">
+                        <span class="icon-racing">🏎️</span>
+                    </div>
+                    <h3 class="game-title">TURBO RACING</h3>
+                    <p class="game-description">Retro-style racing with multiple tracks, pixel cars, and tournament mode.</p>
+                    <span class="game-status premium">PREMIUM</span>
+                    <button class="play-btn premium-btn" disabled>UNLOCK $3.99</button>
+                </div>
+
+                <div class="game-card locked">
+                    <div class="lock-icon">🔒</div>
+                    <div class="game-icon">
+                        <span class="icon-kingdom">🏰</span>
+                    </div>
+                    <h3 class="game-title">KINGDOM BUILDER</h3>
+                    <p class="game-description">Build your pixel kingdom with strategic gameplay and resource management.</p>
+                    <span class="game-status premium">PREMIUM</span>
+                    <button class="play-btn premium-btn" disabled>UNLOCK $5.99</button>
+                </div>
+
+                <div class="game-card locked">
+                    <div class="lock-icon">🔒</div>
+                    <div class="game-icon">
+                        <span class="icon-sniper">🎯</span>
+                    </div>
+                    <h3 class="game-title">SNIPER ELITE</h3>
+                    <p class="game-description">Pixel precision shooting with challenging missions and retro-style graphics.</p>
+                    <span class="game-status premium">PREMIUM</span>
+                    <button class="play-btn premium-btn" disabled>UNLOCK $4.49</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 PIXELVAULT - RETRO GAMING EXPERIENCE</p>
+                <p class="blinking">PRESS START TO CONTINUE</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Game play function
+        function playGame(gameId) {
+            const gameCard = event.currentTarget;
+            if (gameCard.classList.contains('locked')) {
+                // Retro-style alert for premium games
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+juwmnEBjGH1O/JeCMFl2+z4s15KgUP');
+                audio.play();
+                
+                const originalContent = gameCard.innerHTML;
+                gameCard.style.border = '3px solid #ff0000';
+                gameCard.innerHTML = '<div style="padding: 50px; text-align: center; color: #ff0000; font-size: 14px;">ACCESS DENIED<br><br>PREMIUM REQUIRED</div>';
+                
+                setTimeout(() => {
+                    gameCard.innerHTML = originalContent;
+                    gameCard.style.border = '3px solid #666666';
+                }, 2000);
+                return;
+            }
+            
+            // Add retro click effect
+            gameCard.style.transform = 'scale(0.95)';
+            gameCard.style.filter = 'brightness(1.5)';
+            
+            setTimeout(() => {
+                gameCard.style.transform = '';
+                gameCard.style.filter = '';
+            }, 150);
+            
+            // Simulate loading screen
+            const originalContent = gameCard.innerHTML;
+            gameCard.innerHTML = '<div style="padding: 50px; text-align: center; color: #00ff00; font-size: 12px;">LOADING...<br><br>████████████</div>';
+            
+            setTimeout(() => {
+                gameCard.innerHTML = originalContent;
+                alert(`GAME LOADED: ${gameId.toUpperCase()}\n\n[In real implementation, this would launch the game]`);
+            }, 1500);
+        }
+
+        // Add retro sound effects (placeholder)
+        function playBeep() {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+juwmnEBjGH1O/JeCMFl2+z4s15KgUP');
+            audio.play();
+        }
+
+        // Add hover sound effects to buttons
+        document.querySelectorAll('.play-btn, .crt-button').forEach(button => {
+            button.addEventListener('mouseenter', () => {
+                button.style.transform = 'scale(1.05)';
+            });
+            
+            button.addEventListener('mouseleave', () => {
+                button.style.transform = '';
+            });
+        });
+
+        // Add keyboard navigation (retro gaming style)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                document.getElementById('games').scrollIntoView({behavior: 'smooth'});
+            }
+        });
+
+        // Retro startup message
+        // Removed console message for cleaner experience
+    </script>
+</body>
+</html>
