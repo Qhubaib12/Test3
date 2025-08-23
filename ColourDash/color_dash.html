@@ -18,23 +18,22 @@
             font-family: 'Orbitron', monospace;
             overflow: hidden;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
             color: #00ff88;
         }
         
         #gameContainer {
-            width: 900px;
-            height: 500px;
+            width: 100vw;
+            height: 100vh;
             background: #000;
             position: relative;
-            border: 2px solid #00ff88;
+            border: none;
             border-radius: 0;
             overflow: hidden;
             box-shadow: 
-                0 0 20px #00ff88,
-                inset 0 0 20px rgba(0, 255, 136, 0.1);
+                inset 0 0 30px rgba(0, 255, 136, 0.1);
         }
         
         #gameCanvas {
@@ -49,18 +48,18 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 60px;
+            height: 12vh;
             background: linear-gradient(to bottom, rgba(0, 255, 136, 0.2), transparent);
             border-bottom: 1px solid #00ff88;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 3vw;
             z-index: 10;
         }
         
         #gameTitle {
-            font-size: 24px;
+            font-size: clamp(18px, 4vw, 32px);
             font-weight: 900;
             color: #00ff88;
             text-shadow: 0 0 10px #00ff88;
@@ -69,8 +68,8 @@
         
         #gameStats {
             display: flex;
-            gap: 30px;
-            font-size: 14px;
+            gap: clamp(15px, 3vw, 30px);
+            font-size: clamp(10px, 2vw, 14px);
             font-weight: 700;
         }
         
@@ -82,13 +81,13 @@
         }
         
         .stat-label {
-            font-size: 10px;
+            font-size: clamp(8px, 1.5vw, 10px);
             opacity: 0.7;
             margin-bottom: 2px;
         }
         
         .stat-value {
-            font-size: 16px;
+            font-size: clamp(12px, 2.5vw, 16px);
             color: #fff;
             text-shadow: 0 0 5px #00ff88;
         }
@@ -101,17 +100,19 @@
             text-align: center;
             color: #00ff88;
             background: rgba(0, 0, 0, 0.95);
-            padding: 40px;
+            padding: clamp(20px, 5vw, 40px);
             border: 2px solid #00ff88;
             box-shadow: 
                 0 0 30px #00ff88,
                 inset 0 0 20px rgba(0, 255, 136, 0.1);
             display: none;
             z-index: 20;
+            border-radius: 8px;
+            min-width: 300px;
         }
         
         #gameOver h2 {
-            font-size: 32px;
+            font-size: clamp(24px, 6vw, 32px);
             font-weight: 900;
             margin-bottom: 20px;
             text-shadow: 0 0 15px #00ff88;
@@ -120,7 +121,7 @@
         
         .score-display {
             margin: 15px 0;
-            font-size: 18px;
+            font-size: clamp(14px, 3vw, 18px);
         }
         
         .high-score {
@@ -130,37 +131,38 @@
         
         .restart-hint {
             margin-top: 20px;
-            font-size: 12px;
+            font-size: clamp(10px, 2vw, 12px);
             opacity: 0.8;
             animation: blink 1.5s ease-in-out infinite;
         }
         
         #instructions {
             position: absolute;
-            bottom: 15px;
+            bottom: 3vh;
             left: 50%;
             transform: translateX(-50%);
             color: #00ff88;
             text-align: center;
-            font-size: 11px;
+            font-size: clamp(9px, 1.5vw, 12px);
             opacity: 0.7;
             background: rgba(0, 255, 136, 0.1);
-            padding: 8px 15px;
+            padding: clamp(6px, 1vh, 10px) clamp(10px, 2vw, 20px);
             border: 1px solid rgba(0, 255, 136, 0.3);
+            white-space: nowrap;
         }
         
         .color-indicator {
             position: absolute;
-            bottom: 80px;
-            left: 20px;
+            bottom: 15vh;
+            left: 3vw;
             display: flex;
-            gap: 8px;
+            gap: clamp(6px, 1vw, 12px);
             z-index: 10;
         }
         
         .color-dot {
-            width: 20px;
-            height: 20px;
+            width: clamp(16px, 3vw, 24px);
+            height: clamp(16px, 3vw, 24px);
             border-radius: 50%;
             border: 2px solid rgba(255, 255, 255, 0.3);
             transition: all 0.2s ease;
@@ -208,6 +210,46 @@
             pointer-events: none;
             z-index: 15;
         }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            #gameStats {
+                gap: clamp(10px, 2vw, 20px);
+            }
+            
+            #gameOver {
+                margin: 0 5vw;
+                max-width: 90vw;
+            }
+            
+            .color-indicator {
+                bottom: 12vh;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            #instructions {
+                font-size: clamp(8px, 2vw, 10px);
+                padding: 8px 12px;
+                bottom: 2vh;
+            }
+        }
+
+        /* Landscape mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            #gameHeader {
+                height: 15vh;
+            }
+            
+            .color-indicator {
+                bottom: 8vh;
+            }
+            
+            #instructions {
+                bottom: 1vh;
+                font-size: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -230,7 +272,7 @@
             </div>
         </div>
         
-        <canvas id="gameCanvas" width="900" height="440"></canvas>
+        <canvas id="gameCanvas"></canvas>
         
         <div class="color-indicator">
             <div class="color-dot active" id="dot0" style="background-color: #ff4757;"></div>
@@ -287,16 +329,39 @@
         // Particles for effects
         let particles = [];
         
-        // Load high score from browser storage
+        // Set canvas size to full screen
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Update player position and size to be proportional
+            player.x = canvas.width * 0.13; // About 13% from left
+            player.y = canvas.height / 2 - player.height / 2;
+            player.width = Math.max(25, canvas.width * 0.025); // Scale with screen
+            player.height = Math.max(25, canvas.width * 0.025);
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Load high score
         function loadHighScore() {
-            const saved = localStorage.getItem('colorDashHighScore');
-            highScore = saved ? parseInt(saved) : 0;
+            try {
+                const saved = localStorage.getItem('colorDashHighScore');
+                highScore = saved ? parseInt(saved) : 0;
+            } catch (e) {
+                highScore = 0;
+            }
             updateHighScoreDisplay();
         }
         
-        // Save high score to browser storage
+        // Save high score
         function saveHighScore() {
-            localStorage.setItem('colorDashHighScore', highScore.toString());
+            try {
+                localStorage.setItem('colorDashHighScore', highScore.toString());
+            } catch (e) {
+                // Storage not available, continue without saving
+            }
         }
         
         // Update high score display with padding
@@ -316,17 +381,18 @@
         
         function createBarrier() {
             const colorIndex = Math.floor(Math.random() * colors.length);
-            const gapHeight = 120;
-            const barrierHeight = (canvas.height - 60 - gapHeight) / 2; // Account for header
-            const gapY = 60 + Math.random() * (canvas.height - 60 - gapHeight - barrierHeight);
+            const gapHeight = canvas.height * 0.25; // Gap is 25% of screen height
+            const headerHeight = canvas.height * 0.12; // Header is 12% of screen
+            const availableHeight = canvas.height - headerHeight - gapHeight;
+            const gapY = headerHeight + Math.random() * availableHeight;
             
             barriers.push({
                 x: canvas.width,
-                topY: 60,
-                topHeight: gapY - 60,
+                topY: headerHeight,
+                topHeight: gapY - headerHeight,
                 bottomY: gapY + gapHeight,
                 bottomHeight: canvas.height - (gapY + gapHeight),
-                width: 25,
+                width: Math.max(20, canvas.width * 0.028), // Width scales with screen
                 colorIndex: colorIndex,
                 passed: false,
                 get color() { return colors[this.colorIndex]; }
@@ -334,7 +400,8 @@
         }
         
         function createParticle(x, y, color) {
-            for (let i = 0; i < 8; i++) {
+            const particleCount = Math.max(4, Math.min(12, canvas.width / 100)); // Scale particle count
+            for (let i = 0; i < particleCount; i++) {
                 particles.push({
                     x: x,
                     y: y,
@@ -399,11 +466,15 @@
             // Draw inner core
             ctx.shadowBlur = 0;
             ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-            ctx.fillRect(player.x + 3, player.y + 3, player.width - 6, player.height - 6);
+            const coreSize = Math.max(6, player.width - 6);
+            const coreOffset = (player.width - coreSize) / 2;
+            ctx.fillRect(player.x + coreOffset, player.y + coreOffset, coreSize, coreSize);
             
             // Draw center dot
             ctx.fillStyle = '#fff';
-            ctx.fillRect(player.x + player.width/2 - 2, player.y + player.height/2 - 2, 4, 4);
+            const dotSize = Math.max(2, player.width * 0.12);
+            const dotOffset = (player.width - dotSize) / 2;
+            ctx.fillRect(player.x + dotOffset, player.y + dotOffset, dotSize, dotSize);
             ctx.restore();
         }
         
@@ -427,8 +498,13 @@
                 // Draw barrier edges
                 ctx.shadowBlur = 0;
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                ctx.fillRect(barrier.x, barrier.topY, 2, barrier.topHeight);
-                ctx.fillRect(barrier.x, barrier.bottomY, 2, barrier.bottomHeight);
+                const edgeWidth = Math.max(1, barrier.width * 0.1);
+                if (barrier.topHeight > 0) {
+                    ctx.fillRect(barrier.x, barrier.topY, edgeWidth, barrier.topHeight);
+                }
+                if (barrier.bottomHeight > 0) {
+                    ctx.fillRect(barrier.x, barrier.bottomY, edgeWidth, barrier.bottomHeight);
+                }
                 
                 ctx.restore();
             });
@@ -439,17 +515,18 @@
             ctx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
             ctx.lineWidth = 0.5;
             
-            const gridSize = 25;
+            const gridSize = Math.max(25, canvas.width * 0.028); // Scale grid with screen size
+            const headerHeight = canvas.height * 0.12;
             const offsetX = (score * gameSpeed * 0.3) % gridSize;
             
             for (let x = -offsetX; x < canvas.width; x += gridSize) {
                 ctx.beginPath();
-                ctx.moveTo(x, 60);
+                ctx.moveTo(x, headerHeight);
                 ctx.lineTo(x, canvas.height);
                 ctx.stroke();
             }
             
-            for (let y = 60; y < canvas.height; y += gridSize) {
+            for (let y = headerHeight; y < canvas.height; y += gridSize) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
                 ctx.lineTo(canvas.width, y);
@@ -462,14 +539,15 @@
             
             // Increase speed gradually
             speedMultiplier = 1 + (score * 0.0008);
-            gameSpeed = 3 * speedMultiplier;
+            gameSpeed = (canvas.width * 0.003) * speedMultiplier; // Scale speed with screen size
             
             // Update score
             score += 1;
             
             // Create barriers
             barrierTimer++;
-            if (barrierTimer >= Math.max(barrierInterval - (score * 0.03), 60)) {
+            const scaledInterval = barrierInterval - (score * 0.03);
+            if (barrierTimer >= Math.max(scaledInterval, 60)) {
                 createBarrier();
                 barrierTimer = 0;
             }
@@ -567,12 +645,17 @@
         function restart() {
             gameRunning = true;
             score = 0;
-            gameSpeed = 3;
+            gameSpeed = canvas.width * 0.003;
             speedMultiplier = 1.0;
             barriers = [];
             particles = [];
             barrierTimer = 0;
             player.colorIndex = 0;
+            
+            // Reset player position
+            player.x = canvas.width * 0.13;
+            player.y = canvas.height / 2 - player.height / 2;
+            
             updateColorIndicator();
             document.getElementById('gameOver').style.display = 'none';
             document.getElementById('gameOver').classList.remove('new-high-score');
@@ -595,8 +678,33 @@
                 }
             }
         });
-        
+
+        // Touch controls for mobile
+        let touchStartTime = 0;
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            touchStartTime = Date.now();
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const touchDuration = Date.now() - touchStartTime;
+            if (touchDuration < 500) { // Quick tap
+                if (gameRunning) {
+                    changePlayerColor();
+                } else {
+                    restart();
+                }
+            }
+        });
+
+        // Prevent default touch behaviors
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
         // Initialize game
+        resizeCanvas();
         loadHighScore();
         updateColorIndicator();
         gameLoop();
