@@ -255,6 +255,24 @@
             box-shadow: 0 0 10px rgba(255, 107, 0, 0.5);
         }
 
+        .coming-soon {
+            background: #9966ff;
+            color: #000;
+            box-shadow: 0 0 10px rgba(153, 102, 255, 0.5);
+            animation: comingSoonPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes comingSoonPulse {
+            0%, 100% { 
+                background: #9966ff; 
+                box-shadow: 0 0 10px rgba(153, 102, 255, 0.5);
+            }
+            50% { 
+                background: #bb88ff; 
+                box-shadow: 0 0 15px rgba(153, 102, 255, 0.8);
+            }
+        }
+
         .play-btn {
             background: #333333;
             color: #00ff00;
@@ -290,6 +308,29 @@
             background: #ff6b00;
             color: #000;
             box-shadow: 0 0 15px rgba(255, 107, 0, 0.5);
+        }
+
+        .play-btn.coming-soon-btn {
+            border-color: #9966ff;
+            color: #9966ff;
+            animation: comingSoonBtnPulse 2s ease-in-out infinite;
+        }
+
+        .play-btn.coming-soon-btn:hover {
+            background: #9966ff;
+            color: #000;
+            box-shadow: 0 0 15px rgba(153, 102, 255, 0.5);
+        }
+
+        @keyframes comingSoonBtnPulse {
+            0%, 100% { 
+                border-color: #9966ff;
+                color: #9966ff;
+            }
+            50% { 
+                border-color: #bb88ff;
+                color: #bb88ff;
+            }
         }
 
         /* Pixel Grid Background */
@@ -361,7 +402,7 @@
 
         /* Game icons with retro colors */
         .icon-puzzle { color: #ff6b00; }
-        .icon-runner { color: #00ff00; }
+        .icon-pong { color: #00ff00; }
         .icon-shooter { color: #ff0066; }
         .icon-word { color: #66ff00; }
         .icon-dragon { color: #ff3300; }
@@ -400,32 +441,32 @@
             <h2 class="section-title">GAME COLLECTION</h2>
             <div class="games-grid">
                 <!-- Free Games -->
-                <div class="game-card" onclick="playGame('puzzle-quest')">
+                <div class="game-card" onclick="playGame('colour-dash')">
                     <div class="game-icon">
-                        <span class="icon-puzzle">🧩</span>
+                        <span class="icon-puzzle">🎨</span>
                     </div>
-                    <h3 class="game-title">Colour Dash</h3>
-                    <p class="game-description">Classic block-matching puzzle with retro 8-bit graphics and chiptune soundtrack.</p>
+                    <h3 class="game-title">COLOUR DASH</h3>
+                    <p class="game-description">Fast-paced color-matching game where you dash through vibrant pixel landscapes. Match colors to survive!</p>
                     <span class="game-status free">FREE</span>
                     <button class="play-btn">PLAY NOW</button>
                 </div>
 
-                <div class="game-card" onclick="playGame('neon-runner')">
+                <div class="game-card" onclick="playGame('cyber-pong')">
                     <div class="game-icon">
-                        <span class="icon-runner">🏃‍♂️</span>
+                        <span class="icon-pong">🏓</span>
                     </div>
-                    <h3 class="game-title">Cyber Pong</h3>
-                    <p class="game-description">High-speed pixel runner through neon-lit cyberpunk landscapes. Beat your best score!</p>
+                    <h3 class="game-title">CYBER PONG</h3>
+                    <p class="game-description">Classic pong reimagined with neon cyberpunk aesthetics and power-ups. Beat the AI!</p>
                     <span class="game-status free">FREE</span>
                     <button class="play-btn">PLAY NOW</button>
                 </div>
 
-                <div class="game-card" onclick="playGame('space-blaster')">
+                <div class="game-card" onclick="playGame('cyber-twist')">
                     <div class="game-icon">
-                        <span class="icon-shooter">🚀</span>
+                        <span class="icon-shooter">🌀</span>
                     </div>
-                    <h3 class="game-title">Cyber Twist</h3>
-                    <p class="game-description">Classic arcade-style space shooter with power-ups and boss battles.</p>
+                    <h3 class="game-title">CYBER TWIST</h3>
+                    <p class="game-description">Mind-bending puzzle shooter with rotating mechanics and cyber-themed challenges.</p>
                     <span class="game-status free">FREE</span>
                     <button class="play-btn">PLAY NOW</button>
                 </div>
@@ -442,47 +483,47 @@
 
                 <!-- Premium Games -->
                 <div class="game-card locked">
-                    <div class="lock-icon">🔒</div>
+                    <div class="lock-icon">⏰</div>
                     <div class="game-icon">
                         <span class="icon-dragon">🐲</span>
                     </div>
                     <h3 class="game-title">DRAGON LEGENDS</h3>
                     <p class="game-description">Epic 16-bit RPG adventure with dragons, magic spells, and legendary quests to complete.</p>
-                    <span class="game-status premium">PREMIUM</span>
-                    <button class="play-btn premium-btn" disabled>UNLOCK $4.99</button>
+                    <span class="game-status coming-soon">COMING SOON</span>
+                    <button class="play-btn coming-soon-btn" disabled>COMING SOON</button>
                 </div>
 
                 <div class="game-card locked">
-                    <div class="lock-icon">🔒</div>
+                    <div class="lock-icon">⏰</div>
                     <div class="game-icon">
                         <span class="icon-racing">🏎️</span>
                     </div>
                     <h3 class="game-title">TURBO RACING</h3>
                     <p class="game-description">Retro-style racing with multiple tracks, pixel cars, and tournament mode.</p>
-                    <span class="game-status premium">PREMIUM</span>
-                    <button class="play-btn premium-btn" disabled>UNLOCK $3.99</button>
+                    <span class="game-status coming-soon">COMING SOON</span>
+                    <button class="play-btn coming-soon-btn" disabled>COMING SOON</button>
                 </div>
 
                 <div class="game-card locked">
-                    <div class="lock-icon">🔒</div>
+                    <div class="lock-icon">⏰</div>
                     <div class="game-icon">
                         <span class="icon-kingdom">🏰</span>
                     </div>
                     <h3 class="game-title">KINGDOM BUILDER</h3>
                     <p class="game-description">Build your pixel kingdom with strategic gameplay and resource management.</p>
-                    <span class="game-status premium">PREMIUM</span>
-                    <button class="play-btn premium-btn" disabled>UNLOCK $5.99</button>
+                    <span class="game-status coming-soon">COMING SOON</span>
+                    <button class="play-btn coming-soon-btn" disabled>COMING SOON</button>
                 </div>
 
                 <div class="game-card locked">
-                    <div class="lock-icon">🔒</div>
+                    <div class="lock-icon">⏰</div>
                     <div class="game-icon">
                         <span class="icon-sniper">🎯</span>
                     </div>
                     <h3 class="game-title">SNIPER ELITE</h3>
                     <p class="game-description">Pixel precision shooting with challenging missions and retro-style graphics.</p>
-                    <span class="game-status premium">PREMIUM</span>
-                    <button class="play-btn premium-btn" disabled>UNLOCK $4.49</button>
+                    <span class="game-status coming-soon">COMING SOON</span>
+                    <button class="play-btn coming-soon-btn" disabled>COMING SOON</button>
                 </div>
             </div>
         </div>
@@ -526,12 +567,12 @@
                 gameCard.style.filter = '';
             }, 150);
             
-            // Game file paths - Update these paths to match your folder structure
+            // Game folder paths - Clean URLs without index.html
             const gamePaths = {
-                'puzzle-quest': './ColourDash/index.html',
-                'neon-runner': './CyberPong/index.html',
-                'space-blaster': './CyberTwist/index.html',
-                'word-dungeon': './games/word-dungeon/index.html'
+                'colour-dash': './ColourDash/',
+                'cyber-pong': './CyberPong/',
+                'cyber-twist': './CyberTwist/',
+                'word-dungeon': './games/word-dungeon/'
             };
             
             // Open the game in a new window/tab
@@ -542,11 +583,11 @@
                 
                 setTimeout(() => {
                     gameCard.innerHTML = originalContent;
-                    // Open game in new tab
+                    // Open game in new tab - the server will automatically serve index.html
                     window.open(gamePaths[gameId], '_blank');
                 }, 1000);
             } else {
-                alert(`GAME FILE NOT FOUND: ${gameId.toUpperCase()}\n\nPlease add the game file to: ./games/${gameId}/index.html`);
+                alert(`GAME FILE NOT FOUND: ${gameId.toUpperCase()}\n\nPlease add the game file to: ${gamePaths[gameId] || './games/' + gameId + '/'}index.html`);
             }
         }
 
@@ -574,9 +615,6 @@
                 document.getElementById('games').scrollIntoView({behavior: 'smooth'});
             }
         });
-
-        // Retro startup message
-        // Removed console message for cleaner experience
     </script>
 </body>
 </html>
