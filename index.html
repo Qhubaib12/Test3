@@ -232,6 +232,24 @@
             z-index: -1;
         }
 
+        .game-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+                    rgba(0, 255, 0, 0.15) 0%, 
+                    rgba(0, 255, 0, 0.05) 30%, 
+                    transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+
         .game-card:hover {
             border-color: #00ff00;
             box-shadow: 
@@ -242,6 +260,158 @@
 
         .game-card:hover::before {
             opacity: 1;
+        }
+
+        .game-card:hover::after {
+            opacity: 1;
+        }
+
+        /* Animated background particles */
+        .game-card .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 1;
+        }
+
+        .game-card:hover .particles {
+            opacity: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: float 3s linear infinite;
+        }
+
+        .particle:nth-child(1) {
+            left: 10%;
+            animation-delay: 0s;
+            animation-duration: 2s;
+        }
+
+        .particle:nth-child(2) {
+            left: 20%;
+            animation-delay: 0.3s;
+            animation-duration: 2.5s;
+        }
+
+        .particle:nth-child(3) {
+            left: 30%;
+            animation-delay: 0.6s;
+            animation-duration: 3s;
+        }
+
+        .particle:nth-child(4) {
+            left: 40%;
+            animation-delay: 0.9s;
+            animation-duration: 2.2s;
+        }
+
+        .particle:nth-child(5) {
+            left: 50%;
+            animation-delay: 1.2s;
+            animation-duration: 2.8s;
+        }
+
+        .particle:nth-child(6) {
+            left: 60%;
+            animation-delay: 1.5s;
+            animation-duration: 2.3s;
+        }
+
+        .particle:nth-child(7) {
+            left: 70%;
+            animation-delay: 1.8s;
+            animation-duration: 2.7s;
+        }
+
+        .particle:nth-child(8) {
+            left: 80%;
+            animation-delay: 2.1s;
+            animation-duration: 2.4s;
+        }
+
+        @keyframes float {
+            0% {
+                top: 100%;
+                opacity: 0;
+                transform: scale(0);
+            }
+            10% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            90% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                top: -10px;
+                opacity: 0;
+                transform: scale(0);
+            }
+        }
+
+        /* Digital rain effect for locked games */
+        .game-card.locked::after {
+            background: 
+                radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+                    rgba(153, 102, 255, 0.15) 0%, 
+                    rgba(153, 102, 255, 0.05) 30%, 
+                    transparent 60%);
+        }
+
+        .game-card.locked .particle {
+            background: #9966ff;
+            box-shadow: 0 0 4px #9966ff;
+        }
+
+        /* Scan line effect */
+        .game-card .scan-line {
+            position: absolute;
+            top: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff00, transparent);
+            animation: scan 2s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2;
+        }
+
+        .game-card:hover .scan-line {
+            opacity: 0.8;
+        }
+
+        .game-card.locked .scan-line {
+            background: linear-gradient(90deg, transparent, #9966ff, transparent);
+        }
+
+        @keyframes scan {
+            0% {
+                top: -2px;
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                top: 100%;
+                opacity: 0;
+            }
         }
 
         .game-card.locked {
@@ -516,15 +686,227 @@
             animation: blink 1s infinite;
         }
 
-        /* Game icons with retro colors */
-        .icon-puzzle { color: #ff6b00; }
-        .icon-pong { color: #00ff00; }
-        .icon-shooter { color: #ff0066; }
-        .icon-word { color: #66ff00; }
-        .icon-dragon { color: #ff3300; }
-        .icon-racing { color: #ffff00; }
-        .icon-kingdom { color: #9966ff; }
-        .icon-sniper { color: #00ffff; }
+        /* Game icons with retro colors and animations */
+        .icon-puzzle { 
+            color: #ff6b00; 
+            animation: colorShift 3s ease-in-out infinite;
+        }
+
+        .icon-pong { 
+            color: #00ff00; 
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .icon-shooter { 
+            color: #ff0066; 
+            animation: twist 4s linear infinite;
+        }
+
+        .icon-gravity { 
+            color: #66ff00; 
+            animation: gravityFlip 2.5s ease-in-out infinite;
+        }
+
+        .icon-dragon { 
+            color: #ff3300; 
+            animation: dragonBreath 2.5s ease-in-out infinite;
+        }
+
+        .icon-racing { 
+            color: #ffff00; 
+            animation: speedRush 1.5s linear infinite;
+        }
+
+        .icon-kingdom { 
+            color: #9966ff; 
+            animation: castleGlow 3s ease-in-out infinite alternate;
+        }
+
+        .icon-sniper { 
+            color: #00ffff; 
+            animation: targetLock 2s ease-in-out infinite;
+        }
+
+        /* Game-specific animations */
+        @keyframes colorShift {
+            0%, 100% { 
+                color: #ff6b00; 
+                filter: hue-rotate(0deg);
+            }
+            25% { 
+                color: #ff0066; 
+                filter: hue-rotate(90deg);
+            }
+            50% { 
+                color: #6600ff; 
+                filter: hue-rotate(180deg);
+            }
+            75% { 
+                color: #00ff66; 
+                filter: hue-rotate(270deg);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% { 
+                transform: translateY(0px) scale(1);
+            }
+            25% { 
+                transform: translateY(-8px) scaleX(1.1);
+            }
+            50% { 
+                transform: translateY(0px) scale(1);
+            }
+            75% { 
+                transform: translateY(-4px) scaleX(0.95);
+            }
+        }
+
+        @keyframes twist {
+            0% { 
+                transform: rotate(0deg) scale(1);
+                color: #ff0066;
+            }
+            25% { 
+                transform: rotate(90deg) scale(1.1);
+                color: #ff6600;
+            }
+            50% { 
+                transform: rotate(180deg) scale(1);
+                color: #66ff00;
+            }
+            75% { 
+                transform: rotate(270deg) scale(0.9);
+                color: #0066ff;
+            }
+            100% { 
+                transform: rotate(360deg) scale(1);
+                color: #ff0066;
+            }
+        }
+
+        @keyframes gravityFlip {
+            0% { 
+                transform: translateY(0px) rotate(0deg) scale(1);
+                color: #66ff00;
+            }
+            25% { 
+                transform: translateY(-10px) rotate(180deg) scale(0.8);
+                color: #00ff66;
+            }
+            50% { 
+                transform: translateY(0px) rotate(360deg) scale(1.1);
+                color: #ffff00;
+            }
+            75% { 
+                transform: translateY(10px) rotate(180deg) scale(0.9);
+                color: #ff6600;
+            }
+            100% { 
+                transform: translateY(0px) rotate(0deg) scale(1);
+                color: #66ff00;
+            }
+        }
+
+        @keyframes dragonBreath {
+            0%, 100% { 
+                transform: scale(1);
+                text-shadow: 0 0 10px #ff3300;
+            }
+            50% { 
+                transform: scale(1.2);
+                text-shadow: 
+                    0 0 20px #ff3300,
+                    0 0 30px #ff6600,
+                    0 0 40px #ffaa00;
+            }
+        }
+
+        @keyframes speedRush {
+            0% { 
+                transform: translateX(-3px) scale(1);
+            }
+            25% { 
+                transform: translateX(3px) scaleX(1.2);
+            }
+            50% { 
+                transform: translateX(-2px) scale(1);
+            }
+            75% { 
+                transform: translateX(2px) scaleX(0.9);
+            }
+            100% { 
+                transform: translateX(-3px) scale(1);
+            }
+        }
+
+        @keyframes castleGlow {
+            from { 
+                text-shadow: 
+                    0 0 10px #9966ff,
+                    0 0 20px #9966ff;
+                transform: scale(1);
+            }
+            to { 
+                text-shadow: 
+                    0 0 20px #9966ff,
+                    0 0 30px #bb88ff,
+                    0 0 40px #dd99ff;
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes targetLock {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg);
+                color: #00ffff;
+            }
+            25% { 
+                transform: scale(0.9) rotate(-5deg);
+                color: #0099ff;
+            }
+            50% { 
+                transform: scale(1.1) rotate(0deg);
+                color: #00ff99;
+            }
+            75% { 
+                transform: scale(0.95) rotate(5deg);
+                color: #99ff00;
+            }
+        }
+
+        /* Enhanced hover effects for icons */
+        .game-card:hover .icon-puzzle {
+            animation: colorShift 1s ease-in-out infinite;
+        }
+
+        .game-card:hover .icon-pong {
+            animation: bounce 0.8s ease-in-out infinite;
+        }
+
+        .game-card:hover .icon-shooter {
+            animation: twist 2s linear infinite;
+        }
+
+        .game-card:hover .icon-gravity {
+            animation: gravityFlip 1.2s ease-in-out infinite;
+        }
+
+        .game-card:hover .icon-dragon {
+            animation: dragonBreath 1.2s ease-in-out infinite;
+        }
+
+        .game-card:hover .icon-racing {
+            animation: speedRush 0.8s linear infinite;
+        }
+
+        .game-card:hover .icon-kingdom {
+            animation: castleGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        .game-card:hover .icon-sniper {
+            animation: targetLock 1s ease-in-out infinite;
+        }
     </style>
 </head>
 <body>
@@ -559,6 +941,17 @@
             <div class="games-grid">
                 <!-- Free Games -->
                 <div class="game-card" onclick="playGame('colour-dash')">
+                    <div class="particles">
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                    </div>
+                    <div class="scan-line"></div>
                     <div class="game-icon">
                         <span class="icon-puzzle">🎨</span>
                     </div>
@@ -569,6 +962,17 @@
                 </div>
 
                 <div class="game-card" onclick="playGame('cyber-pong')">
+                    <div class="particles">
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                    </div>
+                    <div class="scan-line"></div>
                     <div class="game-icon">
                         <span class="icon-pong">🏓</span>
                     </div>
@@ -579,6 +983,17 @@
                 </div>
 
                 <div class="game-card" onclick="playGame('cyber-twist')">
+                    <div class="particles">
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                    </div>
+                    <div class="scan-line"></div>
                     <div class="game-icon">
                         <span class="icon-shooter">🌀</span>
                     </div>
@@ -588,18 +1003,40 @@
                     <button class="play-btn">PLAY NOW</button>
                 </div>
 
-                <div class="game-card" onclick="playGame('word-dungeon')">
+                <div class="game-card" onclick="playGame('gravity-flip')">
+                    <div class="particles">
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                    </div>
+                    <div class="scan-line"></div>
                     <div class="game-icon">
-                        <span class="icon-word">📝</span>
+                        <span class="icon-gravity">⚡</span>
                     </div>
                     <h3 class="game-title">GRAVITY FLIP</h3>
-                    <p class="game-description">RPG-style word game where vocabulary is your weapon against pixel monsters.</p>
+                    <p class="game-description">Mind-bending platformer where you control gravity! Flip up and down to navigate through challenging pixel worlds.</p>
                     <span class="game-status free">FREE</span>
                     <button class="play-btn">PLAY NOW</button>
                 </div>
 
                 <!-- Premium Games -->
                 <div class="game-card locked">
+                    <div class="particles">
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                    </div>
+                    <div class="scan-line"></div>
                     <div class="lock-icon">⏰</div>
                     <div class="game-icon">
                         <span class="icon-dragon">🐲</span>
@@ -611,6 +1048,17 @@
                 </div>
 
                 <div class="game-card locked">
+                    <div class="particles">
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                    </div>
+                    <div class="scan-line"></div>
                     <div class="lock-icon">⏰</div>
                     <div class="game-icon">
                         <span class="icon-racing">🏎️</span>
@@ -622,6 +1070,17 @@
                 </div>
 
                 <div class="game-card locked">
+                    <div class="particles">
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                    </div>
+                    <div class="scan-line"></div>
                     <div class="lock-icon">⏰</div>
                     <div class="game-icon">
                         <span class="icon-kingdom">🏰</span>
@@ -633,6 +1092,17 @@
                 </div>
 
                 <div class="game-card locked">
+                    <div class="particles">
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                        <div class="particle"></div>
+                    </div>
+                    <div class="scan-line"></div>
                     <div class="lock-icon">⏰</div>
                     <div class="game-icon">
                         <span class="icon-sniper">🎯</span>
