@@ -156,6 +156,7 @@
     let score = 0; let best = 0;
     let objects = []; // spikes, gems, powerups
     let particles = [];
+    let lastSpawnX = 0; // Track last spawn position to ensure proper spacing
 
     // Player dragon
     const dragon = {
@@ -206,43 +207,96 @@
     playBtn.addEventListener('click', (e) => { e.preventDefault(); start(); });
     againBtn.addEventListener('click', (e) => { e.preventDefault(); reset(); start(); });
 
-    // Generators
+    // Generators - FIXED SPACING (SIMPLIFIED)
     let spawnTimer = 0;
+    
     function spawnStuff(dt) {
       spawnTimer += dt;
-      const spawnEvery = 950; // ms
-      if (spawnTimer < spawnEvery) return;
+      
+      // Determine spawn interval based on difficulty
+      const baseInterval = 1200; // Base spawn time in ms
+      const minInterval = 700; // Minimum spawn time
+      const difficultyReduction = Math.min(400, score * 0.6);
+      const spawnInterval = Math.max(minInterval, baseInterval - difficultyReduction);
+      
+      if (spawnTimer < spawnInterval) return;
       spawnTimer = 0;
+
+      // Simple but effective spacing
+      const speed = getSpeed();
+      const minSpacing = 300 * dpr; // Fixed minimum spacing in pixels
+      
+      // Find rightmost obstacle
+      let rightmostX = W + 50 * dpr; // Default spawn position
+      for (const obj of objects) {
+        const objRight = obj.x + (obj.type === 'spike' ? obj.w : obj.r * 2);
+        if (objRight > rightmostX - minSpacing) {
+          rightmostX = objRight + minSpacing;
+        }
+      }
+      
+      const spawnX = rightmostX;
 
       // Decide what to spawn: spikes pair, gem, or shield
       const roll = Math.random();
-      const speed = getSpeed();
 
-      if (roll < 0.68) {
-        // Spike pair like cave teeth
-        const gap = clamp(140 - score * 0.1, 90, 140) * dpr;
-        const topHeight = rand(40, H*0.55 - gap*0.5);
+      if (roll < 0.65) {
+        // Spike pair
+        const gap = clamp(150 - score * 0.05, 120, 150) * dpr;
+        const topHeight = rand(60, H*0.42 - gap*0.5);
         const bottomStart = topHeight + gap;
-        const thickness = rand(28, 42) * dpr;
-        const x = W + 20 * dpr;
+        const thickness = rand(22, 32) * dpr;
         const color = `hsl(${220 + rand(-10, 10)}, 70%, 65%)`;
-        objects.push({ type: 'spike', x, y: 0, w: thickness, h: topHeight, vx: -speed, color });
-        objects.push({ type: 'spike', x, y: bottomStart, w: thickness, h: H - bottomStart, vx: -speed, color });
-      } else if (roll < 0.92) {
-        // Gem
-        const x = W + 20 * dpr;
-        const y = rand(H*0.16, H*0.84);
-        objects.push({ type: 'gem', x, y, r: 10 * dpr, vx: -speed*0.95, bob: rand(0, 6.28) });
+        
+        objects.push({ 
+          type: 'spike', 
+          x: spawnX, 
+          y: 0, 
+          w: thickness, 
+          h: topHeight, 
+          vx: -speed, 
+          color
+        });
+        objects.push({ 
+          type: 'spike', 
+          x: spawnX, 
+          y: bottomStart, 
+          w: thickness, 
+          h: H - bottomStart, 
+          vx: -speed, 
+          color
+        });
+        
+      } else if (roll < 0.88) {
+        // Gem - spawn with small offset
+        const gemX = spawnX + rand(60, 120) * dpr;
+        const safeY = rand(H*0.25, H*0.75);
+        objects.push({ 
+          type: 'gem', 
+          x: gemX,
+          y: safeY, 
+          r: 10 * dpr, 
+          vx: -speed*0.95, 
+          bob: rand(0, 6.28)
+        });
+        
       } else {
         // Shield power-up
-        const x = W + 20 * dpr;
-        const y = rand(H*0.2, H*0.8);
-        objects.push({ type: 'shield', x, y, r: 13 * dpr, vx: -speed*0.9, bob: rand(0, 6.28) });
+        const shieldX = spawnX + rand(80, 150) * dpr;
+        const safeY = rand(H*0.3, H*0.7);
+        objects.push({ 
+          type: 'shield', 
+          x: shieldX,
+          y: safeY, 
+          r: 13 * dpr, 
+          vx: -speed*0.9, 
+          bob: rand(0, 6.28)
+        });
       }
     }
 
     function getSpeed() {
-      return (3.2 + Math.min(8, score * 0.004)) * dpr; // scales with score
+      return (2.4 + Math.min(5, score * 0.002)) * dpr; // Even slower, more controlled speed
     }
 
     // Particles
@@ -447,8 +501,8 @@
         if (o.type === 'gem' || o.type === 'shield') {
           o.y += Math.sin((t*0.006) + o.bob) * 0.6 * dpr;
         }
-        // off screen
-        if (o.x < -120*dpr) objects.splice(i,1);
+        // off screen - increased cleanup distance
+        if (o.x < -150*dpr) objects.splice(i,1);
       }
 
       // Particles
@@ -496,9 +550,6 @@
       score += Math.max(1, Math.floor(dt * 0.02));
       scoreEl.textContent = pad(score);
 
-      // Shield fades slowly while active by time in obstacles (optional keep as on/off)
-      // Here we keep one-hit shield that stays until used.
-
       drawFrame(dt);
       requestAnimationFrame(update);
     }
@@ -521,7 +572,7 @@
     function reset() {
       score = 0; scoreEl.textContent = pad(score);
       dragon.x = 160 * dpr; dragon.y = H*0.5; dragon.vx = 0; dragon.vy = 0; dragon.alive = true; dragon.shield = 0; shieldEl.textContent = 'OFF';
-      objects = []; particles = []; spawnTimer = 0; t = 0; paused = false;
+      objects = []; particles = []; spawnTimer = 0; t = 0; paused = false; nextSpawnX = 0;
     }
 
     function gameOver() {
