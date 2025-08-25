@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyberpunk Twist</title>
+    <title>Retro Runner</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
         * {
             margin: 0;
@@ -14,18 +14,17 @@
         }
         
         body {
-            background: #0a0a0a;
-            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            font-family: 'Press Start 2P', monospace;
             overflow: hidden;
             height: 100vh;
             width: 100vw;
-            color: #00ffff;
+            color: #fff;
         }
         
         #gameContainer {
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(45deg, #000611, #0a0a1e);
             position: relative;
             overflow: hidden;
         }
@@ -33,8 +32,8 @@
         #gameCanvas {
             width: 100%;
             height: 100%;
-            background: transparent;
             display: block;
+            image-rendering: pixelated;
         }
         
         #gameHeader {
@@ -43,8 +42,8 @@
             left: 0;
             right: 0;
             height: 10vh;
-            background: linear-gradient(to bottom, rgba(0, 255, 255, 0.2), transparent);
-            border-bottom: 1px solid #00ffff;
+            background: rgba(0, 0, 0, 0.8);
+            border-bottom: 2px solid #ffd700;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -53,145 +52,80 @@
         }
         
         #gameTitle {
-            font-size: clamp(18px, 4vw, 32px);
-            font-weight: 900;
-            color: #00ffff;
-            text-shadow: 0 0 20px #00ffff;
-            letter-spacing: 3px;
-            animation: titleGlow 2s ease-in-out infinite alternate;
-        }
-        
-        @keyframes titleGlow {
-            from { text-shadow: 0 0 20px #00ffff; }
-            to { text-shadow: 0 0 30px #00ffff, 0 0 40px #ff0080; }
+            font-size: clamp(12px, 2.5vw, 20px);
+            color: #ffd700;
+            text-shadow: 2px 2px 0px #ff6b35;
         }
         
         #gameStats {
             display: flex;
             gap: clamp(15px, 3vw, 30px);
-            font-size: clamp(10px, 2vw, 14px);
-            font-weight: 700;
+            font-size: clamp(8px, 1.5vw, 12px);
         }
         
         .stat {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             text-align: center;
         }
         
         .stat-label {
-            font-size: clamp(8px, 1.5vw, 10px);
-            opacity: 0.7;
+            font-size: clamp(6px, 1vw, 8px);
+            opacity: 0.8;
             margin-bottom: 2px;
         }
         
         .stat-value {
-            font-size: clamp(12px, 2.5vw, 16px);
-            color: #fff;
-            text-shadow: 0 0 5px #00ffff;
+            color: #ffd700;
+            text-shadow: 1px 1px 0px #ff6b35;
         }
         
-        #gameOver, #gameMenu {
+        #gameOver {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            color: #00ffff;
             background: rgba(0, 0, 0, 0.95);
-            padding: clamp(20px, 5vw, 40px);
-            border: 2px solid #00ffff;
-            box-shadow: 
-                0 0 30px #00ffff,
-                inset 0 0 20px rgba(0, 255, 255, 0.1);
+            padding: clamp(20px, 4vw, 40px);
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            display: none;
             z-index: 20;
             border-radius: 8px;
             min-width: 300px;
         }
         
-        #gameMenu {
-            display: block;
-        }
-        
-        #gameOver {
-            display: none;
-        }
-        
-        .menu-title {
-            font-size: clamp(24px, 6vw, 32px);
-            font-weight: 900;
-            margin-bottom: 20px;
-            text-shadow: 0 0 15px #00ffff;
-            animation: titleGlow 2s ease-in-out infinite alternate;
-        }
-        
-        .menu-button {
-            display: block;
-            width: 100%;
-            margin: 10px 0;
-            padding: 15px 25px;
-            background: linear-gradient(45deg, #001a2e, #003366);
-            border: 2px solid #00ffff;
-            color: #00ffff;
-            font-family: 'Orbitron', monospace;
-            font-size: clamp(12px, 2.5vw, 16px);
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .menu-button:hover {
-            background: linear-gradient(45deg, #003366, #0066cc);
-            box-shadow: 0 0 20px #00ffff;
-            transform: scale(1.05);
+        #gameOver h2 {
+            font-size: clamp(16px, 4vw, 24px);
+            color: #ff6b35;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 0px #000;
         }
         
         .score-display {
-            margin: 15px 0;
-            font-size: clamp(14px, 3vw, 18px);
-        }
-        
-        .high-score {
-            color: #ff0080;
-            text-shadow: 0 0 10px #ff0080;
+            margin: 10px 0;
+            font-size: clamp(10px, 2.5vw, 14px);
+            color: #ffd700;
         }
         
         .restart-hint {
-            margin-top: 20px;
-            font-size: clamp(10px, 2vw, 12px);
+            margin-top: 15px;
+            font-size: clamp(8px, 1.5vw, 10px);
             opacity: 0.8;
             animation: blink 1.5s ease-in-out infinite;
         }
         
         #instructions {
             position: absolute;
-            bottom: 3vh;
+            bottom: 2vh;
             left: 50%;
             transform: translateX(-50%);
-            color: #00ffff;
             text-align: center;
-            font-size: clamp(9px, 1.5vw, 12px);
-            opacity: 0.7;
-            background: rgba(0, 255, 255, 0.1);
-            padding: clamp(6px, 1vh, 10px) clamp(10px, 2vw, 20px);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-        }
-        
-        #powerUpDisplay {
-            position: absolute;
-            top: 12vh;
-            left: 3vw;
-            color: #ff0080;
-            font-size: clamp(10px, 2vw, 14px);
-            font-weight: 700;
-            background: rgba(255, 0, 128, 0.1);
-            padding: 8px 15px;
-            border: 1px solid #ff0080;
+            font-size: clamp(8px, 1.2vw, 10px);
+            opacity: 0.8;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 16px;
+            border: 1px solid #ffd700;
             border-radius: 4px;
-            display: none;
         }
         
         @keyframes blink {
@@ -201,7 +135,7 @@
         
         @keyframes celebrate {
             0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
         
@@ -209,54 +143,15 @@
             animation: celebrate 0.6s ease-out;
         }
         
-        /* Cyberpunk scanlines */
-        #gameContainer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(
-                transparent 50%, 
-                rgba(0, 255, 255, 0.03) 50%
-            );
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 15;
-        }
-        
-        /* Grid overlay */
-        #gameContainer::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
-            background-size: 30px 30px;
-            pointer-events: none;
-            z-index: 1;
-        }
-
         /* Mobile optimizations */
         @media (max-width: 768px) {
             #gameStats {
-                gap: clamp(10px, 2vw, 20px);
+                gap: 15px;
             }
             
-            #gameOver, #gameMenu {
+            #gameOver {
                 margin: 0 5vw;
                 max-width: 90vw;
-            }
-            
-            #instructions {
-                font-size: clamp(8px, 2vw, 10px);
-                padding: 8px 12px;
-                bottom: 2vh;
             }
         }
     </style>
@@ -264,56 +159,41 @@
 <body>
     <div id="gameContainer">
         <div id="gameHeader">
-            <div id="gameTitle">CYBERPUNK TWIST</div>
+            <div id="gameTitle">RETRO RUNNER</div>
             <div id="gameStats">
                 <div class="stat">
                     <div class="stat-label">SCORE</div>
-                    <div class="stat-value" id="score">00000</div>
+                    <div class="stat-value" id="score">0</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-label">HI-SCORE</div>
-                    <div class="stat-value high-score" id="highScore">00000</div>
+                    <div class="stat-label">DISTANCE</div>
+                    <div class="stat-value" id="distance">0m</div>
                 </div>
                 <div class="stat">
                     <div class="stat-label">LEVEL</div>
-                    <div class="stat-value" id="level">001</div>
+                    <div class="stat-value" id="level">1</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-label">TRAIL</div>
-                    <div class="stat-value" id="trailLength">005</div>
+                    <div class="stat-label">BEST</div>
+                    <div class="stat-value" id="highScore">0</div>
                 </div>
             </div>
         </div>
         
         <canvas id="gameCanvas"></canvas>
         
-        <div id="powerUpDisplay">
-            <div id="powerUpText">POWER-UP ACTIVE</div>
-            <div id="powerUpTimer">5.0s</div>
-        </div>
-        
-        <div id="gameMenu">
-            <h2 class="menu-title">CYBERPUNK TWIST</h2>
-            <p style="margin-bottom: 20px; font-size: 12px; opacity: 0.8;">Select Game Mode</p>
-            <button class="menu-button" onclick="startGame('classic')">CLASSIC MODE</button>
-            <button class="menu-button" onclick="startGame('maze')">MAZE ESCAPE</button>
-            <button class="menu-button" onclick="startGame('timed')">TIMED CHALLENGE</button>
-            <button class="menu-button" onclick="startGame('survival')">SURVIVAL MODE</button>
-        </div>
-        
         <div id="gameOver">
-            <h2>GAME OVER</h2>
-            <div class="score-display">FINAL SCORE: <span id="finalScore">00000</span></div>
+            <h2>GAME OVER!</h2>
+            <div class="score-display">FINAL SCORE: <span id="finalScore">0</span></div>
+            <div class="score-display">DISTANCE: <span id="finalDistance">0m</span></div>
             <div class="score-display" id="highScoreDisplay" style="display: none;">
                 🏆 NEW HIGH SCORE! 🏆
             </div>
-            <div class="score-display">BEST: <span id="bestScore" class="high-score">00000</span></div>
-            <button class="menu-button" onclick="showMenu()">MAIN MENU</button>
-            <button class="menu-button" onclick="restart()">PLAY AGAIN</button>
+            <div class="restart-hint">PRESS [SPACE] OR TAP TO RESTART</div>
         </div>
         
         <div id="instructions">
-            ARROW KEYS / WASD TO MOVE • COLLECT DATA PACKETS • AVOID WALLS
+            SPACE/UP: JUMP • DOWN: SLIDE • Auto-run enabled
         </div>
     </div>
 
@@ -322,214 +202,69 @@
         const ctx = canvas.getContext('2d');
         
         // Game state
-        let gameRunning = false;
-        let gameMode = 'classic';
+        let gameRunning = true;
         let score = 0;
+        let distance = 0;
         let highScore = 0;
         let level = 1;
-        let timeLeft = 60;
+        let gameSpeed = 8;
         
-        // Snake/Player
-        const snake = {
-            body: [],
-            direction: { x: 1, y: 0 },
-            trail: [],
-            maxTrailLength: 5,
-            color: '#00ffff',
-            size: 20
+        // Player
+        const player = {
+            x: 100,
+            y: 300,
+            width: 32,
+            height: 32,
+            velY: 0,
+            jumping: false,
+            sliding: false,
+            grounded: false,
+            color: '#ff6b35'
         };
         
-        // Data packets (food)
-        let dataPackets = [];
-        let powerUps = [];
+        // Game world
+        let obstacles = [];
+        let coins = [];
+        let platforms = [];
         let particles = [];
-        let walls = [];
+        let clouds = [];
+        let backgroundOffset = 0;
         
-        // Power-up system
-        let activePowerUp = null;
-        let powerUpTimer = 0;
+        // Constants
+        const gravity = 0.6;
+        const jumpPower = -18;
+        const groundY = 400;
         
-        // Game timing
-        let lastTime = 0;
-        let gameSpeed = 150; // milliseconds between moves
-        
-        // Audio context for electronic soundtrack
-        let audioContext;
-        let oscillator;
-        let gainNode;
-        
-        // Initialize audio
-        function initAudio() {
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            } catch (e) {
-                console.log('Audio not supported');
-            }
-        }
-        
-        // Play electronic sound
-        function playSound(frequency, duration, type = 'sine') {
-            if (!audioContext) return;
-            
-            try {
-                const osc = audioContext.createOscillator();
-                const gain = audioContext.createGain();
-                
-                osc.connect(gain);
-                gain.connect(audioContext.destination);
-                
-                osc.frequency.setValueAtTime(frequency, audioContext.currentTime);
-                osc.type = type;
-                
-                gain.gain.setValueAtTime(0.1, audioContext.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
-                
-                osc.start();
-                osc.stop(audioContext.currentTime + duration);
-            } catch (e) {
-                console.log('Audio playback failed');
-            }
-        }
-        
-        // Set canvas size
         function resizeCanvas() {
             canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight - window.innerHeight * 0.1; // Account for header
+            canvas.height = window.innerHeight;
             
-            snake.size = Math.max(15, Math.min(25, canvas.width * 0.02));
+            // Adjust ground level based on screen height
+            const groundY = canvas.height - canvas.height * 0.25;
+            player.y = Math.min(player.y, groundY - player.height);
         }
         
         window.addEventListener('resize', resizeCanvas);
         
-        // Load high score
+        // Load/save high score
         function loadHighScore() {
-            try {
-                const saved = localStorage.getItem('cyberpunkTwistHighScore');
-                highScore = saved ? parseInt(saved) : 0;
-            } catch (e) {
-                highScore = 0;
-            }
-            updateHighScoreDisplay();
+            const saved = localStorage.getItem('retroRunnerHighScore') || '0';
+            highScore = parseInt(saved);
+            document.getElementById('highScore').textContent = highScore;
         }
         
-        // Save high score
         function saveHighScore() {
-            try {
-                localStorage.setItem('cyberpunkTwistHighScore', highScore.toString());
-            } catch (e) {
-                // Storage not available
-            }
+            localStorage.setItem('retroRunnerHighScore', highScore.toString());
         }
         
-        function updateHighScoreDisplay() {
-            document.getElementById('highScore').textContent = highScore.toString().padStart(5, '0');
-        }
-        
-        function formatScore(num) {
-            return num.toString().padStart(5, '0');
-        }
-        
-        // Initialize snake
-        function initSnake() {
-            const centerX = Math.floor(canvas.width / 2 / snake.size) * snake.size;
-            const centerY = Math.floor(canvas.height / 2 / snake.size) * snake.size;
-            
-            snake.body = [
-                { x: centerX, y: centerY },
-                { x: centerX - snake.size, y: centerY },
-                { x: centerX - snake.size * 2, y: centerY },
-                { x: centerX - snake.size * 3, y: centerY },
-                { x: centerX - snake.size * 4, y: centerY }
-            ];
-            snake.direction = { x: 1, y: 0 };
-            snake.trail = [];
-            snake.maxTrailLength = 5;
-        }
-        
-        // Create data packet
-        function createDataPacket() {
-            let x, y;
-            let attempts = 0;
-            
-            do {
-                x = Math.floor(Math.random() * (canvas.width / snake.size)) * snake.size;
-                y = Math.floor(Math.random() * (canvas.height / snake.size)) * snake.size;
-                attempts++;
-            } while (attempts < 100 && (isPositionOccupied(x, y) || isWall(x, y)));
-            
-            if (attempts < 100) {
-                dataPackets.push({
-                    x: x,
-                    y: y,
-                    value: Math.floor(Math.random() * 5) + 1,
-                    color: ['#ff0080', '#00ff80', '#8000ff', '#ff8000', '#ffff00'][Math.floor(Math.random() * 5)],
-                    pulse: 0
-                });
-            }
-        }
-        
-        // Create power-up
-        function createPowerUp() {
-            if (Math.random() < 0.3 && powerUps.length < 2) {
-                let x, y;
-                let attempts = 0;
-                
-                do {
-                    x = Math.floor(Math.random() * (canvas.width / snake.size)) * snake.size;
-                    y = Math.floor(Math.random() * (canvas.height / snake.size)) * snake.size;
-                    attempts++;
-                } while (attempts < 100 && (isPositionOccupied(x, y) || isWall(x, y)));
-                
-                if (attempts < 100) {
-                    const types = ['phase', 'slow', 'boost', 'magnet'];
-                    powerUps.push({
-                        x: x,
-                        y: y,
-                        type: types[Math.floor(Math.random() * types.length)],
-                        pulse: 0
-                    });
-                }
-            }
-        }
-        
-        // Create walls based on game mode
-        function createWalls() {
-            walls = [];
-            
-            if (gameMode === 'maze') {
-                // Create maze walls
-                for (let i = 0; i < 15; i++) {
-                    walls.push({
-                        x: Math.floor(Math.random() * (canvas.width / snake.size)) * snake.size,
-                        y: Math.floor(Math.random() * (canvas.height / snake.size)) * snake.size,
-                        width: snake.size * (Math.floor(Math.random() * 4) + 1),
-                        height: snake.size * (Math.floor(Math.random() * 4) + 1)
-                    });
-                }
-            }
-        }
-        
-        function isPositionOccupied(x, y) {
-            return snake.body.some(segment => segment.x === x && segment.y === y) ||
-                   dataPackets.some(packet => packet.x === x && packet.y === y) ||
-                   powerUps.some(powerUp => powerUp.x === x && powerUp.y === y);
-        }
-        
-        function isWall(x, y) {
-            return walls.some(wall => 
-                x >= wall.x && x < wall.x + wall.width &&
-                y >= wall.y && y < wall.y + wall.height
-            );
-        }
-        
-        // Create particles
-        function createParticle(x, y, color, count = 8) {
+        // Particle system
+        function createParticle(x, y, color, count = 5) {
             for (let i = 0; i < count; i++) {
                 particles.push({
-                    x: x + snake.size / 2,
-                    y: y + snake.size / 2,
-                    vx: (Math.random() - 0.5) * 10,
-                    vy: (Math.random() - 0.5) * 10,
+                    x: x + Math.random() * 20 - 10,
+                    y: y + Math.random() * 20 - 10,
+                    vx: Math.random() * 6 - 3,
+                    vy: Math.random() * 6 - 3,
                     color: color,
                     life: 30,
                     maxLife: 30,
@@ -543,8 +278,8 @@
                 const p = particles[i];
                 p.x += p.vx;
                 p.y += p.vy;
-                p.vx *= 0.95;
-                p.vy *= 0.95;
+                p.vx *= 0.98;
+                p.vy += 0.1; // Gravity
                 p.life--;
                 
                 if (p.life <= 0) {
@@ -553,389 +288,419 @@
             }
         }
         
-        // Movement and collision
-        function moveSnake() {
-            const head = { ...snake.body[0] };
-            head.x += snake.direction.x * snake.size;
-            head.y += snake.direction.y * snake.size;
-            
-            // Check wall collision (boundaries)
-            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
-                if (activePowerUp && activePowerUp.type === 'phase') {
-                    // Phase through walls
-                    head.x = (head.x + canvas.width) % canvas.width;
-                    head.y = (head.y + canvas.height) % canvas.height;
-                } else {
-                    gameOver();
-                    return;
-                }
-            }
-            
-            // Check maze wall collision
-            if (isWall(head.x, head.y) && !(activePowerUp && activePowerUp.type === 'phase')) {
-                gameOver();
-                return;
-            }
-            
-            // Check self collision
-            if (snake.body.some(segment => segment.x === head.x && segment.y === head.y)) {
-                gameOver();
-                return;
-            }
-            
-            snake.body.unshift(head);
-            
-            // Add to trail
-            snake.trail.push({ ...head, color: snake.color, life: snake.maxTrailLength });
-            if (snake.trail.length > snake.maxTrailLength * 3) {
-                snake.trail.shift();
-            }
-            
-            // Check data packet collision
-            let grew = false;
-            for (let i = dataPackets.length - 1; i >= 0; i--) {
-                const packet = dataPackets[i];
-                if (head.x === packet.x && head.y === packet.y) {
-                    score += packet.value * 10;
-                    snake.maxTrailLength = Math.min(50, snake.maxTrailLength + 1);
-                    createParticle(packet.x, packet.y, packet.color, 12);
-                    playSound(800 + packet.value * 200, 0.1, 'square');
-                    dataPackets.splice(i, 1);
-                    grew = true;
-                    
-                    // Level up every 500 points
-                    if (score > 0 && score % 500 === 0) {
-                        level++;
-                        gameSpeed = Math.max(80, gameSpeed - 10);
-                        playSound(1200, 0.3, 'sawtooth');
-                    }
-                }
-            }
-            
-            // Check power-up collision
-            for (let i = powerUps.length - 1; i >= 0; i--) {
-                const powerUp = powerUps[i];
-                if (head.x === powerUp.x && head.y === powerUp.y) {
-                    activatePowerUp(powerUp.type);
-                    createParticle(powerUp.x, powerUp.y, '#ff0080', 15);
-                    playSound(600, 0.2, 'triangle');
-                    powerUps.splice(i, 1);
-                }
-            }
-            
-            if (!grew) {
-                snake.body.pop();
-            }
-        }
-        
-        function activatePowerUp(type) {
-            activePowerUp = { type: type, duration: 5000 };
-            powerUpTimer = 5000;
-            
-            document.getElementById('powerUpDisplay').style.display = 'block';
-            
-            const powerUpNames = {
-                'phase': 'PHASE SHIFT',
-                'slow': 'TIME DILATION',
-                'boost': 'NEURAL BOOST',
-                'magnet': 'DATA MAGNET'
-            };
-            
-            document.getElementById('powerUpText').textContent = powerUpNames[type];
-            
-            if (type === 'slow') {
-                gameSpeed *= 2;
-            } else if (type === 'boost') {
-                gameSpeed /= 2;
-            }
-        }
-        
-        function updatePowerUp(deltaTime) {
-            if (activePowerUp) {
-                powerUpTimer -= deltaTime;
-                document.getElementById('powerUpTimer').textContent = (powerUpTimer / 1000).toFixed(1) + 's';
-                
-                if (powerUpTimer <= 0) {
-                    deactivatePowerUp();
-                }
-            }
-        }
-        
-        function deactivatePowerUp() {
-            if (activePowerUp) {
-                if (activePowerUp.type === 'slow' || activePowerUp.type === 'boost') {
-                    gameSpeed = 150 - (level - 1) * 10;
-                }
-                activePowerUp = null;
-                document.getElementById('powerUpDisplay').style.display = 'none';
-            }
-        }
-        
-        // Drawing functions
-        function drawSnake() {
-            // Draw trail
-            snake.trail.forEach((segment, index) => {
-                ctx.save();
-                const alpha = (snake.trail.length - index) / snake.trail.length * 0.6;
-                ctx.globalAlpha = alpha;
-                ctx.shadowColor = segment.color;
-                ctx.shadowBlur = 15;
-                ctx.fillStyle = segment.color;
-                ctx.fillRect(segment.x + 2, segment.y + 2, snake.size - 4, snake.size - 4);
-                ctx.restore();
-            });
-            
-            // Draw body
-            snake.body.forEach((segment, index) => {
-                ctx.save();
-                ctx.shadowColor = snake.color;
-                ctx.shadowBlur = index === 0 ? 20 : 10;
-                ctx.fillStyle = index === 0 ? '#ffffff' : snake.color;
-                
-                if (activePowerUp && activePowerUp.type === 'phase') {
-                    ctx.globalAlpha = 0.7;
-                    ctx.shadowBlur += 10;
-                }
-                
-                ctx.fillRect(segment.x, segment.y, snake.size, snake.size);
-                
-                if (index === 0) {
-                    // Draw head details
-                    ctx.shadowBlur = 0;
-                    ctx.fillStyle = snake.color;
-                    ctx.fillRect(segment.x + 4, segment.y + 4, snake.size - 8, snake.size - 8);
-                }
-                
-                ctx.restore();
-            });
-        }
-        
-        function drawDataPackets() {
-            dataPackets.forEach(packet => {
-                packet.pulse += 0.2;
-                const pulseSize = Math.sin(packet.pulse) * 3;
-                
-                ctx.save();
-                ctx.shadowColor = packet.color;
-                ctx.shadowBlur = 15 + pulseSize;
-                ctx.fillStyle = packet.color;
-                ctx.fillRect(packet.x - pulseSize/2, packet.y - pulseSize/2, 
-                           snake.size + pulseSize, snake.size + pulseSize);
-                
-                // Draw inner core
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(packet.x + 6, packet.y + 6, snake.size - 12, snake.size - 12);
-                
-                // Draw value
-                ctx.fillStyle = packet.color;
-                ctx.font = '10px Orbitron';
-                ctx.textAlign = 'center';
-                ctx.fillText(packet.value.toString(), packet.x + snake.size/2, packet.y + snake.size/2 + 3);
-                
-                ctx.restore();
-            });
-        }
-        
-        function drawPowerUps() {
-            powerUps.forEach(powerUp => {
-                powerUp.pulse += 0.3;
-                const pulseSize = Math.sin(powerUp.pulse) * 5;
-                
-                ctx.save();
-                ctx.shadowColor = '#ff0080';
-                ctx.shadowBlur = 20 + pulseSize;
-                ctx.fillStyle = '#ff0080';
-                ctx.fillRect(powerUp.x - pulseSize/2, powerUp.y - pulseSize/2, 
-                           snake.size + pulseSize, snake.size + pulseSize);
-                
-                // Draw symbol
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '12px Orbitron';
-                ctx.textAlign = 'center';
-                
-                const symbols = {
-                    'phase': '◊',
-                    'slow': '⧗',
-                    'boost': '▲',
-                    'magnet': '◉'
-                };
-                
-                ctx.fillText(symbols[powerUp.type], powerUp.x + snake.size/2, powerUp.y + snake.size/2 + 4);
-                ctx.restore();
-            });
-        }
-        
-        function drawWalls() {
-            walls.forEach(wall => {
-                ctx.save();
-                ctx.shadowColor = '#ff4444';
-                ctx.shadowBlur = 10;
-                ctx.fillStyle = '#ff4444';
-                ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
-                
-                // Draw wall pattern
-                ctx.shadowBlur = 0;
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 1;
-                for (let x = wall.x; x < wall.x + wall.width; x += snake.size) {
-                    for (let y = wall.y; y < wall.y + wall.height; y += snake.size) {
-                        ctx.strokeRect(x, y, snake.size, snake.size);
-                    }
-                }
-                ctx.restore();
-            });
-        }
-        
         function drawParticles() {
             particles.forEach(p => {
                 ctx.save();
                 ctx.globalAlpha = p.life / p.maxLife;
-                ctx.shadowColor = p.color;
-                ctx.shadowBlur = 5;
                 ctx.fillStyle = p.color;
                 ctx.fillRect(p.x, p.y, p.size, p.size);
                 ctx.restore();
             });
         }
         
-        function drawBackground() {
-            // Draw cyberpunk grid
-            ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
-            ctx.lineWidth = 0.5;
-            
-            for (let x = 0; x < canvas.width; x += snake.size) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvas.height);
-                ctx.stroke();
+        // Cloud system
+        function createCloud() {
+            clouds.push({
+                x: canvas.width + 100,
+                y: Math.random() * (canvas.height * 0.4) + 50,
+                width: Math.random() * 100 + 80,
+                height: Math.random() * 40 + 30,
+                speed: Math.random() * 2 + 1
+            });
+        }
+        
+        function updateClouds() {
+            for (let i = clouds.length - 1; i >= 0; i--) {
+                clouds[i].x -= clouds[i].speed;
+                if (clouds[i].x + clouds[i].width < 0) {
+                    clouds.splice(i, 1);
+                }
             }
             
-            for (let y = 0; y < canvas.height; y += snake.size) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
+            if (Math.random() < 0.003) {
+                createCloud();
             }
         }
         
-        function draw() {
-            // Clear canvas with fade effect
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        function drawClouds() {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            clouds.forEach(cloud => {
+                ctx.fillRect(cloud.x, cloud.y, cloud.width, cloud.height);
+                // Add cloud details
+                ctx.fillRect(cloud.x - 20, cloud.y + 10, cloud.width * 0.6, cloud.height * 0.7);
+                ctx.fillRect(cloud.x + cloud.width * 0.3, cloud.y + 5, cloud.width * 0.5, cloud.height * 0.8);
+            });
+        }
+        
+        // Obstacle generation
+        function createObstacle() {
+            const types = ['cactus', 'rock', 'bird'];  // Removed pit - too punishing
+            const type = types[Math.floor(Math.random() * types.length)];
+            const groundLevel = canvas.height - canvas.height * 0.25;
             
-            drawBackground();
-            drawWalls();
-            drawDataPackets();
-            drawPowerUps();
-            drawSnake();
-            drawParticles();
-            
-            // Update UI
-            document.getElementById('score').textContent = formatScore(score);
-            document.getElementById('level').textContent = level.toString().padStart(3, '0');
-            document.getElementById('trailLength').textContent = snake.maxTrailLength.toString().padStart(3, '0');
-            
-            if (gameMode === 'timed') {
-                document.getElementById('level').parentElement.querySelector('.stat-label').textContent = 'TIME';
-                document.getElementById('level').textContent = Math.max(0, Math.ceil(timeLeft)).toString().padStart(3, '0');
+            switch (type) {
+                case 'cactus':
+                    obstacles.push({
+                        type: 'cactus',
+                        x: canvas.width,
+                        y: groundLevel - 35,
+                        width: 18,
+                        height: 35,
+                        color: '#2d5a27'
+                    });
+                    break;
+                case 'rock':
+                    obstacles.push({
+                        type: 'rock',
+                        x: canvas.width,
+                        y: groundLevel - 20,
+                        width: 25,
+                        height: 20,
+                        color: '#555'
+                    });
+                    break;
+                case 'bird':
+                    obstacles.push({
+                        type: 'bird',
+                        x: canvas.width,
+                        y: groundLevel - 60 - Math.random() * 40,  // Lower flying height
+                        width: 20,
+                        height: 12,
+                        color: '#4a90e2',
+                        wingFlap: 0
+                    });
+                    break;
             }
         }
         
-        function update(currentTime) {
-            if (!gameRunning) return;
+        function createCoin() {
+            const groundLevel = canvas.height - canvas.height * 0.25;
+            coins.push({
+                x: canvas.width + Math.random() * 200,
+                y: groundLevel - 60 - Math.random() * 100,
+                width: 16,
+                height: 16,
+                collected: false,
+                rotation: 0,
+                bounce: 0
+            });
+        }
+        
+        function createPlatform() {
+            const groundLevel = canvas.height - canvas.height * 0.25;
+            platforms.push({
+                x: canvas.width + Math.random() * 100,
+                y: groundLevel - 100 - Math.random() * 80,
+                width: 80 + Math.random() * 60,
+                height: 20,
+                color: '#8B4513'
+            });
+        }
+        
+        // Collision detection
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+        
+        // Player physics and drawing
+        function updatePlayer() {
+            const groundLevel = canvas.height - canvas.height * 0.25;
             
-            const deltaTime = currentTime - lastTime;
+            // Apply gravity
+            if (!player.grounded) {
+                player.velY += gravity;
+            }
             
-            if (deltaTime > gameSpeed) {
-                moveSnake();
-                lastTime = currentTime;
+            // Update position
+            player.y += player.velY;
+            
+            // Ground collision
+            if (player.y + player.height >= groundLevel) {
+                player.y = groundLevel - player.height;
+                player.velY = 0;
+                player.grounded = true;
+                player.jumping = false;
+            } else {
+                player.grounded = false;
+            }
+            
+            // Platform collision
+            platforms.forEach(platform => {
+                if (checkCollision(player, platform) && player.velY > 0) {
+                    if (player.y < platform.y) {
+                        player.y = platform.y - player.height;
+                        player.velY = 0;
+                        player.grounded = true;
+                        player.jumping = false;
+                    }
+                }
+            });
+            
+            // Sliding mechanics
+            if (player.sliding) {
+                player.height = 16;
+                if (!keys.down && player.grounded) {
+                    player.sliding = false;
+                    player.height = 32;
+                }
+            }
+        }
+        
+        function drawPlayer() {
+            ctx.save();
+            
+            // Player shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(player.x + 2, player.y + player.height + 2, player.width, 4);
+            
+            // Player body
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // Player details
+            ctx.fillStyle = '#fff';
+            if (player.sliding) {
+                // Sliding pose
+                ctx.fillRect(player.x + 4, player.y + 2, 4, 4); // Eye
+                ctx.fillRect(player.x + player.width - 12, player.y + 4, 8, 8); // Hand
+            } else {
+                // Running pose
+                ctx.fillRect(player.x + 4, player.y + 4, 4, 4); // Eye
+                ctx.fillRect(player.x + 2, player.y + player.height - 8, 6, 8); // Leg
+                ctx.fillRect(player.x + player.width - 8, player.y + player.height - 8, 6, 8); // Leg
+            }
+            
+            // Player outline
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(player.x, player.y, player.width, player.height);
+            
+            ctx.restore();
+        }
+        
+        // Game objects
+        function updateObstacles() {
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                const obs = obstacles[i];
+                obs.x -= gameSpeed;
                 
-                // Spawn data packets
-                if (dataPackets.length < 3 + Math.floor(level / 2)) {
-                    createDataPacket();
+                // Animate birds
+                if (obs.type === 'bird') {
+                    obs.wingFlap += 0.3;
+                    obs.y += Math.sin(obs.wingFlap) * 0.5;
                 }
                 
-                // Spawn power-ups occasionally
-                if (Math.random() < 0.01) {
-                    createPowerUp();
-                }
-                
-                // Update timed mode
-                if (gameMode === 'timed') {
-                    timeLeft -= deltaTime / 1000;
-                    if (timeLeft <= 0) {
+                // Check collision - more forgiving
+                if (checkCollision(player, obs)) {
+                    // Add small tolerance to make it less punishing
+                    const tolerance = 5;
+                    const adjustedPlayer = {
+                        x: player.x + tolerance,
+                        y: player.y + tolerance,
+                        width: player.width - tolerance * 2,
+                        height: player.height - tolerance * 2
+                    };
+                    
+                    if (checkCollision(adjustedPlayer, obs)) {
                         gameOver();
                         return;
                     }
                 }
+                
+                // Remove off-screen obstacles
+                if (obs.x + obs.width < 0) {
+                    obstacles.splice(i, 1);
+                    score += 10;
+                }
             }
+        }
+        
+        function drawObstacles() {
+            obstacles.forEach(obs => {
+                ctx.save();
+                ctx.fillStyle = obs.color;
+                
+                switch (obs.type) {
+                    case 'cactus':
+                        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                        // Cactus details
+                        ctx.fillStyle = '#4a7c59';
+                        ctx.fillRect(obs.x + 2, obs.y + 5, 4, 10);
+                        ctx.fillRect(obs.x + obs.width - 6, obs.y + 15, 4, 8);
+                        break;
+                    case 'rock':
+                        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                        // Rock highlight
+                        ctx.fillStyle = '#777';
+                        ctx.fillRect(obs.x + 2, obs.y + 2, obs.width - 4, obs.height - 10);
+                        break;
+                    case 'pit':
+                        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                        // Pit spikes
+                        ctx.fillStyle = '#333';
+                        for (let j = 0; j < obs.width; j += 10) {
+                            ctx.fillRect(obs.x + j, obs.y, 4, 8);
+                        }
+                        break;
+                    case 'bird':
+                        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                        // Wing animation
+                        const wingOffset = Math.sin(obs.wingFlap) * 3;
+                        ctx.fillStyle = '#6bb6ff';
+                        ctx.fillRect(obs.x - 5, obs.y - 2 + wingOffset, 8, 4);
+                        ctx.fillRect(obs.x + obs.width - 3, obs.y - 2 - wingOffset, 8, 4);
+                        break;
+                }
+                ctx.restore();
+            });
+        }
+        
+        function updateCoins() {
+            for (let i = coins.length - 1; i >= 0; i--) {
+                const coin = coins[i];
+                coin.x -= gameSpeed;
+                coin.rotation += 0.15;
+                coin.bounce += 0.1;
+                
+                if (checkCollision(player, coin) && !coin.collected) {
+                    coin.collected = true;
+                    score += 50;
+                    createParticle(coin.x + coin.width/2, coin.y + coin.height/2, '#ffd700', 8);
+                    coins.splice(i, 1);
+                    continue;
+                }
+                
+                if (coin.x + coin.width < 0) {
+                    coins.splice(i, 1);
+                }
+            }
+        }
+        
+        function drawCoins() {
+            coins.forEach(coin => {
+                if (!coin.collected) {
+                    ctx.save();
+                    ctx.translate(coin.x + coin.width/2, coin.y + coin.height/2);
+                    ctx.rotate(coin.rotation);
+                    ctx.scale(1 + Math.sin(coin.bounce) * 0.1, 1);
+                    
+                    ctx.fillStyle = '#ffd700';
+                    ctx.fillRect(-coin.width/2, -coin.height/2, coin.width, coin.height);
+                    
+                    ctx.fillStyle = '#ffed4a';
+                    ctx.fillRect(-coin.width/2 + 3, -coin.height/2 + 3, coin.width - 6, coin.height - 6);
+                    
+                    ctx.restore();
+                }
+            });
+        }
+        
+        function updatePlatforms() {
+            for (let i = platforms.length - 1; i >= 0; i--) {
+                platforms[i].x -= gameSpeed;
+                if (platforms[i].x + platforms[i].width < 0) {
+                    platforms.splice(i, 1);
+                }
+            }
+        }
+        
+        function drawPlatforms() {
+            platforms.forEach(platform => {
+                ctx.fillStyle = platform.color;
+                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                
+                // Platform highlight
+                ctx.fillStyle = '#A0522D';
+                ctx.fillRect(platform.x, platform.y, platform.width, 4);
+            });
+        }
+        
+        // Background
+        function drawBackground() {
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(0.7, '#98FB98');
+            gradient.addColorStop(1, '#90EE90');
             
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Ground
+            const groundLevel = canvas.height - canvas.height * 0.25;
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(0, groundLevel, canvas.width, canvas.height - groundLevel);
+            
+            // Ground details
+            ctx.fillStyle = '#A0522D';
+            ctx.fillRect(0, groundLevel, canvas.width, 8);
+            
+            // Moving background pattern
+            backgroundOffset -= gameSpeed * 0.3;
+            ctx.fillStyle = 'rgba(139, 69, 19, 0.3)';
+            for (let x = backgroundOffset; x < canvas.width + 20; x += 40) {
+                ctx.fillRect(x, groundLevel + 10, 20, 5);
+            }
+        }
+        
+        // Game logic
+        function update() {
+            if (!gameRunning) return;
+            
+            distance += gameSpeed;
+            level = Math.floor(distance / 2000) + 1;
+            gameSpeed = 6 + (level - 1) * 0.8;
+            
+            updatePlayer();
+            updateObstacles();
+            updateCoins();
+            updatePlatforms();
             updateParticles();
-            updatePowerUp(deltaTime);
-        }
-        
-        function gameLoop(currentTime) {
-            update(currentTime);
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-        
-        function startGame(mode) {
-            gameMode = mode;
-            gameRunning = true;
-            score = 0;
-            level = 1;
-            timeLeft = gameMode === 'timed' ? 60 : 0;
+            updateClouds();
             
-            // Initialize game objects
-            initSnake();
-            dataPackets = [];
-            powerUps = [];
-            particles = [];
-            walls = [];
-            
-            createWalls();
-            
-            // Create initial data packets
-            for (let i = 0; i < 3; i++) {
-                createDataPacket();
+            // Spawn objects - much less frequent
+            if (Math.random() < 0.008 + level * 0.002) {
+                createObstacle();
             }
             
-            gameSpeed = 150;
-            lastTime = 0;
+            if (Math.random() < 0.015) {
+                createCoin();
+            }
             
-            // Hide menu, show game
-            document.getElementById('gameMenu').style.display = 'none';
-            document.getElementById('gameOver').style.display = 'none';
+            if (Math.random() < 0.005) {
+                createPlatform();
+            }
             
-            // Update instructions based on mode
-            const instructions = {
-                'classic': 'ARROW KEYS / WASD TO MOVE • COLLECT DATA PACKETS • AVOID WALLS',
-                'maze': 'NAVIGATE THE MAZE • COLLECT DATA PACKETS • FIND THE EXIT',
-                'timed': 'BEAT THE CLOCK • COLLECT AS MUCH DATA AS POSSIBLE',
-                'survival': 'SURVIVE AS LONG AS POSSIBLE • WALLS CLOSE IN OVER TIME'
-            };
+            // Update score
+            score += 1;
             
-            document.getElementById('instructions').textContent = instructions[mode];
-            
-            initAudio();
-            playSound(440, 0.2, 'square'); // Start sound
+            // Update UI
+            document.getElementById('score').textContent = score;
+            document.getElementById('distance').textContent = Math.floor(distance / 10) + 'm';
+            document.getElementById('level').textContent = level;
+        }
+        
+        function draw() {
+            drawBackground();
+            drawClouds();
+            drawPlatforms();
+            drawObstacles();
+            drawCoins();
+            drawPlayer();
+            drawParticles();
         }
         
         function gameOver() {
             gameRunning = false;
             
-            deactivatePowerUp();
-            
-            // Check for new high score
             let isNewHighScore = false;
             if (score > highScore) {
                 highScore = score;
                 isNewHighScore = true;
                 saveHighScore();
-                updateHighScoreDisplay();
+                document.getElementById('highScore').textContent = highScore;
                 document.getElementById('highScoreDisplay').style.display = 'block';
                 document.getElementById('gameOver').classList.add('new-high-score');
             } else {
@@ -943,97 +708,153 @@
                 document.getElementById('gameOver').classList.remove('new-high-score');
             }
             
-            document.getElementById('finalScore').textContent = formatScore(score);
-            document.getElementById('bestScore').textContent = formatScore(highScore);
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('finalDistance').textContent = Math.floor(distance / 10) + 'm';
             document.getElementById('gameOver').style.display = 'block';
             
-            playSound(200, 0.5, 'sawtooth'); // Game over sound
-        }
-        
-        function showMenu() {
-            document.getElementById('gameMenu').style.display = 'block';
-            document.getElementById('gameOver').style.display = 'none';
-            gameRunning = false;
+            createParticle(player.x + player.width/2, player.y + player.height/2, '#ff4757', 15);
         }
         
         function restart() {
-            startGame(gameMode);
+            gameRunning = true;
+            score = 0;
+            distance = 0;
+            level = 1;
+            gameSpeed = 6;
+            
+            player.x = 100;
+            player.y = 300;
+            player.velY = 0;
+            player.jumping = false;
+            player.sliding = false;
+            player.grounded = false;
+            player.height = 32;
+            
+            obstacles = [];
+            coins = [];
+            platforms = [];
+            particles = [];
+            backgroundOffset = 0;
+            
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('gameOver').classList.remove('new-high-score');
+        }
+        
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
         }
         
         // Input handling
+        const keys = {
+            up: false,
+            down: false,
+            space: false
+        };
+        
         document.addEventListener('keydown', (e) => {
-            if (!gameRunning) return;
-            
-            const key = e.key.toLowerCase();
-            let newDirection = { ...snake.direction };
-            
-            // Arrow keys and WASD
-            if ((key === 'arrowup' || key === 'w') && snake.direction.y === 0) {
-                newDirection = { x: 0, y: -1 };
-            } else if ((key === 'arrowdown' || key === 's') && snake.direction.y === 0) {
-                newDirection = { x: 0, y: 1 };
-            } else if ((key === 'arrowleft' || key === 'a') && snake.direction.x === 0) {
-                newDirection = { x: -1, y: 0 };
-            } else if ((key === 'arrowright' || key === 'd') && snake.direction.x === 0) {
-                newDirection = { x: 1, y: 0 };
+            switch(e.code) {
+                case 'Space':
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (gameRunning) {
+                        if (player.grounded && !player.jumping) {
+                            player.velY = jumpPower;
+                            player.jumping = true;
+                            player.grounded = false;
+                        }
+                    } else {
+                        restart();
+                    }
+                    keys.up = true;
+                    keys.space = true;
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (gameRunning) {
+                        player.sliding = true;
+                        player.height = 16;
+                    }
+                    keys.down = true;
+                    break;
             }
-            
-            snake.direction = newDirection;
-            playSound(300, 0.05, 'square'); // Move sound
         });
         
-        // Touch controls for mobile
-        let touchStartX = 0;
+        document.addEventListener('keyup', (e) => {
+            switch(e.code) {
+                case 'Space':
+                case 'ArrowUp':
+                    keys.up = false;
+                    keys.space = false;
+                    break;
+                case 'ArrowDown':
+                    keys.down = false;
+                    if (player.sliding && player.grounded) {
+                        player.sliding = false;
+                        player.height = 32;
+                    }
+                    break;
+            }
+        });
+        
+        // Touch controls
         let touchStartY = 0;
         
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
-        });
-        
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
         });
         
         canvas.addEventListener('touchend', (e) => {
             e.preventDefault();
-            if (!gameRunning) return;
-            
-            const touchEndX = e.changedTouches[0].clientX;
             const touchEndY = e.changedTouches[0].clientY;
+            const deltaY = touchStartY - touchEndY;
             
-            const deltaX = touchEndX - touchStartX;
-            const deltaY = touchEndY - touchStartY;
+            if (!gameRunning) {
+                restart();
+                return;
+            }
             
-            const minSwipeDistance = 30;
-            
-            if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                // Horizontal swipe
-                if (Math.abs(deltaX) > minSwipeDistance && snake.direction.x === 0) {
-                    snake.direction = deltaX > 0 ? { x: 1, y: 0 } : { x: -1, y: 0 };
-                    playSound(300, 0.05, 'square');
+            if (Math.abs(deltaY) > 30) {
+                if (deltaY > 0) {
+                    // Swipe up - jump
+                    if (player.grounded && !player.jumping) {
+                        player.velY = jumpPower;
+                        player.jumping = true;
+                        player.grounded = false;
+                    }
+                } else {
+                    // Swipe down - slide
+                    player.sliding = true;
+                    player.height = 16;
+                    setTimeout(() => {
+                        if (player.grounded) {
+                            player.sliding = false;
+                            player.height = 32;
+                        }
+                    }, 500);
                 }
             } else {
-                // Vertical swipe
-                if (Math.abs(deltaY) > minSwipeDistance && snake.direction.y === 0) {
-                    snake.direction = deltaY > 0 ? { x: 0, y: 1 } : { x: 0, y: -1 };
-                    playSound(300, 0.05, 'square');
+                // Tap - jump
+                if (player.grounded && !player.jumping) {
+                    player.velY = jumpPower;
+                    player.jumping = true;
+                    player.grounded = false;
                 }
             }
         });
-        
-        // Prevent default touch behaviors
-        document.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-        }, { passive: false });
         
         // Initialize game
         resizeCanvas();
         loadHighScore();
         
-        // Start game loop
-        requestAnimationFrame(gameLoop);
+        // Create initial clouds
+        for (let i = 0; i < 3; i++) {
+            createCloud();
+        }
+        
+        gameLoop();
     </script>
 </body>
 </html>
