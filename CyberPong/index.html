@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Pong - Full Screen</title>
+    <title>Cyber Pong - Smooth Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         
@@ -177,7 +177,6 @@
             100% { transform: translate(-50%, -50%) scale(1); }
         }
         
-        /* Enhanced scanlines effect for full screen */
         #gameContainer::before {
             content: '';
             position: absolute;
@@ -194,7 +193,6 @@
             z-index: 15;
         }
 
-        /* Fullscreen border glow effect */
         #gameContainer::after {
             content: '';
             position: absolute;
@@ -256,16 +254,19 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
+        // Performance optimizations
+        let lastTime = 0;
+        let deltaTime = 0;
+        const targetFPS = 60;
+        const targetFrameTime = 1000 / targetFPS;
+        
         // Set canvas to full screen dimensions
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
         
-        // Initial resize
         resizeCanvas();
-        
-        // Resize on window resize
         window.addEventListener('resize', resizeCanvas);
         
         // Game state
@@ -273,16 +274,24 @@
         let score = 0;
         let highScore = 0;
         let level = 1;
-        let ballSpeed = 6; // Increased for larger screen
+        let ballSpeed = 5;
         
-        // Game objects (scaled for full screen)
+        // Smooth mouse tracking
+        let mouseY = 0;
+        let targetMouseY = 0;
+        let lastMouseUpdate = 0;
+        
+        // Game objects (optimized for smooth movement)
         const paddle = {
             x: 80,
-            y: canvas.height / 2 - 60,
+            y: 0,
             width: 20,
             height: 120,
-            speed: 12,
-            targetY: canvas.height / 2 - 60
+            targetY: 0,
+            velocity: 0,
+            maxSpeed: 18,
+            acceleration: 1.2,
+            friction: 0.85
         };
         
         let balls = [];
@@ -293,7 +302,7 @@
         // Power-up system
         let currentPowerUp = null;
         let powerUpTimer = 0;
-        const powerUpDuration = 300; // frames
+        const powerUpDuration = 300;
         
         const powerUpTypes = {
             MULTI_BALL: { name: 'MULTI BALL', color: '#ff6b6b' },
@@ -302,23 +311,28 @@
             SHIELD: { name: 'SHIELD', color: '#f9ca24' }
         };
         
-        // Initialize first ball
+        // Optimized ball creation
         function createBall(x = canvas.width / 2, y = canvas.height / 2, vx = null, vy = null) {
             return {
                 x: x,
                 y: y,
-                radius: 12, // Larger ball for full screen
+                prevX: x,
+                prevY: y,
+                radius: 12,
                 vx: vx || (Math.random() > 0.5 ? ballSpeed : -ballSpeed),
                 vy: vy || (Math.random() - 0.5) * ballSpeed,
                 color: '#00ff88',
-                trail: []
+                trail: [],
+                trailTimer: 0
             };
         }
         
         function initGame() {
-            // Reset paddle position for current screen size
             paddle.y = canvas.height / 2 - paddle.height / 2;
             paddle.targetY = paddle.y;
+            paddle.velocity = 0;
+            mouseY = canvas.height / 2;
+            targetMouseY = canvas.height / 2;
             
             balls = [createBall()];
             powerUps = [];
@@ -328,16 +342,13 @@
             powerUpTimer = 0;
         }
         
-        // High score functions (using in-memory storage)
         function loadHighScore() {
-            // Note: Using in-memory storage instead of localStorage for Claude.ai compatibility
             highScore = 0;
             updateHighScoreDisplay();
         }
         
         function saveHighScore() {
-            // In a real implementation, this would save to localStorage
-            // localStorage.setItem('cyberPongHighScore', highScore.toString());
+            // In-memory storage for Claude.ai compatibility
         }
         
         function updateHighScoreDisplay() {
@@ -349,7 +360,7 @@
         }
         
         function createPowerUp() {
-            if (Math.random() < 0.3) { // 30% chance
+            if (Math.random() < 0.25) {
                 const types = Object.keys(powerUpTypes);
                 const type = types[Math.floor(Math.random() * types.length)];
                 powerUps.push({
@@ -360,7 +371,8 @@
                     type: type,
                     color: powerUpTypes[type].color,
                     collected: false,
-                    pulse: 0
+                    pulse: 0,
+                    velocity: -2
                 });
             }
         }
@@ -371,7 +383,6 @@
             
             switch (type) {
                 case 'MULTI_BALL':
-                    // Add 2 more balls
                     for (let i = 0; i < 2; i++) {
                         balls.push(createBall(
                             canvas.width / 2,
@@ -401,47 +412,43 @@
             }
         }
         
-        function createParticle(x, y, color, count = 12) {
+        function createParticle(x, y, color, count = 8) {
             for (let i = 0; i < count; i++) {
                 particles.push({
                     x: x,
                     y: y,
-                    vx: (Math.random() - 0.5) * 15,
-                    vy: (Math.random() - 0.5) * 15,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.5) * 12,
                     color: color,
-                    life: 40,
-                    maxLife: 40,
-                    size: Math.random() * 6 + 3
+                    life: 30,
+                    maxLife: 30,
+                    size: Math.random() * 4 + 2
                 });
             }
         }
         
+        // Optimized trail system
         function updateTrails() {
             balls.forEach(ball => {
-                ball.trail.push({ x: ball.x, y: ball.y });
-                if (ball.trail.length > 20) {
-                    ball.trail.shift();
+                ball.trailTimer++;
+                if (ball.trailTimer >= 2) { // Add trail point every 2 frames
+                    ball.trail.push({ x: ball.x, y: ball.y });
+                    if (ball.trail.length > 15) {
+                        ball.trail.shift();
+                    }
+                    ball.trailTimer = 0;
                 }
             });
-            
-            // Update trail particles
-            for (let i = trails.length - 1; i >= 0; i--) {
-                const trail = trails[i];
-                trail.life--;
-                if (trail.life <= 0) {
-                    trails.splice(i, 1);
-                }
-            }
         }
         
-        function updateParticles() {
+        function updateParticles(dt) {
             for (let i = particles.length - 1; i >= 0; i--) {
                 const p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
                 p.vx *= 0.98;
                 p.vy *= 0.98;
-                p.life--;
+                p.life -= dt;
                 
                 if (p.life <= 0) {
                     particles.splice(i, 1);
@@ -456,13 +463,31 @@
                    rect1.y + rect1.height > rect2.y;
         }
         
+        // Smooth paddle movement with physics
+        function updatePaddle(dt) {
+            // Smooth mouse interpolation
+            mouseY += (targetMouseY - mouseY) * 0.3;
+            
+            paddle.targetY = mouseY - paddle.height / 2;
+            paddle.targetY = Math.max(80, Math.min(canvas.height - paddle.height, paddle.targetY));
+            
+            // Physics-based movement
+            const targetVelocity = (paddle.targetY - paddle.y) * paddle.acceleration;
+            paddle.velocity += (targetVelocity - paddle.velocity) * 0.3;
+            paddle.velocity *= paddle.friction;
+            paddle.velocity = Math.max(-paddle.maxSpeed, Math.min(paddle.maxSpeed, paddle.velocity));
+            
+            paddle.y += paddle.velocity * dt;
+        }
+        
         function drawBackground() {
-            // Draw grid pattern
-            ctx.strokeStyle = 'rgba(0, 255, 136, 0.08)';
+            // Optimized background rendering
+            ctx.strokeStyle = 'rgba(0, 255, 136, 0.06)';
             ctx.lineWidth = 1;
             
-            const gridSize = 40; // Larger grid for full screen
+            const gridSize = 50;
             
+            // Vertical lines
             for (let x = 0; x < canvas.width; x += gridSize) {
                 ctx.beginPath();
                 ctx.moveTo(x, 80);
@@ -470,6 +495,7 @@
                 ctx.stroke();
             }
             
+            // Horizontal lines
             for (let y = 80; y < canvas.height; y += gridSize) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
@@ -477,10 +503,10 @@
                 ctx.stroke();
             }
             
-            // Draw center line
-            ctx.strokeStyle = 'rgba(0, 255, 136, 0.4)';
-            ctx.lineWidth = 3;
-            ctx.setLineDash([15, 15]);
+            // Center line
+            ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([20, 20]);
             ctx.beginPath();
             ctx.moveTo(canvas.width / 2, 80);
             ctx.lineTo(canvas.width / 2, canvas.height);
@@ -490,52 +516,59 @@
         
         function drawPaddle() {
             ctx.save();
+            
+            // Main paddle glow
             ctx.shadowColor = '#00ff88';
-            ctx.shadowBlur = 25;
+            ctx.shadowBlur = 20;
             ctx.fillStyle = '#00ff88';
             ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
             
-            // Draw paddle segments
+            // Paddle segments
             ctx.shadowBlur = 0;
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            for (let i = 0; i < 4; i++) {
-                const segmentHeight = paddle.height / 4 - 6;
-                const segmentY = paddle.y + i * (paddle.height / 4) + 3;
-                ctx.fillRect(paddle.x + 3, segmentY, paddle.width - 6, segmentHeight);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            const segments = 4;
+            for (let i = 0; i < segments; i++) {
+                const segmentHeight = (paddle.height / segments) - 4;
+                const segmentY = paddle.y + i * (paddle.height / segments) + 2;
+                ctx.fillRect(paddle.x + 2, segmentY, paddle.width - 4, segmentHeight);
             }
+            
             ctx.restore();
         }
         
         function drawBalls() {
             balls.forEach(ball => {
-                // Draw trail
-                ctx.save();
-                ball.trail.forEach((point, index) => {
-                    const alpha = index / ball.trail.length;
-                    ctx.globalAlpha = alpha * 0.6;
-                    ctx.shadowColor = ball.color;
-                    ctx.shadowBlur = 12;
-                    ctx.fillStyle = ball.color;
-                    ctx.beginPath();
-                    ctx.arc(point.x, point.y, ball.radius * alpha, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-                ctx.restore();
+                // Optimized trail rendering
+                if (ball.trail.length > 1) {
+                    ctx.save();
+                    for (let i = 1; i < ball.trail.length; i++) {
+                        const point = ball.trail[i];
+                        const alpha = (i / ball.trail.length) * 0.5;
+                        const size = ball.radius * alpha;
+                        
+                        ctx.globalAlpha = alpha;
+                        ctx.fillStyle = ball.color;
+                        ctx.beginPath();
+                        ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.restore();
+                }
                 
-                // Draw main ball
+                // Main ball
                 ctx.save();
                 ctx.shadowColor = ball.color;
-                ctx.shadowBlur = 30;
+                ctx.shadowBlur = 25;
                 ctx.fillStyle = ball.color;
                 ctx.beginPath();
                 ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Draw inner core
+                // Inner core
                 ctx.shadowBlur = 0;
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
                 ctx.beginPath();
-                ctx.arc(ball.x, ball.y, ball.radius * 0.4, 0, Math.PI * 2);
+                ctx.arc(ball.x, ball.y, ball.radius * 0.3, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
             });
@@ -544,102 +577,107 @@
         function drawPowerUps() {
             powerUps.forEach(powerUp => {
                 if (!powerUp.collected) {
-                    powerUp.pulse += 0.2;
-                    const scale = 1 + Math.sin(powerUp.pulse) * 0.3;
+                    powerUp.pulse += 0.15;
+                    const scale = 1 + Math.sin(powerUp.pulse) * 0.2;
                     
                     ctx.save();
                     ctx.translate(powerUp.x + powerUp.width/2, powerUp.y + powerUp.height/2);
                     ctx.scale(scale, scale);
                     ctx.shadowColor = powerUp.color;
-                    ctx.shadowBlur = 20;
+                    ctx.shadowBlur = 15;
                     ctx.fillStyle = powerUp.color;
                     ctx.fillRect(-powerUp.width/2, -powerUp.height/2, powerUp.width, powerUp.height);
                     
                     ctx.shadowBlur = 0;
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                    ctx.fillRect(-powerUp.width/2 + 6, -powerUp.height/2 + 6, powerUp.width - 12, powerUp.height - 12);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.fillRect(-powerUp.width/2 + 4, -powerUp.height/2 + 4, powerUp.width - 8, powerUp.height - 8);
                     ctx.restore();
                 }
             });
         }
         
         function drawParticles() {
+            if (particles.length === 0) return;
+            
+            ctx.save();
             particles.forEach(p => {
-                ctx.save();
                 ctx.globalAlpha = p.life / p.maxLife;
-                ctx.shadowColor = p.color;
-                ctx.shadowBlur = 8;
                 ctx.fillStyle = p.color;
-                ctx.fillRect(p.x, p.y, p.size, p.size);
-                ctx.restore();
+                ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
             });
+            ctx.restore();
         }
         
-        function update() {
+        function update(dt) {
             if (!gameRunning) return;
             
-            // Update paddle movement (smooth following)
-            const dy = paddle.targetY - paddle.y;
-            paddle.y += dy * 0.15;
+            updatePaddle(dt);
             
             // Update power-up timer
             if (powerUpTimer > 0) {
-                powerUpTimer--;
-                if (powerUpTimer === 0) {
+                powerUpTimer -= dt;
+                if (powerUpTimer <= 0) {
                     currentPowerUp = null;
-                    paddle.height = 120; // Reset paddle size
+                    paddle.height = 120;
                     updatePowerUpDisplay();
                 }
             }
             
-            // Update balls
+            // Update balls with smooth movement
             const speedMultiplier = currentPowerUp === 'SLOW_MOTION' ? 0.5 : 1;
             
             for (let i = balls.length - 1; i >= 0; i--) {
                 const ball = balls[i];
-                ball.x += ball.vx * speedMultiplier;
-                ball.y += ball.vy * speedMultiplier;
                 
-                // Ball collision with top/bottom walls
+                // Store previous position for smooth interpolation
+                ball.prevX = ball.x;
+                ball.prevY = ball.y;
+                
+                ball.x += ball.vx * speedMultiplier * dt;
+                ball.y += ball.vy * speedMultiplier * dt;
+                
+                // Wall collisions
                 if (ball.y - ball.radius <= 80 || ball.y + ball.radius >= canvas.height) {
                     ball.vy = -ball.vy;
+                    ball.y = ball.y - ball.radius <= 80 ? 80 + ball.radius : canvas.height - ball.radius;
                     createParticle(ball.x, ball.y, ball.color, 6);
                 }
                 
-                // Ball collision with paddle
+                // Paddle collision with improved physics
                 if (ball.x - ball.radius <= paddle.x + paddle.width &&
-                    ball.y >= paddle.y && ball.y <= paddle.y + paddle.height &&
+                    ball.y >= paddle.y - 5 && ball.y <= paddle.y + paddle.height + 5 &&
                     ball.vx < 0) {
                     
-                    ball.vx = -ball.vx * 1.02; // Slight speed increase
+                    const hitPos = (ball.y - (paddle.y + paddle.height / 2)) / (paddle.height / 2);
+                    const angle = hitPos * Math.PI / 3; // Max 60 degree angle
+                    
+                    const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy) * 1.05;
+                    ball.vx = speed * Math.cos(angle);
+                    ball.vy = speed * Math.sin(angle);
+                    
+                    // Add paddle velocity to ball
+                    ball.vy += paddle.velocity * 0.3;
+                    
                     ball.x = paddle.x + paddle.width + ball.radius;
-                    
-                    // Add spin based on where ball hits paddle
-                    const hitPos = (ball.y - paddle.y) / paddle.height - 0.5;
-                    ball.vy += hitPos * 4;
-                    
                     score += 10;
                     createParticle(ball.x, ball.y, ball.color, 8);
                 }
                 
-                // Ball collision with right wall (AI paddle)
+                // Right wall (AI) collision
                 if (ball.x + ball.radius >= canvas.width - 25) {
-                    ball.vx = -ball.vx;
+                    ball.vx = -Math.abs(ball.vx);
                     ball.x = canvas.width - 25 - ball.radius;
                     
-                    // Simple AI behavior
-                    const aiSpeed = Math.min(Math.abs(ball.vy), 8);
-                    if (ball.y > canvas.height / 2) {
-                        ball.vy = -aiSpeed;
-                    } else {
-                        ball.vy = aiSpeed;
-                    }
+                    // Improved AI behavior
+                    const centerY = canvas.height / 2;
+                    const aiResponse = Math.min(Math.abs(ball.vy) * 0.8, 6);
+                    ball.vy = ball.y > centerY ? -aiResponse : aiResponse;
                     
                     score += 5;
                     createParticle(ball.x, ball.y, '#ff4757', 6);
                 }
                 
-                // Ball goes off left side - game over or remove ball
+                // Ball elimination
                 if (ball.x + ball.radius < 0) {
                     if (balls.length > 1) {
                         balls.splice(i, 1);
@@ -653,9 +691,9 @@
             // Update power-ups
             for (let i = powerUps.length - 1; i >= 0; i--) {
                 const powerUp = powerUps[i];
-                powerUp.x -= 3;
+                powerUp.x += powerUp.velocity * dt;
                 
-                // Check collision with player
+                // Collision detection
                 if (!powerUp.collected && 
                     powerUp.x < paddle.x + paddle.width &&
                     powerUp.x + powerUp.width > paddle.x &&
@@ -664,19 +702,18 @@
                     
                     powerUp.collected = true;
                     activatePowerUp(powerUp.type);
-                    createParticle(powerUp.x + powerUp.width/2, powerUp.y + powerUp.height/2, powerUp.color, 16);
+                    createParticle(powerUp.x + powerUp.width/2, powerUp.y + powerUp.height/2, powerUp.color, 12);
                     score += 50;
                     powerUps.splice(i, 1);
                 }
                 
-                // Remove off-screen power-ups
                 if (powerUp.x + powerUp.width < 0) {
                     powerUps.splice(i, 1);
                 }
             }
             
-            // Spawn power-ups occasionally
-            if (Math.random() < 0.002) {
+            // Spawn power-ups
+            if (Math.random() < 0.001 * dt) {
                 createPowerUp();
             }
             
@@ -684,22 +721,23 @@
             const newLevel = Math.floor(score / 500) + 1;
             if (newLevel > level) {
                 level = newLevel;
-                ballSpeed += 0.5;
+                ballSpeed += 0.3;
                 balls.forEach(ball => {
                     const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
-                    ball.vx = (ball.vx / speed) * ballSpeed;
-                    ball.vy = (ball.vy / speed) * ballSpeed;
+                    const newSpeed = speed + 0.5;
+                    ball.vx = (ball.vx / speed) * newSpeed;
+                    ball.vy = (ball.vy / speed) * newSpeed;
                 });
-                createParticle(canvas.width/2, canvas.height/2, '#ffd700', 25);
+                createParticle(canvas.width/2, canvas.height/2, '#ffd700', 20);
             }
             
             updateTrails();
-            updateParticles();
+            updateParticles(dt);
         }
         
         function draw() {
-            // Clear canvas
-            ctx.fillStyle = '#000';
+            // Clear with fade effect for smoother trails
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.95)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             drawBackground();
@@ -716,7 +754,6 @@
         function gameOver() {
             gameRunning = false;
             
-            // Check for new high score
             let isNewHighScore = false;
             if (score > highScore) {
                 highScore = score;
@@ -739,27 +776,44 @@
             gameRunning = true;
             score = 0;
             level = 1;
-            ballSpeed = 6;
+            ballSpeed = 5;
             paddle.height = 120;
-            paddle.y = canvas.height / 2 - 60;
-            paddle.targetY = canvas.height / 2 - 60;
             document.getElementById('gameOver').style.display = 'none';
             document.getElementById('gameOver').classList.remove('new-high-score');
             initGame();
         }
         
-        function gameLoop() {
-            update();
+        // Optimized game loop with delta time
+        function gameLoop(currentTime) {
+            if (lastTime === 0) lastTime = currentTime;
+            deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+            
+            // Normalize delta time (60 FPS = 1.0)
+            const normalizedDelta = Math.min(deltaTime / targetFrameTime, 2);
+            
+            update(normalizedDelta);
             draw();
             requestAnimationFrame(gameLoop);
         }
         
-        // Input handling
+        // Improved input handling
+        let isMouseActive = false;
+        
         canvas.addEventListener('mousemove', (e) => {
+            if (!isMouseActive) isMouseActive = true;
+            
             const rect = canvas.getBoundingClientRect();
-            const mouseY = e.clientY - rect.top;
-            paddle.targetY = mouseY - paddle.height / 2;
-            paddle.targetY = Math.max(80, Math.min(canvas.height - paddle.height, paddle.targetY));
+            const newMouseY = e.clientY - rect.top;
+            
+            // Immediate update for responsive feeling
+            if (Math.abs(newMouseY - targetMouseY) > 5) {
+                targetMouseY = newMouseY;
+            }
+        });
+        
+        canvas.addEventListener('mouseenter', () => {
+            isMouseActive = true;
         });
         
         document.addEventListener('keydown', (e) => {
@@ -770,7 +824,6 @@
                 }
             }
             
-            // F11 for fullscreen toggle
             if (e.key === 'F11') {
                 e.preventDefault();
                 if (!document.fullscreenElement) {
@@ -785,15 +838,264 @@
         document.addEventListener('fullscreenchange', () => {
             setTimeout(() => {
                 resizeCanvas();
-                initGame();
+                if (gameRunning) {
+                    // Smoothly reposition paddle for new screen size
+                    const newCenterY = canvas.height / 2;
+                    paddle.targetY = newCenterY - paddle.height / 2;
+                    mouseY = newCenterY;
+                    targetMouseY = newCenterY;
+                }
             }, 100);
         });
         
-        // Initialize game
+        // Performance monitoring and adaptive quality
+        let frameCount = 0;
+        let fpsTimer = 0;
+        let currentFPS = 60;
+        let qualityLevel = 1; // 0 = low, 1 = medium, 2 = high
+        
+        function updatePerformance(deltaTime) {
+            frameCount++;
+            fpsTimer += deltaTime;
+            
+            if (fpsTimer >= 1000) { // Check every second
+                currentFPS = frameCount;
+                frameCount = 0;
+                fpsTimer = 0;
+                
+                // Adaptive quality based on FPS
+                if (currentFPS < 45 && qualityLevel > 0) {
+                    qualityLevel--;
+                } else if (currentFPS > 55 && qualityLevel < 2) {
+                    qualityLevel++;
+                }
+            }
+        }
+        
+        // Touch support for mobile devices
+        let touchStartY = 0;
+        let isTouching = false;
+        
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isTouching = true;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            touchStartY = touch.clientY - rect.top;
+            targetMouseY = touchStartY;
+        }, { passive: false });
+        
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (isTouching) {
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const touchY = touch.clientY - rect.top;
+                targetMouseY = touchY;
+            }
+        }, { passive: false });
+        
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isTouching = false;
+        }, { passive: false });
+        
+        // Keyboard controls as backup
+        const keys = {};
+        
+        document.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+            
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (!gameRunning) {
+                    restart();
+                }
+            }
+            
+            if (e.key === 'F11') {
+                e.preventDefault();
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+        
+        // Update keyboard controls in the update function
+        function updateKeyboardControls(dt) {
+            const keySpeed = 15 * dt;
+            if (keys['ArrowUp'] || keys['KeyW']) {
+                targetMouseY -= keySpeed;
+            }
+            if (keys['ArrowDown'] || keys['KeyS']) {
+                targetMouseY += keySpeed;
+            }
+            
+            // Clamp to screen bounds
+            targetMouseY = Math.max(80 + paddle.height/2, Math.min(canvas.height - paddle.height/2, targetMouseY));
+        }
+        
+        // Enhanced update function with keyboard support
+        function updateEnhanced(dt) {
+            if (!gameRunning) return;
+            
+            updateKeyboardControls(dt);
+            updatePaddle(dt);
+            updatePerformance(dt);
+            
+            // Update power-up timer
+            if (powerUpTimer > 0) {
+                powerUpTimer -= dt;
+                if (powerUpTimer <= 0) {
+                    currentPowerUp = null;
+                    paddle.height = 120;
+                    updatePowerUpDisplay();
+                }
+            }
+            
+            // Update balls with collision prediction for smoother gameplay
+            const speedMultiplier = currentPowerUp === 'SLOW_MOTION' ? 0.5 : 1;
+            
+            for (let i = balls.length - 1; i >= 0; i--) {
+                const ball = balls[i];
+                
+                // Store previous position
+                ball.prevX = ball.x;
+                ball.prevY = ball.y;
+                
+                const nextX = ball.x + ball.vx * speedMultiplier * dt;
+                const nextY = ball.y + ball.vy * speedMultiplier * dt;
+                
+                // Collision prediction for smoother bounces
+                if (nextY - ball.radius <= 80 || nextY + ball.radius >= canvas.height) {
+                    ball.vy = -ball.vy;
+                    ball.y = nextY - ball.radius <= 80 ? 80 + ball.radius : canvas.height - ball.radius;
+                    createParticle(ball.x, ball.y, ball.color, Math.min(8, qualityLevel * 4 + 2));
+                } else {
+                    ball.y = nextY;
+                }
+                
+                // Paddle collision with enhanced physics
+                if (nextX - ball.radius <= paddle.x + paddle.width &&
+                    ball.y >= paddle.y - 10 && ball.y <= paddle.y + paddle.height + 10 &&
+                    ball.vx < 0) {
+                    
+                    const hitPos = (ball.y - (paddle.y + paddle.height / 2)) / (paddle.height / 2);
+                    const clampedHitPos = Math.max(-1, Math.min(1, hitPos));
+                    const angle = clampedHitPos * Math.PI / 4; // Max 45 degree angle
+                    
+                    const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+                    const newSpeed = Math.min(speed * 1.03, ballSpeed * 2); // Cap max speed
+                    
+                    ball.vx = newSpeed * Math.cos(angle);
+                    ball.vy = newSpeed * Math.sin(angle);
+                    
+                    // Add paddle velocity influence
+                    ball.vy += paddle.velocity * 0.2;
+                    
+                    ball.x = paddle.x + paddle.width + ball.radius + 2; // Small buffer
+                    score += 10;
+                    createParticle(ball.x, ball.y, ball.color, Math.min(10, qualityLevel * 5 + 3));
+                } else {
+                    ball.x = nextX;
+                }
+                
+                // AI wall collision
+                if (ball.x + ball.radius >= canvas.width - 25) {
+                    ball.vx = -Math.abs(ball.vx);
+                    ball.x = canvas.width - 25 - ball.radius;
+                    
+                    // Smarter AI behavior
+                    const centerY = canvas.height / 2;
+                    const distFromCenter = ball.y - centerY;
+                    const aiResponse = Math.min(Math.abs(ball.vy) * 0.7 + Math.abs(distFromCenter) * 0.01, 7);
+                    ball.vy = distFromCenter > 0 ? -aiResponse : aiResponse;
+                    
+                    score += 5;
+                    createParticle(ball.x, ball.y, '#ff4757', Math.min(8, qualityLevel * 4 + 2));
+                }
+                
+                // Ball elimination
+                if (ball.x + ball.radius < 0) {
+                    if (balls.length > 1) {
+                        balls.splice(i, 1);
+                        createParticle(50, ball.y, '#ff4757', Math.min(15, qualityLevel * 7 + 5));
+                    } else {
+                        gameOver();
+                        return;
+                    }
+                }
+            }
+            
+            // Rest of the update logic remains the same...
+            for (let i = powerUps.length - 1; i >= 0; i--) {
+                const powerUp = powerUps[i];
+                powerUp.x += powerUp.velocity * dt;
+                
+                if (!powerUp.collected && 
+                    powerUp.x < paddle.x + paddle.width &&
+                    powerUp.x + powerUp.width > paddle.x &&
+                    powerUp.y < paddle.y + paddle.height &&
+                    powerUp.y + powerUp.height > paddle.y) {
+                    
+                    powerUp.collected = true;
+                    activatePowerUp(powerUp.type);
+                    createParticle(powerUp.x + powerUp.width/2, powerUp.y + powerUp.height/2, powerUp.color, Math.min(15, qualityLevel * 7 + 5));
+                    score += 50;
+                    powerUps.splice(i, 1);
+                }
+                
+                if (powerUp.x + powerUp.width < 0) {
+                    powerUps.splice(i, 1);
+                }
+            }
+            
+            if (Math.random() < 0.0008 * dt) {
+                createPowerUp();
+            }
+            
+            const newLevel = Math.floor(score / 500) + 1;
+            if (newLevel > level) {
+                level = newLevel;
+                ballSpeed += 0.3;
+                balls.forEach(ball => {
+                    const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+                    const newSpeed = Math.min(speed + 0.4, ballSpeed * 2.5);
+                    ball.vx = (ball.vx / speed) * newSpeed;
+                    ball.vy = (ball.vy / speed) * newSpeed;
+                });
+                createParticle(canvas.width/2, canvas.height/2, '#ffd700', Math.min(25, qualityLevel * 12 + 8));
+            }
+            
+            updateTrails();
+            updateParticles(dt);
+        }
+        
+        // Initialize and start
         loadHighScore();
         initGame();
         updatePowerUpDisplay();
-        gameLoop();
+        
+        // Start the enhanced game loop
+        function gameLoop(currentTime) {
+            if (lastTime === 0) lastTime = currentTime;
+            deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+            
+            const normalizedDelta = Math.min(deltaTime / targetFrameTime, 2);
+            
+            updateEnhanced(normalizedDelta);
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        requestAnimationFrame(gameLoop);
     </script>
 </body>
 </html>
