@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASTEROID BELT - Enhanced Retro Space Runner</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            font-family: 'Orbitron', monospace;
+            overflow: hidden;
+            cursor: none;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #gameCanvas {
+            display: block;
+            background: radial-gradient(ellipse at center, #001122 0%, #000511 40%, #000000 100%);
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #00ffff;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ffff;
+            z-index: 10;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+
+        #minimap {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 150px;
+            height: 100px;
+            border: 2px solid #00ffff;
+            background: rgba(0, 20, 40, 0.8);
+            z-index: 10;
+            border-radius: 5px;
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #ff0066;
+            text-shadow: 0 0 20px #ff0066;
+            z-index: 20;
+            display: none;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            border: 2px solid #ff0066;
+        }
+
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,255,255,0.02) 2px,
+                rgba(0,255,255,0.02) 4px
+            );
+            z-index: 5;
+        }
+
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ff88;
+            text-align: center;
+            font-size: 16px;
+            text-shadow: 0 0 5px #00ff88;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ffff;
+            text-align: center;
+            font-size: min(8vw, 80px);
+            font-weight: 900;
+            text-shadow: 0 0 30px #00ffff;
+            animation: pulse 2s ease-in-out infinite;
+            z-index: 15;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #00ffff;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.02); }
+        }
+
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #00ffff; }
+            to { text-shadow: 0 0 20px #00ffff, 0 0 30px #00ffff; }
+        }
+
+        .combo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ffff00;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 15px #ffff00;
+            z-index: 12;
+            animation: comboAnim 1s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes comboAnim {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        #health {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: #ff0066;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff0066;
+            z-index: 10;
+            font-size: 18px;
+        }
+
+        .health-bar {
+            width: 200px;
+            height: 10px;
+            background: rgba(255, 0, 102, 0.3);
+            border: 1px solid #ff0066;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0066, #ff3388);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px #ff0066;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui" class="glow">
+        <div>SCORE: <span id="score">0</span></div>
+        <div>MULTIPLIER: <span id="multiplier">1.0</span>x</div>
+        <div>SPEED: <span id="speed">1.0</span>x</div>
+        <div>DISTANCE: <span id="distance">0</span> LY</div>
+        <div>LEVEL: <span id="level">1</span></div>
+    </div>
+
+    <canvas id="minimap"></canvas>
+
+    <div id="health">
+        <div>HULL INTEGRITY</div>
+        <div class="health-bar">
+            <div class="health-fill" id="healthFill"></div>
+        </div>
+    </div>
+
+    <div id="gameOver">
+        <h1 style="font-size: 48px; margin-bottom: 20px;">GAME OVER</h1>
+        <p style="font-size: 24px;">FINAL SCORE: <span id="finalScore">0</span></p>
+        <p style="font-size: 20px;">DISTANCE TRAVELED: <span id="finalDistance">0</span> LIGHT YEARS</p>
+        <p style="font-size: 18px;">LEVEL REACHED: <span id="finalLevel">1</span></p>
+        <p style="font-size: 20px; margin-top: 30px; color: #00ffff;">PRESS SPACE TO RESTART</p>
+    </div>
+
+    <div class="title" id="startTitle">
+        <div>ASTEROID BELT</div>
+        <div style="font-size: min(4vw, 32px); margin-top: 15px; color: #00ff88;">Enhanced Edition</div>
+        <div style="font-size: min(3vw, 24px); margin-top: 20px;">PRESS SPACE TO START</div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+    <div class="scanlines"></div>
+
+    <div class="instructions">
+        <div><strong>ARROW KEYS</strong> or <strong>WASD</strong> - Navigate Ship | <strong>SPACE</strong> - Start/Restart | <strong>F</strong> - Toggle Fullscreen</div>
+        <div>Survive the endless asteroid field, collect power-ups, and build your score multiplier!</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const minimap = document.getElementById('minimap');
+        const minimapCtx = minimap.getContext('2d');
+        
+        // Set up full screen canvas
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            minimap.width = 150;
+            minimap.height = 100;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        let gameState = {
+            playing: false,
+            score: 0,
+            distance: 0,
+            speed: 1,
+            gameOver: false,
+            level: 1,
+            multiplier: 1,
+            health: 100,
+            maxHealth: 100,
+            invulnerable: 0,
+            comboTimer: 0,
+            combo: 0
+        };
+
+        // Enhanced ship object
+        const ship = {
+            x: canvas.width / 2,
+            y: canvas.height - 100,
+            width: 25,
+            height: 35,
+            velX: 0,
+            velY: 0,
+            maxSpeed: 10,
+            acceleration: 0.4,
+            friction: 0.88,
+            trail: [],
+            engineGlow: 0,
+            shields: false,
+            shieldTimer: 0
+        };
+
+        // Game objects arrays
+        let asteroids = [];
+        let stars = [];
+        let particles = [];
+        let powerups = [];
+        let nebula = [];
+        
+        // Enhanced star field
+        function createStars() {
+            stars = [];
+            for (let i = 0; i < Math.min(400, canvas.width * canvas.height / 3000); i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 3 + 0.5,
+                    speed: Math.random() * 3 + 1,
+                    brightness: Math.random(),
+                    twinkle: Math.random() * 100,
+                    color: Math.random() > 0.9 ? '#ffaa00' : (Math.random() > 0.7 ? '#ff6666' : '#ffffff')
+                });
+            }
+        }
+
+        // Create nebula background
+        function createNebula() {
+            nebula = [];
+            for (let i = 0; i < 15; i++) {
+                nebula.push({
+                    x: Math.random() * canvas.width * 1.5,
+                    y: Math.random() * canvas.height * 1.5,
+                    size: Math.random() * 200 + 100,
+                    speed: Math.random() * 0.5 + 0.2,
+                    color: `hsl(${Math.random() * 60 + 200}, 70%, ${Math.random() * 20 + 10}%)`,
+                    alpha: Math.random() * 0.3 + 0.1
+                });
+            }
+        }
+
+        // Enhanced asteroid creation
+        function createAsteroid() {
+            const size = Math.random() * 50 + 25 + gameState.level * 2;
+            const type = Math.random() > 0.8 ? 'dangerous' : 'normal';
+            
+            const asteroid = {
+                x: Math.random() * (canvas.width - size),
+                y: -size,
+                size: size,
+                speed: Math.random() * 4 + 2 + gameState.speed * 0.5,
+                rotation: 0,
+                rotationSpeed: (Math.random() - 0.5) * 0.15,
+                vertices: [],
+                type: type,
+                color: type === 'dangerous' ? 
+                    `hsl(${Math.random() * 30}, 90%, ${Math.random() * 30 + 60}%)` :
+                    `hsl(${Math.random() * 60 + 15}, 70%, ${Math.random() * 30 + 40}%)`,
+                health: type === 'dangerous' ? 2 : 1,
+                glow: type === 'dangerous'
+            };
+            
+            // Create more complex asteroid shapes
+            const numVertices = Math.floor(Math.random() * 6) + 8;
+            for (let i = 0; i < numVertices; i++) {
+                const angle = (i / numVertices) * Math.PI * 2;
+                const radius = size * (0.6 + Math.random() * 0.4);
+                asteroid.vertices.push({
+                    x: Math.cos(angle) * radius,
+                    y: Math.sin(angle) * radius
+                });
+            }
+            
+            asteroids.push(asteroid);
+        }
+
+        // Power-up system
+        function createPowerup() {
+            const types = ['shield', 'health', 'multiplier', 'slowmo'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            powerups.push({
+                x: Math.random() * (canvas.width - 30),
+                y: -30,
+                size: 20,
+                type: type,
+                speed: 2,
+                rotation: 0,
+                pulse: 0,
+                collected: false
+            });
+        }
+
+        // Enhanced explosion system
+        function createExplosion(x, y, intensity = 1) {
+            const particleCount = Math.floor(20 * intensity);
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    velX: (Math.random() - 0.5) * 15 * intensity,
+                    velY: (Math.random() - 0.5) * 15 * intensity,
+                    life: Math.floor(80 * intensity),
+                    maxLife: Math.floor(80 * intensity),
+                    size: Math.random() * 4 + 1,
+                    color: intensity > 1 ? '#ff0066' : (Math.random() > 0.5 ? '#ffff00' : '#ff6600'),
+                    gravity: 0.1
+                });
+            }
+        }
+
+        // Show combo notification
+        function showCombo(combo) {
+            const comboEl = document.createElement('div');
+            comboEl.className = 'combo';
+            comboEl.textContent = `${combo}x COMBO!`;
+            document.body.appendChild(comboEl);
+            setTimeout(() => comboEl.remove(), 1000);
+        }
+
+        // Input handling with fullscreen toggle
+        const keys = {};
+        document.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (!gameState.playing && !gameState.gameOver) {
+                    startGame();
+                } else if (gameState.gameOver) {
+                    resetGame();
+                }
+            }
+            if (e.code === 'KeyF') {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Game functions
+        function startGame() {
+            // Ensure canvas is properly sized
+            resizeCanvas();
+            
+            gameState.playing = true;
+            gameState.gameOver = false;
+            document.getElementById('startTitle').style.display = 'none';
+            
+            // Reset ship position
+            ship.x = canvas.width / 2;
+            ship.y = canvas.height - 100;
+            ship.velX = 0;
+            ship.velY = 0;
+            ship.trail = [];
+        }
+
+        function resetGame() {
+            gameState = { 
+                playing: true, 
+                score: 0, 
+                distance: 0, 
+                speed: 1, 
+                gameOver: false, 
+                level: 1, 
+                multiplier: 1, 
+                health: 100, 
+                maxHealth: 100, 
+                invulnerable: 0,
+                comboTimer: 0,
+                combo: 0
+            };
+            ship.x = canvas.width / 2;
+            ship.y = canvas.height - 100;
+            ship.velX = 0;
+            ship.velY = 0;
+            ship.trail = [];
+            ship.shields = false;
+            ship.shieldTimer = 0;
+            asteroids = [];
+            particles = [];
+            powerups = [];
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('startTitle').style.display = 'none';
+        }
+
+        function updateShip() {
+            if (!gameState.playing || gameState.gameOver) return;
+
+            // Handle input with improved responsiveness
+            const inputForce = ship.acceleration;
+            if (keys['ArrowLeft'] || keys['KeyA']) {
+                ship.velX -= inputForce;
+            }
+            if (keys['ArrowRight'] || keys['KeyD']) {
+                ship.velX += inputForce;
+            }
+            if (keys['ArrowUp'] || keys['KeyW']) {
+                ship.velY -= inputForce;
+                ship.engineGlow = Math.min(ship.engineGlow + 0.2, 1);
+            } else {
+                ship.engineGlow = Math.max(ship.engineGlow - 0.1, 0);
+            }
+            if (keys['ArrowDown'] || keys['KeyS']) {
+                ship.velY += inputForce;
+            }
+
+            // Apply physics
+            ship.velX *= ship.friction;
+            ship.velY *= ship.friction;
+            ship.velX = Math.max(-ship.maxSpeed, Math.min(ship.maxSpeed, ship.velX));
+            ship.velY = Math.max(-ship.maxSpeed, Math.min(ship.maxSpeed, ship.velY));
+
+            // Update position
+            ship.x += ship.velX;
+            ship.y += ship.velY;
+
+            // Boundary wrapping for X, clamping for Y
+            if (ship.x < 0) ship.x = canvas.width;
+            if (ship.x > canvas.width) ship.x = 0;
+            ship.y = Math.max(20, Math.min(canvas.height - 20, ship.y));
+
+            // Update trail with variable length
+            ship.trail.push({ x: ship.x, y: ship.y + 20, intensity: ship.engineGlow });
+            const maxTrailLength = Math.floor(12 + ship.engineGlow * 8);
+            if (ship.trail.length > maxTrailLength) ship.trail.shift();
+
+            // Update timers
+            if (gameState.invulnerable > 0) gameState.invulnerable--;
+            if (ship.shieldTimer > 0) {
+                ship.shieldTimer--;
+                ship.shields = ship.shieldTimer > 0;
+            }
+        }
+
+        function updateAsteroids() {
+            if (!gameState.playing || gameState.gameOver) return;
+
+            // Dynamic spawn rate
+            const spawnRate = 0.015 + gameState.speed * 0.008 + gameState.level * 0.002;
+            if (Math.random() < spawnRate) {
+                createAsteroid();
+            }
+
+            // Spawn power-ups occasionally
+            if (Math.random() < 0.003 && powerups.length < 2) {
+                createPowerup();
+            }
+
+            // Update asteroids
+            for (let i = asteroids.length - 1; i >= 0; i--) {
+                const asteroid = asteroids[i];
+                asteroid.y += asteroid.speed * gameState.speed;
+                asteroid.rotation += asteroid.rotationSpeed;
+
+                // Remove off-screen asteroids
+                if (asteroid.y > canvas.height + asteroid.size) {
+                    asteroids.splice(i, 1);
+                    gameState.score += Math.floor(10 * gameState.multiplier);
+                    gameState.combo++;
+                    gameState.comboTimer = 180;
+                    
+                    if (gameState.combo % 10 === 0 && gameState.combo > 0) {
+                        showCombo(gameState.combo);
+                        gameState.multiplier = Math.min(gameState.multiplier + 0.1, 5);
+                    }
+                    continue;
+                }
+
+                // Collision detection
+                const dx = asteroid.x - ship.x;
+                const dy = asteroid.y - ship.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < asteroid.size / 2 + 15) {
+                    if (ship.shields) {
+                        // Destroy asteroid with shields
+                        createExplosion(asteroid.x, asteroid.y, 1.5);
+                        asteroids.splice(i, 1);
+                        gameState.score += Math.floor(50 * gameState.multiplier);
+                        ship.shieldTimer = Math.max(ship.shieldTimer - 60, 0);
+                    } else if (gameState.invulnerable <= 0) {
+                        // Take damage
+                        const damage = asteroid.type === 'dangerous' ? 25 : 15;
+                        gameState.health -= damage;
+                        gameState.invulnerable = 60;
+                        gameState.multiplier = Math.max(gameState.multiplier - 0.2, 1);
+                        gameState.combo = 0;
+                        createExplosion(ship.x, ship.y, 0.8);
+                        
+                        if (gameState.health <= 0) {
+                            createExplosion(ship.x, ship.y, 2);
+                            gameState.gameOver = true;
+                            document.getElementById('gameOver').style.display = 'block';
+                            document.getElementById('finalScore').textContent = gameState.score;
+                            document.getElementById('finalDistance').textContent = Math.floor(gameState.distance);
+                            document.getElementById('finalLevel').textContent = gameState.level;
+                        }
+                    }
+                }
+            }
+
+            // Update power-ups
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                const powerup = powerups[i];
+                powerup.y += powerup.speed;
+                powerup.rotation += 0.05;
+                powerup.pulse += 0.1;
+
+                if (powerup.y > canvas.height + 30) {
+                    powerups.splice(i, 1);
+                    continue;
+                }
+
+                // Power-up collection
+                const dx = powerup.x - ship.x;
+                const dy = powerup.y - ship.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 30 && !powerup.collected) {
+                    powerup.collected = true;
+                    
+                    switch (powerup.type) {
+                        case 'shield':
+                            ship.shields = true;
+                            ship.shieldTimer = 300;
+                            break;
+                        case 'health':
+                            gameState.health = Math.min(gameState.health + 30, gameState.maxHealth);
+                            break;
+                        case 'multiplier':
+                            gameState.multiplier = Math.min(gameState.multiplier + 0.5, 5);
+                            break;
+                        case 'slowmo':
+                            gameState.speed = Math.max(gameState.speed * 0.7, 0.5);
+                            setTimeout(() => { 
+                                if (!gameState.gameOver) gameState.speed = Math.min(gameState.speed / 0.7, 3); 
+                            }, 3000);
+                            break;
+                    }
+                    
+                    createExplosion(powerup.x, powerup.y, 0.5);
+                    gameState.score += Math.floor(100 * gameState.multiplier);
+                    powerups.splice(i, 1);
+                }
+            }
+        }
+
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const particle = particles[i];
+                particle.x += particle.velX;
+                particle.y += particle.velY;
+                particle.velY += particle.gravity || 0;
+                particle.life--;
+                
+                if (particle.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+
+        function updateStars() {
+            if (!gameState.playing) return;
+            
+            stars.forEach(star => {
+                star.y += star.speed * gameState.speed;
+                star.twinkle += 0.1;
+                star.brightness = 0.3 + Math.sin(star.twinkle) * 0.7;
+                
+                if (star.y > canvas.height) {
+                    star.y = -5;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+        }
+
+        function updateNebula() {
+            if (!gameState.playing) return;
+            
+            nebula.forEach(cloud => {
+                cloud.y += cloud.speed * gameState.speed * 0.3;
+                
+                if (cloud.y > canvas.height + cloud.size) {
+                    cloud.y = -cloud.size;
+                    cloud.x = Math.random() * canvas.width * 1.5;
+                }
+            });
+        }
+
+        function updateGameState() {
+            if (!gameState.playing || gameState.gameOver) return;
+            
+            gameState.distance += 0.15;
+            gameState.speed = Math.min(1 + Math.floor(gameState.distance / 150) * 0.3, 3);
+            gameState.level = Math.floor(gameState.distance / 100) + 1;
+            
+            if (gameState.comboTimer > 0) {
+                gameState.comboTimer--;
+                if (gameState.comboTimer <= 0) {
+                    gameState.combo = 0;
+                    gameState.multiplier = Math.max(gameState.multiplier - 0.05, 1);
+                }
+            }
+            
+            // Update UI
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('multiplier').textContent = gameState.multiplier.toFixed(1);
+            document.getElementById('speed').textContent = gameState.speed.toFixed(1);
+            document.getElementById('distance').textContent = Math.floor(gameState.distance);
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('healthFill').style.width = (gameState.health / gameState.maxHealth * 100) + '%';
+        }
+
+        // Enhanced drawing functions
+        function drawNebula() {
+            nebula.forEach(cloud => {
+                ctx.save();
+                ctx.globalAlpha = cloud.alpha;
+                ctx.fillStyle = cloud.color;
+                const gradient = ctx.createRadialGradient(cloud.x, cloud.y, 0, cloud.x, cloud.y, cloud.size);
+                gradient.addColorStop(0, cloud.color);
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(cloud.x - cloud.size, cloud.y - cloud.size, cloud.size * 2, cloud.size * 2);
+                ctx.restore();
+            });
+        }
+
+        function drawStars() {
+            stars.forEach(star => {
+                ctx.save();
+                ctx.globalAlpha = star.brightness;
+                ctx.fillStyle = star.color;
+                ctx.shadowColor = star.color;
+                ctx.shadowBlur = star.size;
+                ctx.fillRect(star.x - star.size/2, star.y - star.size/2, star.size, star.size);
+                
+                // Draw cross pattern for larger stars
+                if (star.size > 2) {
+                    ctx.fillRect(star.x - star.size*2, star.y - 0.5, star.size*4, 1);
+                    ctx.fillRect(star.x - 0.5, star.y - star.size*2, 1, star.size*4);
+                }
+                ctx.restore();
+            });
+        }
+
+        function drawShip() {
+            if (gameState.gameOver) return;
+
+            ctx.save();
+            ctx.translate(ship.x, ship.y);
+
+            // Draw enhanced trail
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 4;
+            ship.trail.forEach((point, index) => {
+                const alpha = (index / ship.trail.length) * point.intensity;
+                ctx.globalAlpha = alpha;
+                ctx.beginPath();
+                ctx.arc(point.x - ship.x, point.y - ship.y, 3 * alpha, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+
+            // Flash effect when invulnerable
+            if (gameState.invulnerable > 0 && Math.floor(gameState.invulnerable / 5) % 2) {
+                ctx.globalAlpha = 0.5;
+            }
+
+            // Draw shield
+            if (ship.shields) {
+                ctx.strokeStyle = '#00ff88';
+                ctx.lineWidth = 3;
+                ctx.shadowColor = '#00ff88';
+                ctx.shadowBlur = 15;
+                ctx.beginPath();
+                ctx.arc(0, 0, 25, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Enhanced ship body
+            ctx.fillStyle = '#00ffff';
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1;
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 15;
+            
+            ctx.beginPath();
+            ctx.moveTo(0, -18);
+            ctx.lineTo(-8, 5);
+            ctx.lineTo(-12, 18);
+            ctx.lineTo(-4, 15);
+            ctx.lineTo(0, 12);
+            ctx.lineTo(4, 15);
+            ctx.lineTo(12, 18);
+            ctx.lineTo(8, 5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Engine glow
+            if (ship.engineGlow > 0) {
+                ctx.fillStyle = `rgba(0, 255, 255, ${ship.engineGlow})`;
+                ctx.shadowColor = '#00ffff';
+                ctx.shadowBlur = 20;
+                ctx.beginPath();
+                ctx.ellipse(0, 18, 6, ship.engineGlow * 12, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Ship core
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 5;
+            ctx.fillRect(-3, -8, 6, 12);
+
+            ctx.restore();
+        }
+
+        function drawAsteroids() {
+            asteroids.forEach(asteroid => {
+                ctx.save();
+                ctx.translate(asteroid.x, asteroid.y);
+                ctx.rotate(asteroid.rotation);
+                
+                ctx.strokeStyle = asteroid.color;
+                ctx.fillStyle = asteroid.color;
+                ctx.lineWidth = 2;
+                
+                if (asteroid.glow) {
+                    ctx.shadowColor = asteroid.color;
+                    ctx.shadowBlur = 10;
+                }
+                
+                ctx.beginPath();
+                asteroid.vertices.forEach((vertex, index) => {
+                    if (index === 0) {
+                        ctx.moveTo(vertex.x, vertex.y);
+                    } else {
+                        ctx.lineTo(vertex.x, vertex.y);
+                    }
+                });
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                
+                // Add surface details for larger asteroids
+                if (asteroid.size > 40) {
+                    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(-asteroid.size/4, -asteroid.size/6);
+                    ctx.lineTo(asteroid.size/4, asteroid.size/6);
+                    ctx.moveTo(asteroid.size/6, -asteroid.size/4);
+                    ctx.lineTo(-asteroid.size/6, asteroid.size/4);
+                    ctx.stroke();
+                }
+                
+                ctx.restore();
+            });
+        }
+
+        function drawPowerups() {
+            powerups.forEach(powerup => {
+                if (powerup.collected) return;
+                
+                ctx.save();
+                ctx.translate(powerup.x, powerup.y);
+                ctx.rotate(powerup.rotation);
+                
+                const pulseSize = 1 + Math.sin(powerup.pulse) * 0.2;
+                ctx.scale(pulseSize, pulseSize);
+                
+                let color = '#ffffff';
+                switch (powerup.type) {
+                    case 'shield': color = '#00ff88'; break;
+                    case 'health': color = '#ff0066'; break;
+                    case 'multiplier': color = '#ffff00'; break;
+                    case 'slowmo': color = '#8800ff'; break;
+                }
+                
+                ctx.fillStyle = color;
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 15;
+                
+                // Draw power-up icon
+                ctx.beginPath();
+                switch (powerup.type) {
+                    case 'shield':
+                        ctx.arc(0, 0, 12, 0, Math.PI * 2);
+                        break;
+                    case 'health':
+                        ctx.rect(-8, -3, 16, 6);
+                        ctx.rect(-3, -8, 6, 16);
+                        break;
+                    case 'multiplier':
+                        ctx.moveTo(-10, -10);
+                        ctx.lineTo(10, 10);
+                        ctx.moveTo(10, -10);
+                        ctx.lineTo(-10, 10);
+                        break;
+                    case 'slowmo':
+                        for (let i = 0; i < 8; i++) {
+                            const angle = (i / 8) * Math.PI * 2;
+                            const x = Math.cos(angle) * 10;
+                            const y = Math.sin(angle) * 10;
+                            ctx.rect(x-1, y-1, 2, 2);
+                        }
+                        break;
+                }
+                
+                if (powerup.type === 'shield') {
+                    ctx.fill();
+                } else {
+                    ctx.stroke();
+                }
+                
+                ctx.restore();
+            });
+        }
+
+        function drawParticles() {
+            particles.forEach(particle => {
+                const alpha = particle.life / particle.maxLife;
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = particle.color;
+                ctx.shadowColor = particle.color;
+                ctx.shadowBlur = particle.size * 2;
+                
+                const size = particle.size * alpha;
+                ctx.fillRect(particle.x - size/2, particle.y - size/2, size, size);
+                ctx.restore();
+            });
+        }
+
+        function drawMinimap() {
+            minimapCtx.clearRect(0, 0, minimap.width, minimap.height);
+            minimapCtx.fillStyle = 'rgba(0, 50, 100, 0.8)';
+            minimapCtx.fillRect(0, 0, minimap.width, minimap.height);
+            
+            const scaleX = minimap.width / canvas.width;
+            const scaleY = minimap.height / canvas.height;
+            
+            // Draw ship
+            minimapCtx.fillStyle = '#00ffff';
+            minimapCtx.fillRect(ship.x * scaleX - 2, ship.y * scaleY - 2, 4, 4);
+            
+            // Draw asteroids
+            minimapCtx.fillStyle = '#ff6666';
+            asteroids.forEach(asteroid => {
+                minimapCtx.fillRect(
+                    asteroid.x * scaleX - 1, 
+                    asteroid.y * scaleY - 1, 
+                    2, 2
+                );
+            });
+            
+            // Draw powerups
+            minimapCtx.fillStyle = '#00ff88';
+            powerups.forEach(powerup => {
+                if (!powerup.collected) {
+                    minimapCtx.fillRect(
+                        powerup.x * scaleX - 1, 
+                        powerup.y * scaleY - 1, 
+                        2, 2
+                    );
+                }
+            });
+        }
+
+        function drawEffects() {
+            // Screen shake on damage
+            if (gameState.invulnerable > 50) {
+                ctx.save();
+                const shake = (60 - gameState.invulnerable) * 0.5;
+                ctx.translate(
+                    (Math.random() - 0.5) * shake,
+                    (Math.random() - 0.5) * shake
+                );
+            }
+            
+            // Speed lines effect
+            if (gameState.speed > 2) {
+                ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 20; i++) {
+                    const x = Math.random() * canvas.width;
+                    const length = gameState.speed * 50;
+                    ctx.beginPath();
+                    ctx.moveTo(x, -10);
+                    ctx.lineTo(x, length);
+                    ctx.stroke();
+                }
+            }
+            
+            if (gameState.invulnerable > 50) {
+                ctx.restore();
+            }
+        }
+
+        // Main game loop
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            updateNebula();
+            updateStars();
+            updateShip();
+            updateAsteroids();
+            updateParticles();
+            updateGameState();
+            
+            drawNebula();
+            drawStars();
+            drawAsteroids();
+            drawPowerups();
+            drawShip();
+            drawParticles();
+            drawEffects();
+            drawMinimap();
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize and start
+        function initializeGame() {
+            resizeCanvas();
+            createStars();
+            createNebula();
+            
+            // Set initial ship position after canvas is sized
+            ship.x = canvas.width / 2;
+            ship.y = canvas.height - 100;
+            
+            gameLoop();
+        }
+
+        // Start the game
+        initializeGame();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            // Update ship position if it's out of bounds
+            ship.x = Math.min(ship.x, canvas.width - 20);
+            ship.y = Math.min(ship.y, canvas.height - 20);
+            
+            // Recreate stars for new screen size
+            if (stars.length === 0) createStars();
+        });
+    </script>
+</body>
+</html>
