@@ -1103,7 +1103,196 @@
                     0 0 20px #00ffff;
             }
         }
+/* COLOR TIDE Logo - Ocean Wave with Color Spectrum */
+.logo-color-tide {
+    background: linear-gradient(180deg, 
+        #00ccff 0%, #00ccff 20%,
+        #0099ff 20%, #0099ff 40%,
+        #0066ff 40%, #0066ff 60%,
+        #003399 60%, #003399 80%,
+        #001166 80%, #001166 100%);
+    border: 4px solid #00ffff;
+    position: relative;
+    animation: tideWaveEffect 3s ease-in-out infinite;
+    box-shadow: 
+        0 0 25px rgba(0, 204, 255, 0.6),
+        inset 0 0 20px rgba(0, 255, 255, 0.1);
+    overflow: hidden;
+}
 
+.logo-color-tide::before {
+    content: '';
+    position: absolute;
+    top: 60%;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(90deg, 
+        #ff6600 0%, #ff6600 16.66%,
+        #ffaa00 16.66%, #ffaa00 33.33%,
+        #ffff00 33.33%, #ffff00 50%,
+        #66ff00 50%, #66ff00 66.66%,
+        #00ff66 66.66%, #00ff66 83.33%,
+        #00ffff 83.33%, #00ffff 100%);
+    clip-path: polygon(
+        0% 60%, 10% 40%, 20% 50%, 30% 30%, 40% 45%, 
+        50% 25%, 60% 40%, 70% 20%, 80% 35%, 90% 15%, 
+        100% 30%, 100% 100%, 0% 100%
+    );
+    animation: tideColorWave 4s ease-in-out infinite;
+    opacity: 0.8;
+}
+
+.logo-color-tide::after {
+    content: '';
+    position: absolute;
+    top: 70%;
+    left: 0;
+    right: 0;
+    height: 30%;
+    background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0.6) 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0.6) 100%);
+    clip-path: polygon(
+        0% 80%, 15% 60%, 25% 70%, 35% 50%, 45% 65%, 
+        55% 45%, 65% 60%, 75% 40%, 85% 55%, 95% 35%, 
+        100% 50%, 100% 100%, 0% 100%
+    );
+    animation: tideFoam 2.5s ease-in-out infinite;
+}
+
+/* Floating bubbles effect */
+.logo-color-tide .tide-bubble {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    animation: tideBubbleFloat 3s linear infinite;
+    box-shadow: 
+        0 0 5px rgba(0, 255, 255, 0.5),
+        inset 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+.logo-color-tide .tide-bubble:nth-child(1) {
+    width: 4px;
+    height: 4px;
+    left: 15%;
+    bottom: 10%;
+    animation-delay: 0s;
+    animation-duration: 2.5s;
+}
+
+.logo-color-tide .tide-bubble:nth-child(2) {
+    width: 6px;
+    height: 6px;
+    left: 35%;
+    bottom: 15%;
+    animation-delay: 0.8s;
+    animation-duration: 3s;
+}
+
+.logo-color-tide .tide-bubble:nth-child(3) {
+    width: 3px;
+    height: 3px;
+    left: 65%;
+    bottom: 12%;
+    animation-delay: 1.5s;
+    animation-duration: 2.8s;
+}
+
+.logo-color-tide .tide-bubble:nth-child(4) {
+    width: 5px;
+    height: 5px;
+    left: 80%;
+    bottom: 8%;
+    animation-delay: 2.2s;
+    animation-duration: 3.2s;
+}
+
+@keyframes tideWaveEffect {
+    0%, 100% { 
+        transform: scale(1) rotate(0deg);
+        box-shadow: 
+            0 0 25px rgba(0, 204, 255, 0.6),
+            inset 0 0 20px rgba(0, 255, 255, 0.1);
+    }
+    25% { 
+        transform: scale(1.02) rotate(-1deg);
+    }
+    50% { 
+        transform: scale(1.05) rotate(0deg);
+        box-shadow: 
+            0 0 35px rgba(0, 204, 255, 0.8),
+            0 0 45px rgba(0, 255, 255, 0.4),
+            inset 0 0 25px rgba(0, 255, 255, 0.2);
+    }
+    75% { 
+        transform: scale(1.02) rotate(1deg);
+    }
+}
+
+@keyframes tideColorWave {
+    0% { 
+        clip-path: polygon(
+            0% 60%, 10% 40%, 20% 50%, 30% 30%, 40% 45%, 
+            50% 25%, 60% 40%, 70% 20%, 80% 35%, 90% 15%, 
+            100% 30%, 100% 100%, 0% 100%
+        );
+        opacity: 0.8;
+    }
+    50% { 
+        clip-path: polygon(
+            0% 40%, 10% 60%, 20% 30%, 30% 50%, 40% 25%, 
+            50% 45%, 60% 20%, 70% 40%, 80% 15%, 90% 35%, 
+            100% 10%, 100% 100%, 0% 100%
+        );
+        opacity: 0.9;
+    }
+    100% { 
+        clip-path: polygon(
+            0% 60%, 10% 40%, 20% 50%, 30% 30%, 40% 45%, 
+            50% 25%, 60% 40%, 70% 20%, 80% 35%, 90% 15%, 
+            100% 30%, 100% 100%, 0% 100%
+        );
+        opacity: 0.8;
+    }
+}
+
+@keyframes tideFoam {
+    0% { 
+        opacity: 0.6;
+        transform: translateY(2px);
+    }
+    50% { 
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+    100% { 
+        opacity: 0.6;
+        transform: translateY(2px);
+    }
+}
+
+@keyframes tideBubbleFloat {
+    0% {
+        bottom: 0%;
+        opacity: 0;
+        transform: scale(0) rotate(0deg);
+    }
+    10% {
+        opacity: 1;
+        transform: scale(1) rotate(45deg);
+    }
+    90% {
+        opacity: 1;
+        transform: scale(1) rotate(315deg);
+    }
+    100% {
+        bottom: 90%;
+        opacity: 0;
+        transform: scale(0) rotate(360deg);
+    }
+}
         .game-title {
             font-size: 16px;
             margin-bottom: 15px;
@@ -1492,6 +1681,31 @@
                   <span class="game-status free">FREE</span>
                     <button class="play-btn">PLAY NOW</button>
                 </div>
+<div class="game-card" onclick="playGame('color-tide')">
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    <div class="scan-line"></div>
+    <div class="game-icon">
+        <div class="retro-logo logo-color-tide">
+            <div class="tide-bubble"></div>
+            <div class="tide-bubble"></div>
+            <div class="tide-bubble"></div>
+            <div class="tide-bubble"></div>
+        </div>
+    </div>
+    <h3 class="game-title">COLOR TIDE</h3>
+    <p class="game-description">Ride the colorful waves in this aquatic adventure. Navigate through spectrum tides!</p>
+    <span class="game-status free">FREE</span>
+    <button class="play-btn">PLAY NOW</button>
+</div>
             </div>
         </div>
     </section>
@@ -1544,7 +1758,8 @@
                 'dragon-flight': './DragonFlight/',
                 'geo-dash': './GeoDash/',
                 'astro-belt': './AstroBelt/',
-                'sniper-elite': './SniperElite/'
+                'sniper-elite': './SniperElite/',
+                'color-tide': './ColorTide/'
             };
             
             // Open the game in a new window/tab
