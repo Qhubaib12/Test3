@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Tide</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0a;
+            font-family: 'Orbitron', monospace;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            color: #00ffff;
+        }
+        
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(45deg, #001122, #000033);
+            position: relative;
+            border: none;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 
+                inset 0 0 50px rgba(0, 255, 255, 0.1);
+        }
+        
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            display: block;
+        }
+        
+        #gameHeader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10vh;
+            background: linear-gradient(to bottom, rgba(0, 255, 255, 0.2), transparent);
+            border-bottom: 1px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 3vw;
+            z-index: 10;
+        }
+        
+        #gameTitle {
+            font-size: clamp(18px, 4vw, 32px);
+            font-weight: 900;
+            color: #00ffff;
+            text-shadow: 0 0 15px #00ffff;
+            letter-spacing: 3px;
+            animation: titlePulse 3s ease-in-out infinite alternate;
+        }
+        
+        #gameStats {
+            display: flex;
+            gap: clamp(15px, 3vw, 30px);
+            font-size: clamp(10px, 2vw, 14px);
+            font-weight: 700;
+        }
+        
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: clamp(8px, 1.5vw, 10px);
+            opacity: 0.7;
+            margin-bottom: 2px;
+        }
+        
+        .stat-value {
+            font-size: clamp(12px, 2.5vw, 16px);
+            color: #fff;
+            text-shadow: 0 0 5px #00ffff;
+        }
+        
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #00ffff;
+            background: rgba(0, 20, 40, 0.95);
+            padding: clamp(20px, 5vw, 40px);
+            border: 2px solid #00ffff;
+            box-shadow: 
+                0 0 30px #00ffff,
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+            display: none;
+            z-index: 20;
+            border-radius: 12px;
+            min-width: 300px;
+        }
+        
+        #gameOver h2 {
+            font-size: clamp(24px, 6vw, 32px);
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px #00ffff;
+            animation: gameOverGlow 2s ease-in-out infinite alternate;
+        }
+        
+        .score-display {
+            margin: 15px 0;
+            font-size: clamp(14px, 3vw, 18px);
+        }
+        
+        .high-score {
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffd700;
+        }
+        
+        .restart-hint {
+            margin-top: 20px;
+            font-size: clamp(10px, 2vw, 12px);
+            opacity: 0.8;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 3vh;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ffff;
+            text-align: center;
+            font-size: clamp(9px, 1.5vw, 12px);
+            opacity: 0.8;
+            background: rgba(0, 255, 255, 0.1);
+            padding: clamp(6px, 1vh, 10px) clamp(10px, 2vw, 20px);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 6px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .property-indicator {
+            position: absolute;
+            left: 3vw;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: clamp(8px, 1.5vh, 15px);
+            z-index: 10;
+        }
+        
+        .property-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: clamp(9px, 1.8vw, 12px);
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+        
+        .property-item.active {
+            opacity: 1;
+            transform: scale(1.1);
+            text-shadow: 0 0 10px currentColor;
+        }
+        
+        .property-color {
+            width: clamp(12px, 2.5vw, 18px);
+            height: clamp(12px, 2.5vw, 18px);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 8px currentColor;
+        }
+        
+        @keyframes titlePulse {
+            from { text-shadow: 0 0 15px #00ffff; }
+            to { text-shadow: 0 0 25px #00ffff, 0 0 35px #00ffff; }
+        }
+        
+        @keyframes gameOverGlow {
+            from { text-shadow: 0 0 15px #00ffff; }
+            to { text-shadow: 0 0 25px #00ffff, 0 0 35px #00ffff; }
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 0.8; }
+            51%, 100% { opacity: 0.3; }
+        }
+        
+        .flow-particle {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+            animation: flowAway 2s ease-out forwards;
+        }
+        
+        @keyframes flowAway {
+            0% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+        }
+        
+        /* Fluid wave effect */
+        #gameContainer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 100, 255, 0.1) 0%, transparent 50%);
+            animation: waveFlow 8s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        @keyframes waveFlow {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            100% {
+                transform: translate(-20px, -20px) rotate(2deg);
+            }
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .property-indicator {
+                left: 50%;
+                top: 12vh;
+                transform: translateX(-50%);
+                flex-direction: row;
+                justify-content: center;
+            }
+            
+            #instructions {
+                font-size: clamp(8px, 2vw, 10px);
+                padding: 8px 12px;
+                bottom: 2vh;
+            }
+        }
+
+        /* Performance optimization */
+        #gameCanvas {
+            will-change: transform;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="gameHeader">
+            <div id="gameTitle">COLOR TIDE</div>
+            <div id="gameStats">
+                <div class="stat">
+                    <div class="stat-label">FLOW</div>
+                    <div class="stat-value" id="score">00000</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">BEST</div>
+                    <div class="stat-value high-score" id="highScore">00000</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">DEPTH</div>
+                    <div class="stat-value" id="depth">0m</div>
+                </div>
+            </div>
+        </div>
+        
+        <canvas id="gameCanvas"></canvas>
+        
+        <div class="property-indicator">
+            <div class="property-item active" id="property0">
+                <div class="property-color" style="background: #ff4757; color: #ff4757;"></div>
+                <span>FAST</span>
+            </div>
+            <div class="property-item" id="property1">
+                <div class="property-color" style="background: #2ed573; color: #2ed573;"></div>
+                <span>FLOAT</span>
+            </div>
+            <div class="property-item" id="property2">
+                <div class="property-color" style="background: #3742fa; color: #3742fa;"></div>
+                <span>HEAVY</span>
+            </div>
+            <div class="property-item" id="property3">
+                <div class="property-color" style="background: #ffa502; color: #ffa502;"></div>
+                <span>PHASE</span>
+            </div>
+        </div>
+        
+        <div id="gameOver">
+            <h2>TIDE ENDED</h2>
+            <div class="score-display">FINAL FLOW: <span id="finalScore">00000</span></div>
+            <div class="score-display" id="highScoreDisplay" style="display: none;">
+                🌊 NEW TIDE RECORD! 🌊
+            </div>
+            <div class="score-display">DEEPEST: <span id="bestScore" class="high-score">00000</span></div>
+            <div class="restart-hint">PRESS [SPACE] TO RIDE AGAIN</div>
+        </div>
+        
+        <div id="instructions">
+            PRESS [SPACE] TO SHIFT PROPERTIES • MATCH YOUR STATE TO FLOW THROUGH CURRENTS
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Game state
+        let gameRunning = true;
+        let score = 0;
+        let highScore = 0;
+        let depth = 0;
+        
+        // Physics properties
+        const colors = ['#ff4757', '#2ed573', '#3742fa', '#ffa502'];
+        const properties = ['FAST', 'FLOAT', 'HEAVY', 'PHASE'];
+        
+        // Player particle
+        const player = {
+            x: 0,
+            y: 0,
+            vx: 0,
+            vy: 0,
+            radius: 0,
+            colorIndex: 0,
+            trail: [],
+            get color() { return colors[this.colorIndex]; },
+            get property() { return properties[this.colorIndex]; }
+        };
+        
+        // Fluid currents (obstacles)
+        let currents = [];
+        let currentTimer = 0;
+        const currentInterval = 120;
+        
+        // Particles and effects
+        let flowParticles = [];
+        let ambientParticles = [];
+        
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Reset player position
+            player.x = canvas.width * 0.15;
+            player.y = canvas.height * 0.5;
+            player.radius = Math.max(8, canvas.width * 0.012);
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Load/save high score
+        function loadHighScore() {
+            try {
+                const saved = localStorage.getItem('colorTideHighScore');
+                highScore = saved ? parseInt(saved) : 0;
+            } catch (e) {
+                highScore = 0;
+            }
+            updateHighScoreDisplay();
+        }
+        
+        function saveHighScore() {
+            try {
+                localStorage.setItem('colorTideHighScore', highScore.toString());
+            } catch (e) {}
+        }
+        
+        function updateHighScoreDisplay() {
+            document.getElementById('highScore').textContent = highScore.toString().padStart(5, '0');
+        }
+        
+        function formatScore(num) {
+            return num.toString().padStart(5, '0');
+        }
+        
+        function updatePropertyIndicator() {
+            document.querySelectorAll('.property-item').forEach((item, index) => {
+                item.classList.toggle('active', index === player.colorIndex);
+            });
+        }
+        
+        function createCurrent() {
+            const colorIndex = Math.floor(Math.random() * colors.length);
+            const headerHeight = canvas.height * 0.1;
+            const currentHeight = canvas.height * (0.15 + Math.random() * 0.3);
+            const gapHeight = canvas.height * 0.25;
+            const maxY = canvas.height - headerHeight - currentHeight - gapHeight;
+            const y = headerHeight + Math.random() * maxY;
+            
+            currents.push({
+                x: canvas.width,
+                y: y,
+                width: Math.max(15, canvas.width * 0.025),
+                height: currentHeight,
+                gapY: y + currentHeight,
+                gapHeight: gapHeight,
+                bottomY: y + currentHeight + gapHeight,
+                bottomHeight: canvas.height - (y + currentHeight + gapHeight),
+                colorIndex: colorIndex,
+                passed: false,
+                flowSpeed: 2 + Math.random() * 3,
+                intensity: 0.5 + Math.random() * 0.5,
+                get color() { return colors[this.colorIndex]; },
+                get property() { return properties[this.colorIndex]; }
+            });
+        }
+        
+        function createFlowParticle(x, y, color, count = 8) {
+            for (let i = 0; i < count; i++) {
+                flowParticles.push({
+                    x: x + (Math.random() - 0.5) * 20,
+                    y: y + (Math.random() - 0.5) * 20,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8,
+                    color: color,
+                    life: 30,
+                    maxLife: 30,
+                    size: Math.random() * 4 + 2
+                });
+            }
+        }
+        
+        function createAmbientParticles() {
+            // Create floating ambient particles
+            for (let i = 0; i < 5; i++) {
+                if (Math.random() < 0.1) {
+                    ambientParticles.push({
+                        x: canvas.width,
+                        y: Math.random() * canvas.height,
+                        vx: -1 - Math.random() * 2,
+                        vy: (Math.random() - 0.5) * 0.5,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        size: Math.random() * 3 + 1,
+                        life: 200,
+                        maxLife: 200,
+                        alpha: 0.1 + Math.random() * 0.3
+                    });
+                }
+            }
+        }
+        
+        function changePlayerProperty() {
+            player.colorIndex = (player.colorIndex + 1) % colors.length;
+            updatePropertyIndicator();
+            createFlowParticle(player.x, player.y, player.color, 12);
+        }
+        
+        function applyPhysics() {
+            const property = properties[player.colorIndex];
+            
+            // Base gravity and resistance
+            let gravity = 0.3;
+            let resistance = 0.98;
+            let maxSpeed = 6;
+            
+            // Apply property-specific physics
+            switch (property) {
+                case 'FAST': // Red - Fast horizontal movement, normal gravity
+                    player.vx *= 0.995; // Less horizontal resistance
+                    maxSpeed = 10;
+                    if (Math.abs(player.vx) < 8) {
+                        player.vx += player.vx > 0 ? 0.2 : -0.2; // Boost speed
+                    }
+                    break;
+                    
+                case 'FLOAT': // Green - Reduced gravity, floaty
+                    gravity = 0.08;
+                    resistance = 0.99;
+                    player.vy -= 0.1; // Slight upward force
+                    maxSpeed = 4;
+                    break;
+                    
+                case 'HEAVY': // Blue - Increased gravity, sinks fast
+                    gravity = 0.6;
+                    resistance = 0.95;
+                    maxSpeed = 8;
+                    break;
+                    
+                case 'PHASE': // Orange - Can phase through some obstacles
+                    gravity = 0.25;
+                    resistance = 0.97;
+                    maxSpeed = 7;
+                    // Add slight oscillating movement
+                    player.vx += Math.sin(Date.now() * 0.01) * 0.1;
+                    break;
+            }
+            
+            // Apply physics
+            player.vy += gravity;
+            player.vx *= resistance;
+            player.vy *= resistance;
+            
+            // Limit speed
+            const speed = Math.sqrt(player.vx * player.vx + player.vy * player.vy);
+            if (speed > maxSpeed) {
+                player.vx = (player.vx / speed) * maxSpeed;
+                player.vy = (player.vy / speed) * maxSpeed;
+            }
+            
+            // Update position
+            player.x += player.vx;
+            player.y += player.vy;
+            
+            // Keep player on screen (with some leeway)
+            const headerHeight = canvas.height * 0.1;
+            if (player.y < headerHeight + player.radius) {
+                player.y = headerHeight + player.radius;
+                player.vy *= -0.3;
+            }
+            if (player.y > canvas.height - player.radius) {
+                player.y = canvas.height - player.radius;
+                player.vy *= -0.5;
+            }
+            if (player.x < player.radius) {
+                player.x = player.radius;
+                player.vx *= -0.3;
+            }
+            if (player.x > canvas.width - player.radius) {
+                player.x = canvas.width - player.radius;
+                player.vx *= -0.3;
+            }
+        }
+        
+        function checkCurrentCollision(current) {
+            const playerProp = properties[player.colorIndex];
+            const currentProp = properties[current.colorIndex];
+            
+            // Check collision with top part
+            if (player.y + player.radius > current.y && 
+                player.y - player.radius < current.y + current.height &&
+                player.x + player.radius > current.x &&
+                player.x - player.radius < current.x + current.width) {
+                
+                // PHASE property can pass through certain currents
+                if (playerProp === 'PHASE' && currentProp !== 'HEAVY') {
+                    return false; // No collision
+                }
+                
+                // Property mismatch = collision
+                if (player.colorIndex !== current.colorIndex) {
+                    return true;
+                }
+                
+                // Matching property = flow effect
+                applyCurrentFlow(current);
+                return false;
+            }
+            
+            // Check collision with bottom part
+            if (current.bottomHeight > 0 &&
+                player.y + player.radius > current.bottomY && 
+                player.y - player.radius < current.bottomY + current.bottomHeight &&
+                player.x + player.radius > current.x &&
+                player.x - player.radius < current.x + current.width) {
+                
+                if (playerProp === 'PHASE' && currentProp !== 'HEAVY') {
+                    return false;
+                }
+                
+                if (player.colorIndex !== current.colorIndex) {
+                    return true;
+                }
+                
+                applyCurrentFlow(current);
+                return false;
+            }
+            
+            return false;
+        }
+        
+        function applyCurrentFlow(current) {
+            const currentProp = properties[current.colorIndex];
+            
+            // Apply flow effects based on current type
+            switch (currentProp) {
+                case 'FAST':
+                    player.vx += current.flowSpeed;
+                    break;
+                case 'FLOAT':
+                    player.vy -= current.flowSpeed * 0.5;
+                    break;
+                case 'HEAVY':
+                    player.vy += current.flowSpeed * 0.8;
+                    break;
+                case 'PHASE':
+                    player.vx += Math.sin(Date.now() * 0.02) * current.flowSpeed;
+                    break;
+            }
+            
+            // Create flow effect particles
+            if (Math.random() < 0.3) {
+                createFlowParticle(player.x, player.y, current.color, 3);
+            }
+        }
+        
+        function updateTrail() {
+            // Add current position to trail
+            player.trail.push({
+                x: player.x,
+                y: player.y,
+                life: 15,
+                size: player.radius
+            });
+            
+            // Update and remove old trail points
+            for (let i = player.trail.length - 1; i >= 0; i--) {
+                player.trail[i].life--;
+                if (player.trail[i].life <= 0) {
+                    player.trail.splice(i, 1);
+                }
+            }
+        }
+        
+        function updateParticles() {
+            // Update flow particles
+            for (let i = flowParticles.length - 1; i >= 0; i--) {
+                const p = flowParticles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vx *= 0.98;
+                p.vy *= 0.98;
+                p.life--;
+                
+                if (p.life <= 0) {
+                    flowParticles.splice(i, 1);
+                }
+            }
+            
+            // Update ambient particles
+            for (let i = ambientParticles.length - 1; i >= 0; i--) {
+                const p = ambientParticles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                
+                if (p.life <= 0 || p.x < -50) {
+                    ambientParticles.splice(i, 1);
+                }
+            }
+        }
+        
+        function update() {
+            if (!gameRunning) return;
+            
+            score += 1;
+            depth = Math.floor(score / 60);
+            
+            // Apply physics to player
+            applyPhysics();
+            
+            // Update trail
+            updateTrail();
+            
+            // Create currents
+            currentTimer++;
+            if (currentTimer >= currentInterval - (score * 0.02)) {
+                createCurrent();
+                currentTimer = 0;
+            }
+            
+            // Update currents
+            for (let i = currents.length - 1; i >= 0; i--) {
+                const current = currents[i];
+                current.x -= 2 + (score * 0.01);
+                
+                // Check collisions
+                if (checkCurrentCollision(current)) {
+                    gameOver();
+                    return;
+                }
+                
+                // Award points for passing
+                if (!current.passed && current.x + current.width < player.x) {
+                    current.passed = true;
+                    score += 100;
+                    createFlowParticle(player.x - 50, player.y, '#00ffff', 6);
+                }
+                
+                // Remove off-screen currents
+                if (current.x + current.width < 0) {
+                    currents.splice(i, 1);
+                }
+            }
+            
+            // Update particles
+            updateParticles();
+            createAmbientParticles();
+        }
+        
+        function drawBackground() {
+            // Draw flowing grid
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
+            ctx.lineWidth = 0.5;
+            
+            const gridSize = 40;
+            const flow = (score * 0.5) % gridSize;
+            
+            for (let x = -flow; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, canvas.height * 0.1);
+                ctx.lineTo(x + 10, canvas.height);
+                ctx.stroke();
+            }
+        }
+        
+        function drawPlayer() {
+            // Draw trail
+            ctx.save();
+            player.trail.forEach((point, index) => {
+                const alpha = point.life / 15;
+                const size = point.size * alpha;
+                ctx.globalAlpha = alpha * 0.6;
+                ctx.shadowColor = player.color;
+                ctx.shadowBlur = 8;
+                ctx.fillStyle = player.color;
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Draw main player
+            ctx.globalAlpha = 1;
+            ctx.shadowColor = player.color;
+            ctx.shadowBlur = 20;
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw inner core
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 0.8;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+        
+        function drawCurrents() {
+            currents.forEach(current => {
+                ctx.save();
+                ctx.shadowColor = current.color;
+                ctx.shadowBlur = 15;
+                
+                // Create flowing effect
+                const flowOffset = Math.sin(Date.now() * 0.01 + current.x * 0.01) * 5;
+                
+                // Draw top current
+                if (current.height > 0) {
+                    ctx.fillStyle = current.color;
+                    ctx.fillRect(current.x + flowOffset, current.y, current.width, current.height);
+                    
+                    // Draw flow lines
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.lineWidth = 2;
+                    for (let i = 0; i < 3; i++) {
+                        const lineY = current.y + (current.height / 4) * (i + 1);
+                        ctx.beginPath();
+                        ctx.moveTo(current.x + flowOffset, lineY);
+                        ctx.lineTo(current.x + current.width + flowOffset, lineY);
+                        ctx.stroke();
+                    }
+                }
+                
+                // Draw bottom current
+                if (current.bottomHeight > 0) {
+                    ctx.fillStyle = current.color;
+                    ctx.fillRect(current.x + flowOffset, current.bottomY, current.width, current.bottomHeight);
+                    
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.lineWidth = 2;
+                    for (let i = 0; i < 3; i++) {
+                        const lineY = current.bottomY + (current.bottomHeight / 4) * (i + 1);
+                        ctx.beginPath();
+                        ctx.moveTo(current.x + flowOffset, lineY);
+                        ctx.lineTo(current.x + current.width + flowOffset, lineY);
+                        ctx.stroke();
+                    }
+                }
+                
+                ctx.restore();
+            });
+        }
+        
+        function drawParticles() {
+            // Draw flow particles
+            flowParticles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.life / p.maxLife;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 5;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+            
+            // Draw ambient particles
+            ambientParticles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.alpha * (p.life / p.maxLife);
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+        
+        function draw() {
+            // Clear canvas with flowing background
+            ctx.fillStyle = 'rgba(0, 5, 10, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawBackground();
+            drawCurrents();
+            drawParticles();
+            drawPlayer();
+            
+            // Update UI
+            document.getElementById('score').textContent = formatScore(score);
+            document.getElementById('depth').textContent = depth + 'm';
+        }
+        
+        function gameOver() {
+            gameRunning = false;
+            
+            // Check for new high score
+            let isNewHighScore = false;
+            if (score > highScore) {
+                highScore = score;
+                isNewHighScore = true;
+                saveHighScore();
+                updateHighScoreDisplay();
+                document.getElementById('highScoreDisplay').style.display = 'block';
+            } else {
+                document.getElementById('highScoreDisplay').style.display = 'none';
+            }
+            
+            document.getElementById('finalScore').textContent = formatScore(score);
+            document.getElementById('bestScore').textContent = formatScore(highScore);
+            document.getElementById('gameOver').style.display = 'block';
+            
+            // Create dramatic end effect
+            createFlowParticle(player.x, player.y, '#ff4757', 20);
+        }
+        
+        function restart() {
+            gameRunning = true;
+            score = 0;
+            depth = 0;
+            currents = [];
+            flowParticles = [];
+            ambientParticles = [];
+            currentTimer = 0;
+            player.colorIndex = 0;
+            player.vx = 0;
+            player.vy = 0;
+            player.trail = [];
+            
+            // Reset player position
+            player.x = canvas.width * 0.15;
+            player.y = canvas.height * 0.5;
+            
+            updatePropertyIndicator();
+            document.getElementById('gameOver').style.display = 'none';
+        }
+        
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Input handling
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (gameRunning) {
+                    changePlayerProperty();
+                } else {
+                    restart();
+                }
+            }
+        });
+
+        // Touch controls for mobile
+        let touchStartTime = 0;
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            touchStartTime = Date.now();
+        });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            const touchDuration = Date.now() - touchStartTime;
+            if (touchDuration < 500) { // Quick tap
+                if (gameRunning) {
+                    changePlayerProperty();
+                } else {
+                    restart();
+                }
+            }
+        });
+
+        // Prevent scrolling on touch
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
+        // Initialize game
+        resizeCanvas();
+        loadHighScore();
+        updatePropertyIndicator();
+        gameLoop();
+    </script>
+</body>
+</html>
