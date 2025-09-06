@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circuit Puzzle - PixelAddict</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 255, 0, 0.03) 2px,
+                rgba(0, 255, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .pixel-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .game-header {
+            background: #1a1a1a;
+            border-bottom: 4px solid #00ff00;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .game-title {
+            font-size: 24px;
+            color: #00ff00;
+            text-shadow: 2px 2px 0px #000, 0 0 10px #00ff00;
+            animation: glow 2s ease-in-out infinite alternate;
+            margin-bottom: 10px;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 2px 2px 0px #000, 0 0 10px #00ff00; }
+            to { text-shadow: 2px 2px 0px #000, 0 0 20px #00ff00, 0 0 30px #00ff00; }
+        }
+
+        .game-subtitle {
+            font-size: 12px;
+            color: #cccccc;
+        }
+
+        .game-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 30px;
+        }
+
+        .game-board {
+            flex: 1;
+            background: #1a1a1a;
+            border: 4px solid #333333;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.2),
+                inset 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .circuit-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 4px;
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 4/3;
+            margin: 0 auto;
+            background: #0f0f0f;
+            border: 3px solid #555555;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .circuit-cell {
+            background: #2a2a2a;
+            border: 2px solid #444444;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 50px;
+        }
+
+        .circuit-cell:hover {
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .circuit-cell.powered {
+            background: #003300;
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+            animation: powerPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes powerPulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(0, 255, 0, 0.6); }
+            50% { box-shadow: 0 0 25px rgba(0, 255, 0, 0.9); }
+        }
+
+        .circuit-element {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        /* Circuit Components */
+        .power-source {
+            background: radial-gradient(circle, #ff6600, #cc4400);
+            border: 3px solid #ffaa00;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 102, 0, 0.6);
+            animation: sourceGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes sourceGlow {
+            from { box-shadow: 0 0 15px rgba(255, 102, 0, 0.6); }
+            to { box-shadow: 0 0 25px rgba(255, 102, 0, 0.9); }
+        }
+
+        .target-system {
+            background: linear-gradient(45deg, #9966ff, #6633cc);
+            border: 3px solid #bb88ff;
+            color: #fff;
+            animation: targetPulse 3s ease-in-out infinite;
+        }
+
+        .target-system.powered {
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+            border-color: #66ff66;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+            animation: targetCompleted 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes targetPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes targetCompleted {
+            from { box-shadow: 0 0 20px rgba(0, 255, 0, 0.8); }
+            to { box-shadow: 0 0 35px rgba(0, 255, 0, 1); }
+        }
+
+        .wire {
+            background: #666666;
+            position: relative;
+        }
+
+        .wire.powered {
+            background: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+            animation: electricFlow 1s linear infinite;
+        }
+
+        @keyframes electricFlow {
+            0% { box-shadow: 0 0 10px rgba(0, 255, 0, 0.8); }
+            50% { box-shadow: 0 0 20px rgba(0, 255, 0, 1); }
+            100% { box-shadow: 0 0 10px rgba(0, 255, 0, 0.8); }
+        }
+
+        .wire-horizontal {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        .wire-vertical {
+            width: 4px;
+            height: 100%;
+            border-radius: 2px;
+        }
+
+        .wire-corner-tr,
+        .wire-corner-tl,
+        .wire-corner-br,
+        .wire-corner-bl {
+            width: 20px;
+            height: 20px;
+            border: 4px solid #666666;
+            background: transparent;
+            border-radius: 0;
+        }
+
+        .wire-corner-tr.powered,
+        .wire-corner-tl.powered,
+        .wire-corner-br.powered,
+        .wire-corner-bl.powered {
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+        }
+
+        .wire-corner-tr { border-bottom: none; border-left: none; }
+        .wire-corner-tl { border-bottom: none; border-right: none; }
+        .wire-corner-br { border-top: none; border-left: none; }
+        .wire-corner-bl { border-top: none; border-right: none; }
+
+        .logic-gate {
+            background: #333333;
+            border: 3px solid #666666;
+            color: #cccccc;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .logic-gate.powered {
+            background: #004400;
+            border-color: #00ff00;
+            color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+        }
+
+        /* Control Panel */
+        .control-panel {
+            width: 300px;
+            background: #1a1a1a;
+            border: 4px solid #333333;
+            border-radius: 12px;
+            padding: 25px;
+            height: fit-content;
+            box-shadow: 
+                0 0 30px rgba(255, 107, 0, 0.2),
+                inset 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .panel-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #333333;
+        }
+
+        .panel-section:last-child {
+            border-bottom: none;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            color: #ff6b00;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(255, 107, 0, 0.5);
+        }
+
+        .stats {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #cccccc;
+        }
+
+        .stat-value {
+            color: #00ff00;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .tool-btn {
+            background: #333333;
+            border: 2px solid #666666;
+            color: #cccccc;
+            padding: 12px 8px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .tool-btn:hover {
+            border-color: #00ff00;
+            color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .tool-btn.active {
+            background: #003300;
+            border-color: #00ff00;
+            color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+        }
+
+        .game-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-btn {
+            background: linear-gradient(145deg, #333333, #2a2a2a);
+            border: 3px solid #666666;
+            color: #00ff00;
+            padding: 15px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .control-btn:hover {
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.danger {
+            border-color: #ff6b00;
+            color: #ff6b00;
+        }
+
+        .control-btn.danger:hover {
+            border-color: #ff6b00;
+            box-shadow: 0 0 15px rgba(255, 107, 0, 0.5);
+        }
+
+        .timer {
+            font-size: 16px;
+            color: #ff6b00;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 107, 0, 0.5);
+            animation: timerPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .level-display {
+            text-align: center;
+            font-size: 18px;
+            color: #9966ff;
+            text-shadow: 0 0 10px rgba(153, 102, 255, 0.5);
+            margin-bottom: 20px;
+        }
+
+        .completion-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(26, 26, 26, 0.95);
+            border: 4px solid #00ff00;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            z-index: 2000;
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.8);
+            display: none;
+        }
+
+        .completion-message.show {
+            display: block;
+            animation: messageAppear 0.5s ease-out;
+        }
+
+        @keyframes messageAppear {
+            from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .completion-title {
+            font-size: 20px;
+            color: #00ff00;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+        }
+
+        .completion-stats {
+            font-size: 12px;
+            color: #cccccc;
+            margin-bottom: 30px;
+            line-height: 1.8;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+                padding: 15px;
+            }
+            
+            .control-panel {
+                width: 100%;
+            }
+            
+            .circuit-grid {
+                grid-template-columns: repeat(6, 1fr);
+                grid-template-rows: repeat(8, 1fr);
+            }
+            
+            .game-title {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="pixel-bg"></div>
+    <div class="scanlines"></div>
+    
+    <header class="game-header">
+        <h1 class="game-title">CIRCUIT PUZZLE</h1>
+        <p class="game-subtitle">Connect the circuits to power up all systems</p>
+    </header>
+
+    <div class="game-container">
+        <div class="game-board">
+            <div class="level-display" id="levelDisplay">LEVEL 1</div>
+            <div class="circuit-grid" id="circuitGrid"></div>
+        </div>
+
+        <div class="control-panel">
+            <div class="panel-section">
+                <h3 class="panel-title">GAME STATUS</h3>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span>TIME:</span>
+                        <span class="stat-value timer" id="timer">05:00</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>LEVEL:</span>
+                        <span class="stat-value" id="levelStat">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>POWERED:</span>
+                        <span class="stat-value" id="poweredStat">0/3</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>SCORE:</span>
+                        <span class="stat-value" id="scoreStat">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3 class="panel-title">TOOLS</h3>
+                <div class="toolbar">
+                    <button class="tool-btn active" data-tool="wire-h">WIRE H</button>
+                    <button class="tool-btn" data-tool="wire-v">WIRE V</button>
+                    <button class="tool-btn" data-tool="corner-tr">┐</button>
+                    <button class="tool-btn" data-tool="corner-tl">┌</button>
+                    <button class="tool-btn" data-tool="corner-br">┘</button>
+                    <button class="tool-btn" data-tool="corner-bl">└</button>
+                    <button class="tool-btn" data-tool="and-gate">AND</button>
+                    <button class="tool-btn" data-tool="or-gate">OR</button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3 class="panel-title">CONTROLS</h3>
+                <div class="game-controls">
+                    <button class="control-btn" id="testCircuit">TEST CIRCUIT</button>
+                    <button class="control-btn" id="clearBoard">CLEAR BOARD</button>
+                    <button class="control-btn" id="nextLevel">NEXT LEVEL</button>
+                    <button class="control-btn danger" id="resetGame">RESET GAME</button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3 class="panel-title">MODE SELECT</h3>
+                <div class="game-controls">
+                    <button class="control-btn" id="timeModeBtn">TIMED MODE</button>
+                    <button class="control-btn" id="freeModeBtn">FREE PLAY</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="completion-message" id="completionMessage">
+        <div class="completion-title">LEVEL COMPLETED!</div>
+        <div class="completion-stats" id="completionStats">
+            Time: 02:34<br>
+            Score: +500 pts<br>
+            Efficiency: 95%
+        </div>
+        <button class="control-btn" id="continueBtn">CONTINUE</button>
+    </div>
+
+    <script>
+        class CircuitPuzzle {
+            constructor() {
+                this.grid = [];
+                this.gridSize = { width: 8, height: 6 };
+                this.currentTool = 'wire-h';
+                this.level = 1;
+                this.score = 0;
+                this.timeLeft = 300; // 5 minutes
+                this.gameMode = 'timed'; // 'timed' or 'free'
+                this.timer = null;
+                this.isGameActive = false;
+                this.powerSources = [];
+                this.targetSystems = [];
+                this.poweredCells = new Set();
+                
+                this.init();
+            }
+
+            init() {
+                this.setupGrid();
+                this.setupEventListeners();
+                this.generateLevel();
+                this.startTimer();
+            }
+
+            setupGrid() {
+                const gridElement = document.getElementById('circuitGrid');
+                gridElement.innerHTML = '';
+                
+                this.grid = Array(this.gridSize.height).fill().map(() => 
+                    Array(this.gridSize.width).fill(null)
+                );
+
+                for (let y = 0; y < this.gridSize.height; y++) {
+                    for (let x = 0; x < this.gridSize.width; x++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'circuit-cell';
+                        cell.dataset.x = x;
+                        cell.dataset.y = y;
+                        
+                        cell.addEventListener('click', (e) => this.handleCellClick(e, x, y));
+                        
+                        gridElement.appendChild(cell);
+                    }
+                }
+            }
+
+            setupEventListeners() {
+                // Tool selection
+                document.querySelectorAll('.tool-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.currentTool = e.target.dataset.tool;
+                    });
+                });
+
+                // Control buttons
+                document.getElementById('testCircuit').addEventListener('click', () => this.testCircuit());
+                document.getElementById('clearBoard').addEventListener('click', () => this.clearBoard());
+                document.getElementById('nextLevel').addEventListener('click', () => this.nextLevel());
+                document.getElementById('resetGame').addEventListener('click', () => this.resetGame());
+                document.getElementById('timeModeBtn').addEventListener('click', () => this.setGameMode('timed'));
+                document.getElementById('freeModeBtn').addEventListener('click', () => this.setGameMode('free'));
+                document.getElementById('continueBtn').addEventListener('click', () => this.hideCompletionMessage());
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Space') {
+                        e.preventDefault();
+                        this.testCircuit();
+                    }
+                    if (e.key === 'Escape') {
+                        this.clearSelection();
+                    }
+                });
+            }
+
+            generateLevel() {
+                this.clearBoard();
+                this.powerSources = [];
+                this.targetSystems = [];
+
+                // Generate power sources and targets based on level
+                const numSources = Math.min(2, Math.floor(this.level / 2) + 1);
+                const numTargets = Math.min(4, this.level + 2);
+
+                // Place power sources (usually on the left side)
+                for (let i = 0; i < numSources; i++) {
+                    const y = Math.floor((i + 1) * this.gridSize.height / (numSources + 1));
+                    const x = 0;
+                    this.placePowerSource(x, y);
+                }
+
+                // Place target systems (usually on the right side)
+                for (let i = 0; i < numTargets; i++) {
+                    const y = Math.floor((i + 1) * this.gridSize.height / (numTargets + 1));
+                    const x = this.gridSize.width - 1;
+                    this.placeTargetSystem(x, y);
+                }
+
+                // Add some obstacles or pre-placed logic gates for higher levels
+                if (this.level > 3) {
+                    this.addLevelObstacles();
+                }
+
+                this.updateUI();
+                this.isGameActive = true;
+            }
+
+            placePowerSource(x, y) {
+                const cell = this.getCellElement(x, y);
+                const element = document.createElement('div');
+                element.className = 'circuit-element power-source';
+                element.innerHTML = '⚡';
+                element.title = 'Power Source';
+                
+                cell.innerHTML = '';
+                cell.appendChild(element);
+                
+                this.grid[y][x] = { type: 'power-source', powered: true };
+                this.powerSources.push({ x, y });
+            }
+
+            placeTargetSystem(x, y) {
+                const cell = this.getCellElement(x, y);
+                const element = document.createElement('div');
+                element.className = 'circuit-element target-system';
+                element.innerHTML = '🎯';
+                element.title = 'Target System';
+                
+                cell.innerHTML = '';
+                cell.appendChild(element);
+                
+                this.grid[y][x] = { type: 'target-system', powered: false };
+                this.targetSystems.push({ x, y });
+            }
+
+            addLevelObstacles() {
+                // Add pre-placed logic gates or obstacles
+                const numObstacles = Math.floor(this.level / 3);
+                
+                for (let i = 0; i < numObstacles; i++) {
+                    let x, y;
+                    do {
+                        x = Math.floor(Math.random() * (this.gridSize.width - 2)) + 1;
+                        y = Math.floor(Math.random() * this.gridSize.height);
+                    } while (this.grid[y][x] !== null);
+
+                    const gateType = Math.random() > 0.5 ? 'and-gate' : 'or-gate';
+                    this.placeComponent(x, y, gateType);
+                }
+            }
+
+            handleCellClick(e, x, y) {
+                if (!this.isGameActive) return;
+                
+                const currentCell = this.grid[y][x];
+                
+                // Don't allow placing over power sources or targets
+                if (currentCell && (currentCell.type === 'power-source' || currentCell.type === 'target-system')) {
+                    return;
+                }
+
+                this.placeComponent(x, y, this.currentTool);
+                this.playSound('click');
+            }
+
+            placeComponent(x, y, componentType) {
+                const cell = this.getCellElement(x, y);
+                cell.innerHTML = '';
+                
+                let component = { type: componentType, powered: false };
+                let element = document.createElement('div');
+                element.className = 'circuit-element';
+
+                switch (componentType) {
+                    case 'wire-h':
+                        element.innerHTML = '<div class="wire wire-horizontal"></div>';
+                        break;
+                    case 'wire-v':
+                        element.innerHTML = '<div class="wire wire-vertical"></div>';
+                        break;
+                    case 'corner-tr':
+                        element.innerHTML = '<div class="wire wire-corner-tr"></div>';
+                        break;
+                    case 'corner-tl':
+                        element.innerHTML = '<div class="wire wire-corner-tl"></div>';
+                        break;
+                    case 'corner-br':
+                        element.innerHTML = '<div class="wire wire-corner-br"></div>';
+                        break;
+                    case 'corner-bl':
+                        element.innerHTML = '<div class="wire wire-corner-bl"></div>';
+                        break;
+                    case 'and-gate':
+                        element.className += ' logic-gate';
+                        element.innerHTML = 'AND';
+                        element.title = 'AND Gate - Requires all inputs';
+                        break;
+                    case 'or-gate':
+                        element.className += ' logic-gate';
+                        element.innerHTML = 'OR';
+                        element.title = 'OR Gate - Requires any input';
+                        break;
+                    default:
+                        return;
+                }
+
+                cell.appendChild(element);
+                this.grid[y][x] = component;
+            }
+
+            testCircuit() {
+                this.clearPowerState();
+                this.propagatePower();
+                this.updatePowerVisuals();
+                this.checkLevelCompletion();
+                this.playSound('test');
+            }
+
+            clearPowerState() {
+                this.poweredCells.clear();
+                
+                // Reset all components except power sources
+                for (let y = 0; y < this.gridSize.height; y++) {
+                    for (let x = 0; x < this.gridSize.width; x++) {
+                        const cell = this.grid[y][x];
+                        if (cell && cell.type !== 'power-source') {
+                            cell.powered = false;
+                        }
+                    }
+                }
+            }
+
+            propagatePower() {
+                const queue = [...this.powerSources];
+                const visited = new Set();
+
+                while (queue.length > 0) {
+                    const { x, y } = queue.shift();
+                    const key = `${x},${y}`;
+                    
+                    if (visited.has(key)) continue;
+                    visited.add(key);
+                    
+                    this.poweredCells.add(key);
+                    
+                    // Check all adjacent cells
+                    const directions = [
+                        { dx: 0, dy: -1, dir: 'up' },
+                        { dx: 1, dy: 0, dir: 'right' },
+                        { dx: 0, dy: 1, dir: 'down' },
+                        { dx: -1, dy: 0, dir: 'left' }
+                    ];
+
+                    for (const { dx, dy, dir } of directions) {
+                        const nx = x + dx;
+                        const ny = y + dy;
+                        
+                        if (this.isValidPosition(nx, ny) && !visited.has(`${nx},${ny}`)) {
+                            const currentCell = this.grid[y][x];
+                            const nextCell = this.grid[ny][nx];
+                            
+                            if (this.canConnectCells(currentCell, nextCell, dir)) {
+                                if (this.shouldPowerCell(nextCell, nx, ny)) {
+                                    nextCell.powered = true;
+                                    queue.push({ x: nx, y: ny });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            canConnectCells(fromCell, toCell, direction) {
+                if (!fromCell || !toCell) return false;
+
+                const fromConnections = this.getConnectionPoints(fromCell.type);
+                const toConnections = this.getConnectionPoints(toCell.type);
+
+                const oppositeDir = {
+                    'up': 'down',
+                    'right': 'left',
+                    'down': 'up',
+                    'left': 'right'
+                };
+
+                return fromConnections.includes(direction) && toConnections.includes(oppositeDir[direction]);
+            }
+
+            getConnectionPoints(componentType) {
+                switch (componentType) {
+                    case 'power-source':
+                        return ['up', 'right', 'down', 'left']; // Can connect in all directions
+                    case 'target-system':
+                        return ['up', 'right', 'down', 'left']; // Can receive from all directions
+                    case 'wire-h':
+                        return ['left', 'right'];
+                    case 'wire-v':
+                        return ['up', 'down'];
+                    case 'corner-tr':
+                        return ['up', 'right'];
+                    case 'corner-tl':
+                        return ['up', 'left'];
+                    case 'corner-br':
+                        return ['down', 'right'];
+                    case 'corner-bl':
+                        return ['down', 'left'];
+                    case 'and-gate':
+                    case 'or-gate':
+                        return ['up', 'right', 'down', 'left'];
+                    default:
+                        return [];
+                }
+            }
+
+            shouldPowerCell(cell, x, y) {
+                if (!cell) return false;
+
+                switch (cell.type) {
+                    case 'power-source':
+                        return true;
+                    case 'target-system':
+                        return true;
+                    case 'wire-h':
+                    case 'wire-v':
+                    case 'corner-tr':
+                    case 'corner-tl':
+                    case 'corner-br':
+                    case 'corner-bl':
+                        return true;
+                    case 'and-gate':
+                        return this.checkAndGate(x, y);
+                    case 'or-gate':
+                        return this.checkOrGate(x, y);
+                    default:
+                        return false;
+                }
+            }
+
+            checkAndGate(x, y) {
+                // AND gate requires power from at least 2 inputs
+                let poweredInputs = 0;
+                const directions = [
+                    { dx: 0, dy: -1 }, // up
+                    { dx: 1, dy: 0 },  // right
+                    { dx: 0, dy: 1 },  // down
+                    { dx: -1, dy: 0 }  // left
+                ];
+
+                for (const { dx, dy } of directions) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    
+                    if (this.isValidPosition(nx, ny)) {
+                        const neighborCell = this.grid[ny][nx];
+                        if (neighborCell && neighborCell.powered && this.poweredCells.has(`${nx},${ny}`)) {
+                            poweredInputs++;
+                        }
+                    }
+                }
+
+                return poweredInputs >= 2;
+            }
+
+            checkOrGate(x, y) {
+                // OR gate requires power from at least 1 input
+                const directions = [
+                    { dx: 0, dy: -1 }, // up
+                    { dx: 1, dy: 0 },  // right
+                    { dx: 0, dy: 1 },  // down
+                    { dx: -1, dy: 0 }  // left
+                ];
+
+                for (const { dx, dy } of directions) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    
+                    if (this.isValidPosition(nx, ny)) {
+                        const neighborCell = this.grid[ny][nx];
+                        if (neighborCell && neighborCell.powered && this.poweredCells.has(`${nx},${ny}`)) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            }
+
+            updatePowerVisuals() {
+                for (let y = 0; y < this.gridSize.height; y++) {
+                    for (let x = 0; x < this.gridSize.width; x++) {
+                        const cell = this.getCellElement(x, y);
+                        const gridCell = this.grid[y][x];
+                        
+                        if (gridCell && gridCell.powered) {
+                            cell.classList.add('powered');
+                            
+                            // Add powered class to wire elements
+                            const wireElement = cell.querySelector('.wire');
+                            const gateElement = cell.querySelector('.logic-gate');
+                            const targetElement = cell.querySelector('.target-system');
+                            
+                            if (wireElement) wireElement.classList.add('powered');
+                            if (gateElement) gateElement.classList.add('powered');
+                            if (targetElement) targetElement.classList.add('powered');
+                        } else {
+                            cell.classList.remove('powered');
+                            
+                            const wireElement = cell.querySelector('.wire');
+                            const gateElement = cell.querySelector('.logic-gate');
+                            
+                            if (wireElement) wireElement.classList.remove('powered');
+                            if (gateElement) gateElement.classList.remove('powered');
+                        }
+                    }
+                }
+            }
+
+            checkLevelCompletion() {
+                let poweredTargets = 0;
+                
+                for (const { x, y } of this.targetSystems) {
+                    const target = this.grid[y][x];
+                    if (target && target.powered) {
+                        poweredTargets++;
+                    }
+                }
+                
+                this.updateStats(poweredTargets);
+                
+                if (poweredTargets === this.targetSystems.length) {
+                    this.completeLevel();
+                }
+            }
+
+            completeLevel() {
+                this.isGameActive = false;
+                
+                // Calculate score bonus
+                const timeBonus = this.gameMode === 'timed' ? Math.floor(this.timeLeft * 2) : 0;
+                const levelBonus = this.level * 100;
+                const totalBonus = timeBonus + levelBonus;
+                
+                this.score += totalBonus;
+                
+                // Show completion message
+                const completionStats = document.getElementById('completionStats');
+                const timeUsed = this.gameMode === 'timed' ? this.formatTime(300 - this.timeLeft) : 'No limit';
+                
+                completionStats.innerHTML = `
+                    Time: ${timeUsed}<br>
+                    Level Bonus: +${levelBonus} pts<br>
+                    Time Bonus: +${timeBonus} pts<br>
+                    Total Score: ${this.score}
+                `;
+                
+                document.getElementById('completionMessage').classList.add('show');
+                this.playSound('complete');
+            }
+
+            hideCompletionMessage() {
+                document.getElementById('completionMessage').classList.remove('show');
+                this.nextLevel();
+            }
+
+            nextLevel() {
+                this.level++;
+                
+                // Increase difficulty
+                if (this.level % 3 === 0 && this.gridSize.width < 10) {
+                    this.gridSize.width++;
+                    this.setupGrid();
+                }
+                
+                if (this.level % 5 === 0 && this.gridSize.height < 8) {
+                    this.gridSize.height++;
+                    this.setupGrid();
+                }
+                
+                this.generateLevel();
+                
+                if (this.gameMode === 'timed') {
+                    this.timeLeft = Math.max(180, 300 - (this.level * 20)); // Decrease time each level
+                    this.startTimer();
+                }
+            }
+
+            clearBoard() {
+                for (let y = 0; y < this.gridSize.height; y++) {
+                    for (let x = 0; x < this.gridSize.width; x++) {
+                        const cell = this.getCellElement(x, y);
+                        const gridCell = this.grid[y][x];
+                        
+                        if (gridCell && gridCell.type !== 'power-source' && gridCell.type !== 'target-system') {
+                            cell.innerHTML = '';
+                            this.grid[y][x] = null;
+                        }
+                        
+                        cell.classList.remove('powered');
+                    }
+                }
+                
+                this.poweredCells.clear();
+                this.playSound('clear');
+            }
+
+            resetGame() {
+                this.level = 1;
+                this.score = 0;
+                this.timeLeft = 300;
+                this.gridSize = { width: 8, height: 6 };
+                
+                this.setupGrid();
+                this.generateLevel();
+                
+                if (this.gameMode === 'timed') {
+                    this.startTimer();
+                }
+                
+                this.playSound('reset');
+            }
+
+            setGameMode(mode) {
+                this.gameMode = mode;
+                
+                if (mode === 'free') {
+                    this.stopTimer();
+                    document.getElementById('timer').textContent = 'Free Play';
+                    document.getElementById('timer').style.color = '#00ff00';
+                } else {
+                    this.timeLeft = 300;
+                    this.startTimer();
+                }
+                
+                this.updateUI();
+            }
+
+            startTimer() {
+                this.stopTimer();
+                
+                if (this.gameMode !== 'timed') return;
+                
+                this.timer = setInterval(() => {
+                    this.timeLeft--;
+                    
+                    if (this.timeLeft <= 0) {
+                        this.gameOver();
+                    }
+                    
+                    this.updateTimer();
+                }, 1000);
+            }
+
+            stopTimer() {
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
+            }
+
+            updateTimer() {
+                const timerElement = document.getElementById('timer');
+                timerElement.textContent = this.formatTime(this.timeLeft);
+                
+                if (this.timeLeft <= 30) {
+                    timerElement.style.color = '#ff6b00';
+                } else if (this.timeLeft <= 60) {
+                    timerElement.style.color = '#ffff00';
+                } else {
+                    timerElement.style.color = '#ff6b00';
+                }
+            }
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            gameOver() {
+                this.isGameActive = false;
+                this.stopTimer();
+                
+                alert(`GAME OVER!\n\nFinal Score: ${this.score}\nLevel Reached: ${this.level}`);
+                this.resetGame();
+            }
+
+            updateStats(poweredTargets = 0) {
+                document.getElementById('levelStat').textContent = this.level;
+                document.getElementById('scoreStat').textContent = this.score;
+                document.getElementById('poweredStat').textContent = `${poweredTargets}/${this.targetSystems.length}`;
+            }
+
+            updateUI() {
+                document.getElementById('levelDisplay').textContent = `LEVEL ${this.level}`;
+                this.updateStats();
+                
+                if (this.gameMode === 'free') {
+                    document.getElementById('timer').textContent = 'Free Play';
+                    document.getElementById('timer').style.color = '#00ff00';
+                }
+            }
+
+            getCellElement(x, y) {
+                return document.querySelector(`.circuit-cell[data-x="${x}"][data-y="${y}"]`);
+            }
+
+            isValidPosition(x, y) {
+                return x >= 0 && x < this.gridSize.width && y >= 0 && y < this.gridSize.height;
+            }
+
+            clearSelection() {
+                document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            }
+
+            playSound(type) {
+                // Create retro-style sound effects using Web Audio API
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                const sounds = {
+                    click: { freq: 800, duration: 0.1 },
+                    test: { freq: 1200, duration: 0.3 },
+                    complete: { freq: 1600, duration: 0.5 },
+                    clear: { freq: 400, duration: 0.2 },
+                    reset: { freq: 300, duration: 0.4 }
+                };
+                
+                const sound = sounds[type];
+                if (!sound) return;
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = sound.freq;
+                oscillator.type = 'square';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + sound.duration);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + sound.duration);
+            }
+        }
+
+        // Initialize the game when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new CircuitPuzzle();
+        });
+    </script>
+</body>
+</html>
