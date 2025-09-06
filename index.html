@@ -1293,6 +1293,110 @@
         transform: scale(0) rotate(360deg);
     }
 }
+
+/* CIRCUIT PUZZLE Logo - Animated Circuit Board */
+.logo-circuit-puzzle {
+    background: linear-gradient(135deg, #001a1a, #003333);
+    border: 4px solid #00ffaa;
+    position: relative;
+    animation: circuitPowerEffect 3s ease-in-out infinite;
+    box-shadow: 
+        0 0 25px rgba(0, 255, 170, 0.6),
+        inset 0 0 20px rgba(0, 255, 170, 0.1);
+    overflow: hidden;
+}
+
+/* Circuit board traces */
+.logo-circuit-puzzle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        /* Horizontal traces */
+        linear-gradient(90deg, transparent 20%, #00ffaa 25%, #00ffaa 30%, transparent 35%),
+        linear-gradient(90deg, transparent 65%, #00ffaa 70%, #00ffaa 75%, transparent 80%),
+        /* Vertical traces */
+        linear-gradient(0deg, transparent 30%, #00ffaa 35%, #00ffaa 40%, transparent 45%),
+        linear-gradient(0deg, transparent 55%, #00ffaa 60%, #00ffaa 65%, transparent 70%);
+    background-size: 100% 25%, 100% 25%, 25% 100%, 25% 100%;
+    background-position: 0 25%, 0 75%, 25% 0, 75% 0;
+    opacity: 0.6;
+    animation: circuitTraceFlow 2s linear infinite;
+}
+
+/* Circuit components */
+.logo-circuit-puzzle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 12px;
+    background: #333333;
+    border: 2px solid #00ffaa;
+    transform: translate(-50%, -50%);
+    box-shadow: 
+        -20px -15px 0 -6px #00ffaa,
+        20px -15px 0 -6px #00ffaa,
+        -20px 15px 0 -6px #00ffaa,
+        20px 15px 0 -6px #00ffaa,
+        0 0 10px #00ffaa;
+    animation: circuitComponentGlow 2.5s ease-in-out infinite alternate;
+}
+
+/* Circuit connection nodes */
+.circuit-node {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #00ffaa;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #00ffaa;
+    animation: circuitNodePulse 1.8s ease-in-out infinite;
+}
+
+.circuit-node:nth-child(1) { top: 20%; left: 20%; animation-delay: 0s; }
+.circuit-node:nth-child(2) { top: 20%; right: 20%; animation-delay: 0.3s; }
+.circuit-node:nth-child(3) { bottom: 20%; left: 20%; animation-delay: 0.6s; }
+.circuit-node:nth-child(4) { bottom: 20%; right: 20%; animation-delay: 0.9s; }
+.circuit-node:nth-child(5) { top: 50%; left: 10%; animation-delay: 1.2s; }
+.circuit-node:nth-child(6) { top: 50%; right: 10%; animation-delay: 1.5s; }
+
+@keyframes circuitPowerEffect {
+    0%, 100% { 
+        box-shadow: 0 0 25px rgba(0, 255, 170, 0.6), inset 0 0 20px rgba(0, 255, 170, 0.1);
+        border-color: #00ffaa;
+    }
+    50% { 
+        box-shadow: 0 0 40px rgba(0, 255, 255, 0.9), 0 0 55px rgba(0, 255, 170, 0.5), inset 0 0 30px rgba(0, 255, 255, 0.2);
+        border-color: #66ffcc;
+    }
+}
+
+@keyframes circuitTraceFlow {
+    0% { opacity: 0.6; filter: brightness(1); }
+    50% { opacity: 1; filter: brightness(1.5); }
+    100% { opacity: 0.6; filter: brightness(1); }
+}
+
+@keyframes circuitComponentGlow {
+    from { 
+        box-shadow: -20px -15px 0 -6px #00ffaa, 20px -15px 0 -6px #00ffaa, -20px 15px 0 -6px #00ffaa, 20px 15px 0 -6px #00ffaa, 0 0 10px #00ffaa;
+        background: #333333;
+    }
+    to { 
+        box-shadow: -20px -15px 0 -6px #66ffcc, 20px -15px 0 -6px #66ffcc, -20px 15px 0 -6px #66ffcc, 20px 15px 0 -6px #66ffcc, 0 0 20px #00ffaa, 0 0 30px #66ffcc;
+        background: #004444;
+    }
+}
+
+@keyframes circuitNodePulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 8px #00ffaa; background: #00ffaa; }
+    50% { transform: scale(1.5); box-shadow: 0 0 15px #00ffaa, 0 0 25px #66ffcc; background: #66ffcc; }
+}
         .game-title {
             font-size: 16px;
             margin-bottom: 15px;
@@ -1681,6 +1785,32 @@
                   <span class="game-status free">FREE</span>
                     <button class="play-btn">PLAY NOW</button>
                 </div>
+<div class="game-card" onclick="playGame('circuit-puzzle')">
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    <div class="scan-line"></div>
+    <div class="game-icon">
+        <div class="retro-logo logo-circuit-puzzle">
+            <div class="circuit-node"></div>
+            <div class="circuit-node"></div>
+            <div class="circuit-node"></div>
+            <div class="circuit-node"></div>
+            <div class="circuit-node"></div>
+            <div class="circuit-node"></div>
+        </div>
+    <h3 class="game-title">CIRCUIT PUZZLE</h3>
+    <p class="game-description">Connect electrical circuits to power up systems. Use logic gates and strategic wiring to complete each level!</p>
+    <span class="game-status free">FREE</span>
+    <button class="play-btn">PLAY NOW</button>
+</div>
 <div class="game-card" onclick="playGame('color-tide')">
     <div class="particles">
         <div class="particle"></div>
@@ -1759,7 +1889,8 @@
                 'geo-dash': './GeoDash/',
                 'astro-belt': './AstroBelt/',
                 'sniper-elite': './SniperElite/',
-                'color-tide': './ColorTide/'
+                'color-tide': './ColorTide/',
+                'circuit-puzzle': './CircuitPuzzle/
             };
             
             // Open the game in a new window/tab
