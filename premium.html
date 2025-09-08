@@ -6,7 +6,7 @@
     <title>Premium - PixelAddict</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        /* Base styling (same as homepage) */
+        /* Base styling */
         * {
             margin: 0;
             padding: 0;
@@ -147,29 +147,269 @@
         .premium-text {
             font-size: 12px;
             max-width: 800px;
-            margin: 0 auto;
+            margin: 0 auto 40px;
             color: #cccccc;
             line-height: 1.8;
             text-shadow: 1px 1px 0px #000;
         }
 
-        .email-highlight {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 20px;
+        .pricing-tiers {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            margin: 60px 0;
+            flex-wrap: wrap;
+        }
+
+        .tier-card {
+            background: #1a1a1a;
+            border: 3px solid #00ff00;
+            padding: 30px 25px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tier-card:hover {
+            border-color: #ff6b00;
+            box-shadow: 0 0 30px rgba(255, 107, 0, 0.5);
+            transform: translateY(-5px);
+        }
+
+        .tier-card.annual {
+            border-color: #ff6b00;
+            box-shadow: 0 0 25px rgba(255, 107, 0, 0.4);
+        }
+
+        .tier-card.annual::before {
+            content: "BEST VALUE";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff6b00;
+            color: #000;
+            padding: 5px 15px;
+            font-size: 8px;
+            font-weight: bold;
+        }
+
+        .tier-title {
+            font-size: 18px;
+            color: #00ff00;
+            margin-bottom: 15px;
+        }
+
+        .tier-card.annual .tier-title {
+            color: #ff6b00;
+        }
+
+        .tier-price {
+            font-size: 24px;
+            color: #ffffff;
+            margin: 20px 0;
+        }
+
+        .tier-duration {
+            font-size: 10px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+
+        .tier-features {
+            text-align: left;
+            margin: 20px 0;
+            font-size: 10px;
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .tier-features li {
+            margin: 8px 0;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .tier-features li::before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #00ff00;
+        }
+
+        .tier-card.annual .tier-features li::before {
+            color: #ff6b00;
+        }
+
+        .tier-button {
             background: #00ff00;
             color: #000;
-            font-size: 12px;
             border: none;
+            padding: 15px 25px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .tier-button:hover {
+            background: #ff6b00;
+            box-shadow: 0 0 25px rgba(255, 107, 0, 0.8);
+            transform: scale(1.05);
+        }
+
+        .tier-card.annual .tier-button {
+            background: #ff6b00;
+            box-shadow: 0 0 15px rgba(255, 107, 0, 0.5);
+        }
+
+        .tier-card.annual .tier-button:hover {
+            background: #00ff00;
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.8);
+        }
+
+        /* Payment Page Styles */
+        .payment-page {
+            display: none;
+            padding: 40px 0;
+        }
+
+        .payment-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #1a1a1a;
+            border: 3px solid #00ff00;
+            padding: 40px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 10px;
+            color: #00ff00;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            background: #0a0a0a;
+            border: 2px solid #333;
+            color: #00ff00;
+            padding: 12px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .coupon-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #444;
+        }
+
+        .coupon-section h3 {
+            font-size: 12px;
+            color: #ff6b00;
+            margin-bottom: 15px;
+        }
+
+        .order-summary {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #00ff00;
+        }
+
+        .order-summary h3 {
+            font-size: 14px;
+            color: #00ff00;
+            margin-bottom: 15px;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 10px;
+        }
+
+        .total-line {
+            border-top: 2px solid #00ff00;
+            padding-top: 10px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #ffffff;
+        }
+
+        .pay-button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 20px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 30px;
+            transition: all 0.3s ease;
             box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
-            text-decoration: none;
+        }
+
+        .pay-button:hover {
+            background: #ff6b00;
+            box-shadow: 0 0 30px rgba(255, 107, 0, 0.8);
+            transform: scale(1.02);
+        }
+
+        .back-button {
+            background: #333;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            padding: 15px 25px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
             transition: all 0.3s ease;
         }
 
-        .email-highlight:hover {
-            background: #ff6b00;
-            box-shadow: 0 0 30px rgba(255, 107, 0, 0.8);
-            transform: scale(1.1);
+        .back-button:hover {
+            background: #00ff00;
+            color: #000;
+        }
+
+        .error-message {
+            background: #ff0000;
+            color: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 10px;
+            border: 2px solid #ff0000;
+            display: none;
         }
 
         footer {
@@ -214,6 +454,10 @@
             .hero h1 { font-size: 20px; }
             .hero p { font-size: 12px; }
             .premium-text { font-size: 11px; padding: 0 15px; }
+            .pricing-tiers { flex-direction: column; align-items: center; }
+            .tier-card { width: 90%; max-width: 350px; }
+            .payment-form { padding: 20px; margin: 0 10px; }
+            .form-row { flex-direction: column; }
         }
     </style>
 </head>
@@ -232,36 +476,231 @@
         </nav>
     </header>
 
-    <section class="hero">
-        <div class="container">
-            <h1>PIXELADDICT PREMIUM</h1>
-            <p>Unlock the full retro experience – endless games, endless fun.</p>
-        </div>
-    </section>
+    <!-- Premium Page -->
+    <div id="premium-page">
+        <section class="hero">
+            <div class="container">
+                <h1>PIXELADDICT PREMIUM</h1>
+                <p>Unlock the full retro experience – endless games, endless fun.</p>
+            </div>
+        </section>
 
-    <section class="premium-section">
+        <section class="premium-section">
+            <div class="container">
+                <h2 class="premium-title">WHY GO PREMIUM?</h2>
+                <p class="premium-text">
+                    What you see in our free section is just the beginning – only 0.1% of what PixelAddict truly offers.  
+                    Our **Premium Package** gives you access to **500+ mind-challenging, reaction-boosting games**,  
+                    covering every genre from retro puzzles to fast-paced arcade shooters.  
+                    <br><br>
+                    **New games are added every month**, keeping your experience fresh and exciting.  
+                    Plus get exclusive merchandise, physical game copies, posters, and premium goodies delivered to your door!
+                </p>
+
+                <div class="pricing-tiers">
+                    <div class="tier-card">
+                        <h3 class="tier-title">MONTHLY</h3>
+                        <div class="tier-price">$5.99</div>
+                        <div class="tier-duration">PER MONTH</div>
+                        <ul class="tier-features">
+                            <li>500+ Premium Games</li>
+                            <li>Monthly New Releases</li>
+                            <li>Ad-Free Experience</li>
+                            <li>Priority Support</li>
+                            <li>Exclusive Merchandise</li>
+                            <li>Physical Game Copies</li>
+                            <li>Premium Posters</li>
+                        </ul>
+                        <button class="tier-button" onclick="selectPlan('monthly', 5.99)">START MONTHLY</button>
+                    </div>
+
+                    <div class="tier-card annual">
+                        <h3 class="tier-title">ANNUAL</h3>
+                        <div class="tier-price">$49.99</div>
+                        <div class="tier-duration">PER YEAR (SAVE 30%)</div>
+                        <ul class="tier-features">
+                            <li>500+ Premium Games</li>
+                            <li>Monthly New Releases</li>
+                            <li>Ad-Free Experience</li>
+                            <li>Priority Support</li>
+                            <li>Exclusive Merchandise</li>
+                            <li>Physical Game Copies</li>
+                            <li>Premium Posters</li>
+                            <li>Annual Collector's Box</li>
+                            <li>Limited Edition Items</li>
+                        </ul>
+                        <button class="tier-button" onclick="selectPlan('annual', 49.99)">START ANNUAL</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Payment Page -->
+    <div id="payment-page" class="payment-page">
         <div class="container">
-            <h2 class="premium-title">WHY GO PREMIUM?</h2>
-            <p class="premium-text">
-                What you see in our free section is just the beginning – only 0.1% of what PixelAddict truly offers.  
-                Our **Premium Package** gives you access to **500+ mind-challenging, reaction-boosting games**,  
-                covering every genre from retro puzzles to fast-paced arcade shooters.  
-                <br><br>
-                **New games are added every month**, keeping your experience fresh and exciting.  
-                If you’re ready to level up and experience the ultimate retro collection, join the premium side today.  
-            </p>
-            <a href="mailto:contact@pixeladdict.tech" class="email-highlight">EMAIL US TO JOIN PREMIUM</a>
+            <button class="back-button" onclick="showPremiumPage()">◀ BACK TO PLANS</button>
+            
+            <div class="payment-form">
+                <h2 style="color: #ff6b00; margin-bottom: 30px; text-align: center;">COMPLETE YOUR ORDER</h2>
+                
+                <div class="order-summary">
+                    <h3>ORDER SUMMARY</h3>
+                    <div class="summary-line">
+                        <span>PixelAddict Premium (<span id="plan-type">Monthly</span>)</span>
+                        <span id="plan-price">$5.99</span>
+                    </div>
+                    <div class="summary-line">
+                        <span>Tax</span>
+                        <span id="tax-amount">$0.00</span>
+                    </div>
+                    <div class="summary-line total-line">
+                        <strong>TOTAL: <span id="total-amount">$5.99</span></strong>
+                    </div>
+                </div>
+
+                <form id="payment-form">
+                    <div class="form-group">
+                        <label>EMAIL ADDRESS</label>
+                        <input type="email" id="email" required placeholder="your@email.com">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>FIRST NAME</label>
+                            <input type="text" id="firstName" required placeholder="John">
+                        </div>
+                        <div class="form-group">
+                            <label>LAST NAME</label>
+                            <input type="text" id="lastName" required placeholder="Doe">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>CARD NUMBER</label>
+                        <input type="text" id="cardNumber" required placeholder="1234 5678 9012 3456" maxlength="19">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>EXPIRY DATE</label>
+                            <input type="text" id="expiryDate" required placeholder="MM/YY" maxlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label>CVV</label>
+                            <input type="text" id="cvv" required placeholder="123" maxlength="4">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>BILLING ADDRESS</label>
+                        <input type="text" id="address" required placeholder="123 Retro Street">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>CITY</label>
+                            <input type="text" id="city" required placeholder="Gaming City">
+                        </div>
+                        <div class="form-group">
+                            <label>ZIP CODE</label>
+                            <input type="text" id="zipCode" required placeholder="12345">
+                        </div>
+                    </div>
+
+                    <div class="coupon-section">
+                        <h3>HAVE A COUPON CODE?</h3>
+                        <div class="form-group">
+                            <input type="text" id="couponCode" placeholder="Enter coupon code">
+                        </div>
+                        <button type="button" class="back-button" onclick="applyCoupon()" style="margin-bottom: 0;">APPLY COUPON</button>
+                    </div>
+
+                    <div class="error-message" id="error-message">
+                        SORRY, THERE WAS A PROBLEM WITH YOUR PAYMENT METHOD. PLEASE CONTACT SUPPORT@PIXELADDICT.TECH FOR ASSISTANCE.
+                    </div>
+
+                    <button type="submit" class="pay-button">COMPLETE PAYMENT</button>
+                </form>
+            </div>
         </div>
-    </section>
+    </div>
 
     <footer>
         <div class="container">
             <div class="footer-content">
                 <p>&copy; 2024 PIXELADDICT - RETRO GAMING EXPERIENCE</p>
-                <p style="margin: 10px 0; color: #00ff00;">CONTACT: <a href="mailto:contact@pixeladdict.tech" style="color: #ff6b00; text-decoration: none;">contact@pixeladdict.tech</a></p>
+                <p style="margin: 10px 0; color: #00ff00;">SUPPORT: <a href="mailto:support@pixeladdict.tech" style="color: #ff6b00; text-decoration: none;">support@pixeladdict.tech</a></p>
                 <p class="blinking">PRESS START TO CONTINUE</p>
             </div>
         </div>
     </footer>
+
+    <script>
+        let selectedPlan = { type: 'monthly', price: 5.99 };
+
+        function selectPlan(planType, price) {
+            selectedPlan = { type: planType, price: price };
+            showPaymentPage();
+        }
+
+        function showPaymentPage() {
+            document.getElementById('premium-page').style.display = 'none';
+            document.getElementById('payment-page').style.display = 'block';
+            
+            // Update order summary
+            document.getElementById('plan-type').textContent = selectedPlan.type.charAt(0).toUpperCase() + selectedPlan.type.slice(1);
+            document.getElementById('plan-price').textContent = '$' + selectedPlan.price.toFixed(2);
+            document.getElementById('total-amount').textContent = '$' + selectedPlan.price.toFixed(2);
+            
+            window.scrollTo(0, 0);
+        }
+
+        function showPremiumPage() {
+            document.getElementById('premium-page').style.display = 'block';
+            document.getElementById('payment-page').style.display = 'none';
+            window.scrollTo(0, 0);
+        }
+
+        function applyCoupon() {
+            const couponCode = document.getElementById('couponCode').value.trim();
+            if (couponCode) {
+                // For demo purposes, show that coupon was applied but no discount
+                alert('COUPON CODE APPLIED! (No active discounts at this time)');
+            }
+        }
+
+        // Format card number input
+        document.getElementById('cardNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || '';
+            e.target.value = formattedValue;
+        });
+
+        // Format expiry date input
+        document.getElementById('expiryDate').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // CVV input validation
+        document.getElementById('cvv').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        // Form submission
+        document.getElementById('payment-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show error message
+            document.getElementById('error-message').style.display = 'block';
+            
+            // Scroll to error message
+            document.getElementById('error-message').scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
 </body>
 </html>
