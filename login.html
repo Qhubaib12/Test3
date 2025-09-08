@@ -106,21 +106,68 @@
       border-bottom: 1px solid #ff6b00;
       text-shadow: 0 0 8px #ff6b00;
     }
-    .forgot-msg {
+    .forgot-form {
       margin-top: 20px;
-      padding: 15px;
+      padding: 20px;
       border: 2px dashed #00ff00;
       color: #00ff00;
       font-size: 11px;
       background: rgba(0, 255, 0, 0.05);
       display: none;
     }
-    .forgot-msg a {
+    .forgot-form h3 {
+      font-size: 12px;
       color: #ff6b00;
-      text-decoration: none;
-    }
-    .forgot-msg a:hover {
+      margin-bottom: 15px;
       text-shadow: 0 0 8px #ff6b00;
+    }
+    .forgot-form p {
+      margin-bottom: 15px;
+      line-height: 1.4;
+    }
+    .forgot-form label {
+      font-size: 10px;
+      color: #cccccc;
+      margin: 15px 0 8px;
+    }
+    .forgot-form input[type="email"] {
+      width: 90%;
+      max-width: 280px;
+      font-size: 10px;
+    }
+    .forgot-form .crt-button {
+      margin-top: 15px;
+      font-size: 9px;
+      padding: 10px 20px;
+    }
+    .email-loading {
+      margin-top: 15px;
+      font-size: 10px;
+      color: #00ff00;
+      text-shadow: 0 0 8px #00ff00;
+      display: none;
+    }
+    .email-error {
+      margin-top: 15px;
+      font-size: 10px;
+      color: #ff3300;
+      text-shadow: 0 0 10px #ff3300;
+      display: none;
+      animation: glitch 0.8s infinite;
+      line-height: 1.4;
+    }
+    .back-link {
+      margin-top: 15px;
+      font-size: 9px;
+    }
+    .back-link a {
+      color: #9966ff;
+      text-decoration: none;
+      border-bottom: 1px dashed #9966ff;
+    }
+    .back-link a:hover {
+      color: #bb88ff;
+      text-shadow: 0 0 8px #bb88ff;
     }
     .blinking {
       animation: blink 1s infinite;
@@ -155,7 +202,7 @@
   <h1>PREMIUM MEMBERS LOGIN</h1>
 
   <div class="login-box">
-    <form onsubmit="showLogin(event)">
+    <form onsubmit="showLogin(event)" id="loginForm">
       <label for="memberId">MEMBER ID</label>
       <input type="text" id="memberId" name="memberId" required>
 
@@ -169,12 +216,41 @@
     <div class="loading" id="loadingMsg">VERIFYING...<br>████████████</div>
     <div class="message" id="errorMsg">ACCESS DENIED – WRONG ID/PIN</div>
 
-    <div class="forgot">
-      <a href="#" onclick="showForgot(event)">Forgot Member ID or PIN?</a>
+    <div class="forgot" id="forgotLink">
+      <a href="#" onclick="showForgotForm(event)">Forgot Member ID or PIN?</a>
     </div>
-    <div class="forgot-msg" id="forgotMsg">
-      For <strong>Forgot Member ID</strong>, <strong>PIN</strong>, or any other issue,<br>
-      please mail us at <a href="mailto:member@pixeladdict.tech">member@pixeladdict.tech</a>
+
+    <div class="forgot-form" id="forgotForm">
+      <h3>PASSWORD/ID RECOVERY</h3>
+      <p>Please enter your registered email address below.<br>
+         We will send you detailed reset instructions<br>
+         to recover your Member ID and PIN.</p>
+      
+      <form onsubmit="handleEmailSubmit(event)">
+        <label for="resetEmail">REGISTERED EMAIL ADDRESS</label>
+        <input type="email" id="resetEmail" name="resetEmail" required 
+               placeholder="your.email@domain.com">
+        
+        <br>
+        <button type="submit" class="crt-button">SEND RESET INSTRUCTIONS</button>
+      </form>
+
+      <div class="email-loading" id="emailLoadingMsg">
+        SEARCHING DATABASE...<br>
+        ████████████
+      </div>
+      
+      <div class="email-error" id="emailErrorMsg">
+        ERROR: THIS EMAIL ADDRESS IS NOT<br>
+        REGISTERED WITH OUR SYSTEM.<br><br>
+        Please check your email address or<br>
+        contact support at<br>
+        <a href="mailto:member@pixeladdict.tech" style="color: #ff6b00;">member@pixeladdict.tech</a>
+      </div>
+
+      <div class="back-link">
+        <a href="#" onclick="showLoginForm(event)">← Back to Login</a>
+      </div>
     </div>
   </div>
 
@@ -193,9 +269,46 @@
       }, 2000); // 2 seconds delay
     }
 
-    function showForgot(e) {
+    function showForgotForm(e) {
       e.preventDefault();
-      document.getElementById("forgotMsg").style.display = "block";
+      document.getElementById("loginForm").style.display = "none";
+      document.getElementById("loadingMsg").style.display = "none";
+      document.getElementById("errorMsg").style.display = "none";
+      document.getElementById("forgotLink").style.display = "none";
+      document.getElementById("forgotForm").style.display = "block";
+      
+      // Reset form state
+      document.getElementById("resetEmail").value = "";
+      document.getElementById("emailLoadingMsg").style.display = "none";
+      document.getElementById("emailErrorMsg").style.display = "none";
+    }
+
+    function showLoginForm(e) {
+      e.preventDefault();
+      document.getElementById("loginForm").style.display = "block";
+      document.getElementById("forgotLink").style.display = "block";
+      document.getElementById("forgotForm").style.display = "none";
+      
+      // Reset login form state
+      document.getElementById("loadingMsg").style.display = "none";
+      document.getElementById("errorMsg").style.display = "none";
+    }
+
+    function handleEmailSubmit(e) {
+      e.preventDefault();
+      
+      // Hide any previous messages
+      document.getElementById("emailErrorMsg").style.display = "none";
+      
+      // Show loading
+      const loading = document.getElementById("emailLoadingMsg");
+      loading.style.display = "block";
+
+      // Always show "not registered" after delay, regardless of email entered
+      setTimeout(() => {
+        loading.style.display = "none";
+        document.getElementById("emailErrorMsg").style.display = "block";
+      }, 2500); // 2.5 seconds delay for realism
     }
   </script>
 </body>
