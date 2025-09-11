@@ -403,13 +403,14 @@
         }
 
         .error-message {
-            background: #ff0000;
-            color: #fff;
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid #ff0000;
+            color: #ff6b6b;
             padding: 20px;
             margin: 20px 0;
             font-size: 10px;
-            border: 2px solid #ff0000;
             display: none;
+            border-radius: 4px;
         }
 
         .loading-overlay {
@@ -418,22 +419,23 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 2000;
             flex-direction: column;
+            backdrop-filter: blur(5px);
         }
 
         .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid #333;
-            border-top: 4px solid #00ff00;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #333;
+            border-top: 3px solid #00ff00;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 30px;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 25px;
         }
 
         @keyframes spin {
@@ -442,24 +444,28 @@
         }
 
         .loading-text {
-            font-size: 12px;
+            font-size: 11px;
             color: #00ff00;
             text-align: center;
-            margin: 10px 0;
-            animation: blink 1.5s ease-in-out infinite;
+            margin: 8px 0;
+            font-family: 'Press Start 2P', monospace;
         }
 
         .processing-steps {
-            font-size: 10px;
-            color: #888;
-            text-align: center;
-            margin-top: 20px;
+            font-size: 9px;
+            color: #666;
+            text-align: left;
+            margin-top: 25px;
+            max-width: 400px;
         }
 
         .processing-step {
-            margin: 5px 0;
-            opacity: 0.3;
-            transition: all 0.5s ease;
+            margin: 8px 0;
+            opacity: 0.4;
+            transition: all 0.6s ease;
+            padding: 4px 0;
+            display: flex;
+            align-items: center;
         }
 
         .processing-step.active {
@@ -468,29 +474,47 @@
         }
 
         .processing-step.completed {
-            opacity: 1;
-            color: #00ff00;
+            opacity: 0.8;
+            color: #888;
         }
 
         .processing-step.completed::before {
             content: "✓ ";
             color: #00ff00;
+            margin-right: 8px;
         }
 
-        .coupon-success {
+        .processing-step.failed {
+            color: #ff6b6b;
+            opacity: 1;
+        }
+
+        .processing-step.failed::before {
+            content: "✗ ";
+            color: #ff6b6b;
+            margin-right: 8px;
+        }
+
+        .step-dot {
+            width: 6px;
+            height: 6px;
+            background: #333;
+            border-radius: 50%;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .processing-step.active .step-dot {
             background: #00ff00;
-            color: #000;
-            padding: 15px;
-            margin: 10px 0;
-            font-size: 10px;
-            border: 2px solid #00ff00;
-            display: none;
-            animation: glow 2s ease-in-out infinite alternate;
+            box-shadow: 0 0 8px #00ff00;
         }
 
-        .discount-line {
-            color: #00ff00;
-            font-weight: bold;
+        .processing-step.completed .step-dot {
+            background: #00ff00;
+        }
+
+        .processing-step.failed .step-dot {
+            background: #ff6b6b;
         }
 
         footer {
@@ -632,10 +656,6 @@
                         <span>PixelAddict Premium (<span id="plan-type">Monthly</span>)</span>
                         <span id="plan-price">$5.99</span>
                     </div>
-                    <div class="summary-line" id="discount-line" style="display: none;">
-                        <span class="discount-line">CUBEFREE Discount</span>
-                        <span class="discount-line" id="discount-amount">-$0.00</span>
-                    </div>
                     <div class="summary-line">
                         <span>Tax</span>
                         <span id="tax-amount">$0.00</span>
@@ -696,9 +716,6 @@
 
                     <div class="coupon-section">
                         <h3>HAVE A COUPON CODE?</h3>
-                        <div class="coupon-success" id="coupon-success">
-                            COUPON APPLIED SUCCESSFULLY! 🎮
-                        </div>
                         <div class="form-group">
                             <input type="text" id="couponCode" placeholder="Enter coupon code">
                         </div>
@@ -706,7 +723,7 @@
                     </div>
 
                     <div class="error-message" id="error-message">
-                        SORRY, THERE WAS A PROBLEM WITH YOUR PAYMENT METHOD. PLEASE CONTACT SUPPORT@PIXELADDICT.TECH FOR ASSISTANCE.
+                        Payment failed, your payment was declined. Please try a different payment method or contact us at payment@pixeladdict.tech for assistance.
                     </div>
 
                     <button type="submit" class="pay-button">COMPLETE PAYMENT</button>
@@ -718,12 +735,24 @@
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="loading-spinner"></div>
-        <div class="loading-text">PROCESSING PAYMENT...</div>
+        <div class="loading-text">Processing payment...</div>
         <div class="processing-steps">
-            <div class="processing-step" id="step1">Validating payment information</div>
-            <div class="processing-step" id="step2">Connecting to payment gateway</div>
-            <div class="processing-step" id="step3">Authorizing transaction</div>
-            <div class="processing-step" id="step4">Finalizing payment</div>
+            <div class="processing-step" id="step1">
+                <div class="step-dot"></div>
+                <span>Validating payment information</span>
+            </div>
+            <div class="processing-step" id="step2">
+                <div class="step-dot"></div>
+                <span>Connecting to secure payment gateway</span>
+            </div>
+            <div class="processing-step" id="step3">
+                <div class="step-dot"></div>
+                <span>Contacting your bank for authorization</span>
+            </div>
+            <div class="processing-step" id="step4">
+                <div class="step-dot"></div>
+                <span>Finalizing transaction</span>
+            </div>
         </div>
     </div>
 
@@ -740,8 +769,6 @@
     <script>
         // Global variables
         let selectedPlan = { type: 'monthly', price: 5.99 };
-        let appliedDiscount = 0;
-        let couponApplied = false;
 
         // Wait for DOM to load
         document.addEventListener('DOMContentLoaded', function() {
@@ -803,8 +830,6 @@
         // Functions
         function selectPlan(planType, price) {
             selectedPlan = { type: planType, price: price };
-            appliedDiscount = 0;
-            couponApplied = false;
             showPaymentPage();
         }
 
@@ -822,40 +847,16 @@
         }
 
         function updateOrderSummary() {
-            const totalPrice = selectedPlan.price - appliedDiscount;
-            
             document.getElementById('plan-type').textContent = selectedPlan.type.charAt(0).toUpperCase() + selectedPlan.type.slice(1);
             document.getElementById('plan-price').textContent = '$' + selectedPlan.price.toFixed(2);
-            
-            if (appliedDiscount > 0) {
-                document.getElementById('discount-line').style.display = 'flex';
-                document.getElementById('discount-amount').textContent = '-$' + appliedDiscount.toFixed(2);
-            } else {
-                document.getElementById('discount-line').style.display = 'none';
-            }
-            
-            document.getElementById('total-amount').textContent = '$' + Math.max(0, totalPrice).toFixed(2);
+            document.getElementById('total-amount').textContent = '$' + selectedPlan.price.toFixed(2);
         }
 
         function applyCoupon() {
             const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
-            const couponSuccess = document.getElementById('coupon-success');
             
-            if (couponCode === 'CUBEFREE' && !couponApplied) {
-                appliedDiscount = selectedPlan.price;
-                couponApplied = true;
-                couponSuccess.style.display = 'block';
-                couponSuccess.innerHTML = '🎮 CUBEFREE COUPON APPLIED! ENJOY YOUR FREE PREMIUM ACCESS! 🎮';
-                updateOrderSummary();
-                
-                // Disable the coupon input
-                document.getElementById('couponCode').disabled = true;
-                document.getElementById('apply-coupon-btn').disabled = true;
-                document.getElementById('apply-coupon-btn').style.opacity = '0.5';
-            } else if (couponCode && !couponApplied) {
+            if (couponCode && couponCode !== '') {
                 alert('INVALID COUPON CODE. TRY AGAIN!');
-            } else if (couponApplied) {
-                alert('COUPON ALREADY APPLIED!');
             }
         }
 
@@ -876,23 +877,42 @@
                 if (currentStep < steps.length) {
                     document.getElementById(steps[currentStep]).classList.add('active');
                     currentStep++;
-                    setTimeout(processStep, 1500);
+                    
+                    // Realistic timing for each step
+                    const delays = [1200, 2800, 3500, 1800];
+                    setTimeout(processStep, delays[currentStep - 1] || 1500);
                 } else {
-                    // All steps completed, show error after a brief pause
+                    // Payment fails at the last step
                     setTimeout(() => {
-                        loadingOverlay.style.display = 'none';
-                        document.getElementById('error-message').style.display = 'block';
-                        document.getElementById('error-message').scrollIntoView({ behavior: 'smooth' });
+                        // Mark last step as failed
+                        document.getElementById('step4').classList.remove('active');
+                        document.getElementById('step4').classList.add('failed');
                         
-                        // Reset steps for next attempt
-                        steps.forEach(step => {
-                            document.getElementById(step).classList.remove('active', 'completed');
-                        });
-                    }, 1000);
+                        // Update loading text
+                        document.querySelector('.loading-text').textContent = 'Payment failed';
+                        document.querySelector('.loading-text').style.color = '#ff6b6b';
+                        
+                        // Hide overlay and show error after realistic delay
+                        setTimeout(() => {
+                            loadingOverlay.style.display = 'none';
+                            document.getElementById('error-message').style.display = 'block';
+                            document.getElementById('error-message').scrollIntoView({ behavior: 'smooth' });
+                            
+                            // Reset steps for next attempt
+                            steps.forEach(step => {
+                                document.getElementById(step).classList.remove('active', 'completed', 'failed');
+                            });
+                            
+                            // Reset loading text
+                            document.querySelector('.loading-text').textContent = 'Processing payment...';
+                            document.querySelector('.loading-text').style.color = '#00ff00';
+                        }, 1500);
+                    }, 800);
                 }
             };
             
-            setTimeout(processStep, 500);
+            // Start processing after short delay
+            setTimeout(processStep, 600);
         }
     </script>
 </body>
