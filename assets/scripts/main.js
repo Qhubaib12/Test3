@@ -55,7 +55,11 @@ ready(() => {
     emptyState.textContent = 'No games match your filters yet. Try another genre or clear the search.';
     emptyState.className = 'games__subtitle';
     emptyState.hidden = true;
-    gameGrid.after(emptyState);
+    if (typeof gameGrid.after === 'function') {
+        gameGrid.after(emptyState);
+    } else if (gameGrid.parentElement) {
+        gameGrid.parentElement.insertBefore(emptyState, gameGrid.nextSibling);
+    }
 
     const applyFilters = () => {
         let visibleCount = 0;

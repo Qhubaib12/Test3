@@ -721,7 +721,8 @@ header {
     min-height: 100vh;
 }
 
-main {
+
+.page main {
     flex: 1;
     display: block;
 }
