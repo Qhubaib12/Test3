@@ -3,1936 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PixelAddict - Retro Browser Games</title>
-<!-- Favicon - Add these lines -->
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg' style='image-rendering: pixelated;'%3E%3Crect width='32' height='32' fill='%230a0a0a'/%3E%3Crect x='1' y='1' width='30' height='30' fill='none' stroke='%2300ff00' stroke-width='1' opacity='0.6'/%3E%3Crect x='6' y='20' width='20' height='8' fill='%23333333'/%3E%3Crect x='6' y='20' width='20' height='2' fill='%23555555'/%3E%3Crect x='8' y='12' width='16' height='8' fill='%23000000'/%3E%3Crect x='9' y='13' width='14' height='6' fill='%2300ff00'/%3E%3Crect x='9' y='14' width='14' height='1' fill='%23000000' opacity='0.3'/%3E%3Crect x='9' y='16' width='14' height='1' fill='%23000000' opacity='0.3'/%3E%3Crect x='9' y='18' width='14' height='1' fill='%23000000' opacity='0.3'/%3E%3Crect x='15' y='6' width='2' height='6' fill='%23ff6b00'/%3E%3Crect x='14' y='4' width='4' height='4' fill='%23ff6b00'/%3E%3Crect x='15' y='5' width='2' height='2' fill='%23ffaa00'/%3E%3Crect x='4' y='14' width='3' height='3' fill='%2300ff00'/%3E%3Crect x='25' y='14' width='3' height='3' fill='%23ff6b00'/%3E%3Crect x='10' y='22' width='2' height='4' fill='%2300ff00'/%3E%3Crect x='9' y='23' width='4' height='2' fill='%2300ff00'/%3E%3Crect x='20' y='22' width='2' height='2' fill='%23ff6b00'/%3E%3Crect x='23' y='23' width='2' height='2' fill='%239966ff'/%3E%3Crect x='16' y='14' width='1' height='1' fill='%23ffff00'/%3E%3Crect x='12' y='16' width='1' height='1' fill='%23ffff00'/%3E%3Crect x='19' y='15' width='1' height='1' fill='%23ffff00'/%3E%3Ccircle cx='8' cy='8' r='1' fill='%2300ff00' opacity='0.7'/%3E%3Ccircle cx='24' cy='10' r='1' fill='%23ff6b00' opacity='0.7'/%3E%3Ccircle cx='6' cy='26' r='1' fill='%239966ff' opacity='0.7'/%3E%3Ccircle cx='26' cy='28' r='1' fill='%2300ff00' opacity='0.7'/%3E%3C/svg%3E">
-<link rel="alternate icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAFkSURBVFiFtZe9SwJxGMafO1MHRAREQ0NDg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg4PD/8=" type="image/png">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
-        }
-
-        body {
-            font-family: 'Press Start 2P', monospace;
-            background: #0a0a0a;
-            color: #00ff00;
-            min-height: 100vh;
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
-
-        .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(0, 255, 0, 0.03) 2px,
-                rgba(0, 255, 0, 0.03) 4px
-            );
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        /* Header */
-        header {
-            background: #1a1a1a;
-            border-bottom: 4px solid #00ff00;
-            padding: 20px 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 24px;
-            color: #00ff00;
-            text-shadow: 2px 2px 0px #000, 0 0 10px #00ff00;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from { text-shadow: 2px 2px 0px #000, 0 0 10px #00ff00; }
-            to { text-shadow: 2px 2px 0px #000, 0 0 20px #00ff00, 0 0 30px #00ff00; }
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: #00ff00;
-            text-decoration: none;
-            font-size: 12px;
-            transition: all 0.3s ease;
-            padding: 8px 12px;
-            border: 2px solid transparent;
-        }
-
-        .nav-links a:hover {
-            color: #ff6b00;
-            border: 2px solid #ff6b00;
-            box-shadow: 0 0 10px #ff6b00;
-        }
-
-        /* Hero Section */
-        .hero {
-            text-align: center;
-            padding: 80px 0;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(0, 255, 0, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 107, 0, 0.1) 0%, transparent 50%);
-        }
-
-        .hero h1 {
-            font-size: clamp(16px, 4vw, 32px);
-            margin-bottom: 30px;
-            text-shadow: 3px 3px 0px #000;
-            animation: pixelPulse 3s ease-in-out infinite;
-        }
-
-        @keyframes pixelPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .hero p {
-            font-size: 14px;
-            max-width: 600px;
-            margin: 0 auto 40px;
-            color: #cccccc;
-            line-height: 1.8;
-        }
-
-        .crt-button {
-            background: linear-gradient(45deg, #00ff00, #00cc00);
-            color: #000;
-            border: none;
-            padding: 15px 30px;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
-            text-transform: uppercase;
-        }
-
-        .crt-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.8);
-        }
-
-        /* Games Section */
-        .games-section {
-            padding: 80px 0;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
-            position: relative;
-        }
-
-        .games-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 25% 25%, rgba(0, 255, 0, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 75% 75%, rgba(255, 107, 0, 0.05) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .section-title {
-            font-size: 36px;
-            text-align: center;
-            margin-bottom: 20px;
-            color: #ff6b00;
-            text-shadow: 3px 3px 0px #000, 0 0 20px #ff6b00;
-            animation: titleGlow 3s ease-in-out infinite alternate;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            font-size: 14px;
-            color: #00ff00;
-            margin-bottom: 60px;
-            text-shadow: 1px 1px 0px #000;
-            animation: subtitleBlink 4s ease-in-out infinite;
-        }
-
-        @keyframes titleGlow {
-            from { 
-                text-shadow: 3px 3px 0px #000, 0 0 20px #ff6b00;
-                transform: scale(1);
-            }
-            to { 
-                text-shadow: 3px 3px 0px #000, 0 0 30px #ff6b00, 0 0 40px #ff6b00;
-                transform: scale(1.02);
-            }
-        }
-
-        @keyframes subtitleBlink {
-            0%, 85% { opacity: 1; }
-            90%, 95% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
-
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 40px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .game-card {
-            background: linear-gradient(145deg, #1a1a1a, #0f0f0f);
-            border: 4px solid #333333;
-            border-radius: 12px;
-            padding: 35px;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            cursor: pointer;
-            overflow: hidden;
-        }
-
-        .game-card::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, transparent, rgba(0, 255, 0, 0.1), transparent);
-            border-radius: 12px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: -1;
-        }
-
-        .game-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-                    rgba(0, 255, 0, 0.15) 0%, 
-                    rgba(0, 255, 0, 0.05) 30%, 
-                    transparent 60%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .game-card:hover {
-            border-color: #00ff00;
-            box-shadow: 
-                0 0 30px rgba(0, 255, 0, 0.6),
-                inset 0 0 20px rgba(0, 255, 0, 0.1);
-            transform: translateY(-10px) scale(1.02);
-        }
-
-        .game-card:hover::before {
-            opacity: 1;
-        }
-
-        .game-card:hover::after {
-            opacity: 1;
-        }
-
-        /* Animated background particles */
-        .game-card .particles {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            z-index: 1;
-        }
-
-        .game-card:hover .particles {
-            opacity: 1;
-        }
-
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: #00ff00;
-            border-radius: 50%;
-            animation: float 3s linear infinite;
-        }
-
-        .particle:nth-child(1) {
-            left: 10%;
-            animation-delay: 0s;
-            animation-duration: 2s;
-        }
-
-        .particle:nth-child(2) {
-            left: 20%;
-            animation-delay: 0.3s;
-            animation-duration: 2.5s;
-        }
-
-        .particle:nth-child(3) {
-            left: 30%;
-            animation-delay: 0.6s;
-            animation-duration: 3s;
-        }
-
-        .particle:nth-child(4) {
-            left: 40%;
-            animation-delay: 0.9s;
-            animation-duration: 2.2s;
-        }
-
-        .particle:nth-child(5) {
-            left: 50%;
-            animation-delay: 1.2s;
-            animation-duration: 2.8s;
-        }
-
-        .particle:nth-child(6) {
-            left: 60%;
-            animation-delay: 1.5s;
-            animation-duration: 2.3s;
-        }
-
-        .particle:nth-child(7) {
-            left: 70%;
-            animation-delay: 1.8s;
-            animation-duration: 2.7s;
-        }
-
-        .particle:nth-child(8) {
-            left: 80%;
-            animation-delay: 2.1s;
-            animation-duration: 2.4s;
-        }
-
-        @keyframes float {
-            0% {
-                top: 100%;
-                opacity: 0;
-                transform: scale(0);
-            }
-            10% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            90% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            100% {
-                top: -10px;
-                opacity: 0;
-                transform: scale(0);
-            }
-        }
-
-        /* Digital rain effect for locked games */
-        .game-card.locked::after {
-            background: 
-                radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
-                    rgba(153, 102, 255, 0.15) 0%, 
-                    rgba(153, 102, 255, 0.05) 30%, 
-                    transparent 60%);
-        }
-
-        .game-card.locked .particle {
-            background: #9966ff;
-            box-shadow: 0 0 4px #9966ff;
-        }
-
-        /* Scan line effect */
-        .game-card .scan-line {
-            position: absolute;
-            top: -2px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #00ff00, transparent);
-            animation: scan 2s linear infinite;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 2;
-        }
-
-        .game-card:hover .scan-line {
-            opacity: 0.8;
-        }
-
-        .game-card.locked .scan-line {
-            background: linear-gradient(90deg, transparent, #9966ff, transparent);
-        }
-
-        @keyframes scan {
-            0% {
-                top: -2px;
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                top: 100%;
-                opacity: 0;
-            }
-        }
-
-        .game-card.locked {
-            border-color: #666666;
-            opacity: 0.85;
-        }
-
-        .game-card.locked::before {
-            background: linear-gradient(45deg, transparent, rgba(153, 102, 255, 0.1), transparent);
-        }
-
-        .game-card.locked:hover {
-            border-color: #9966ff;
-            box-shadow: 
-                0 0 30px rgba(153, 102, 255, 0.6),
-                inset 0 0 20px rgba(153, 102, 255, 0.1);
-            transform: translateY(-8px) scale(1.01);
-        }
-
-        .lock-icon {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 28px;
-            color: #9966ff;
-            animation: lockPulse 2s ease-in-out infinite;
-            text-shadow: 0 0 10px rgba(153, 102, 255, 0.5);
-        }
-
-        @keyframes lockPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .game-icon {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
-            border: 4px solid #555555;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 25px;
-            font-size: 48px;
-            position: relative;
-            box-shadow: 
-                inset 0 0 20px rgba(0, 0, 0, 0.8),
-                0 4px 15px rgba(0, 0, 0, 0.5);
-            transition: all 0.4s ease;
-            overflow: hidden;
-        }
-
-        .game-icon::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #00ff00, #33ff33, #00ff00);
-            border-radius: 12px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: -1;
-        }
-
-        .game-card:hover .game-icon {
-            border-color: #00ff00;
-            box-shadow: 
-                0 0 25px rgba(0, 255, 0, 0.5),
-                inset 0 0 15px rgba(0, 255, 0, 0.1);
-            transform: scale(1.05) rotateY(5deg);
-        }
-
-        .game-card:hover .game-icon::before {
-            opacity: 1;
-        }
-
-        .game-card.locked:hover .game-icon {
-            border-color: #9966ff;
-            box-shadow: 
-                0 0 25px rgba(153, 102, 255, 0.5),
-                inset 0 0 15px rgba(153, 102, 255, 0.1);
-        }
-
-        .game-card.locked .game-icon::before {
-            background: linear-gradient(45deg, #9966ff, #bb88ff, #9966ff);
-        }
-
-        /* Custom Retro Logo Styles */
-        .retro-logo {
-            width: 80px;
-            height: 80px;
-            position: relative;
-            margin: 0 auto;
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
-        }
-
-        /* COLOUR DASH Logo - Colorful Blocks */
-        .logo-colour-dash {
-            background: linear-gradient(45deg, 
-                #ff0066 0%, #ff0066 25%,
-                #00ff66 25%, #00ff66 50%,
-                #6600ff 50%, #6600ff 75%,
-                #ff6600 75%, #ff6600 100%);
-            border: 4px solid #fff;
-            box-shadow: 
-                inset 0 0 0 2px #000,
-                0 0 20px rgba(255, 6, 102, 0.5);
-            animation: colorDashGlow 2s ease-in-out infinite alternate;
-        }
-
-        .logo-colour-dash::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60%;
-            height: 60%;
-            background: linear-gradient(135deg, 
-                transparent 40%,
-                rgba(255, 255, 255, 0.8) 45%,
-                rgba(255, 255, 255, 0.8) 55%,
-                transparent 60%);
-            animation: colorDashSweep 3s linear infinite;
-        }
-
-        @keyframes colorDashGlow {
-            from { 
-                box-shadow: 
-                    inset 0 0 0 2px #000,
-                    0 0 20px rgba(255, 6, 102, 0.5);
-                filter: hue-rotate(0deg);
-            }
-            to { 
-                box-shadow: 
-                    inset 0 0 0 2px #000,
-                    0 0 30px rgba(255, 6, 102, 0.8);
-                filter: hue-rotate(90deg);
-            }
-        }
-
-        @keyframes colorDashSweep {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        /* CYBER PONG Logo - Classic Pong with Cyber Elements */
-        .logo-cyber-pong {
-            background: #000;
-            border: 4px solid #00ff00;
-            position: relative;
-            box-shadow: 
-                0 0 20px rgba(0, 255, 0, 0.6),
-                inset 0 0 20px rgba(0, 255, 0, 0.1);
-            animation: pongGlow 2s ease-in-out infinite alternate;
-        }
-
-        .logo-cyber-pong::before {
-            content: '';
-            position: absolute;
-            left: 8px;
-            top: 20px;
-            width: 4px;
-            height: 40px;
-            background: #00ff00;
-            box-shadow: 0 0 10px #00ff00;
-        }
-
-        .logo-cyber-pong::after {
-            content: '';
-            position: absolute;
-            right: 8px;
-            top: 20px;
-            width: 4px;
-            height: 40px;
-            background: #00ff00;
-            box-shadow: 0 0 10px #00ff00;
-        }
-
-        .pong-ball {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 8px;
-            height: 8px;
-            background: #00ff00;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 15px #00ff00;
-            animation: pongBallBounce 1.5s ease-in-out infinite alternate;
-        }
-
-        @keyframes pongGlow {
-            from { 
-                box-shadow: 
-                    0 0 20px rgba(0, 255, 0, 0.6),
-                    inset 0 0 20px rgba(0, 255, 0, 0.1);
-            }
-            to { 
-                box-shadow: 
-                    0 0 30px rgba(0, 255, 0, 0.8),
-                    inset 0 0 30px rgba(0, 255, 0, 0.2);
-            }
-        }
-
-        @keyframes pongBallBounce {
-            from { 
-                left: 25%;
-                box-shadow: 0 0 15px #00ff00;
-            }
-            to { 
-                left: 75%;
-                box-shadow: 0 0 25px #00ff00, 0 0 35px #00ff00;
-            }
-        }
-
-        /* CYBER TWIST Logo - Spinning Cyber Hexagon */
-        .logo-cyber-twist {
-            background: 
-                linear-gradient(45deg, #ff0066, #6600ff),
-                linear-gradient(135deg, #00ff66, #ff6600);
-            background-blend-mode: multiply;
-            border: 4px solid #fff;
-            position: relative;
-            clip-path: polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0% 50%);
-            animation: twistRotate 3s linear infinite;
-            box-shadow: 
-                0 0 25px rgba(255, 6, 102, 0.6),
-                inset 0 0 20px rgba(0, 0, 0, 0.5);
-        }
-
-        .logo-cyber-twist::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 50%;
-            height: 50%;
-            background: 
-                radial-gradient(circle, 
-                    rgba(255, 255, 255, 0.8) 0%,
-                    transparent 70%);
-            transform: translate(-50%, -50%);
-            animation: twistPulse 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes twistRotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes twistPulse {
-            from { 
-                opacity: 0.3;
-                transform: translate(-50%, -50%) scale(0.5);
-            }
-            to { 
-                opacity: 0.8;
-                transform: translate(-50%, -50%) scale(1);
-            }
-        }
-
-        /* GRAVITY FLIP Logo - Arrow with Gravity Effect */
-        .logo-gravity-flip {
-            background: linear-gradient(180deg, #66ff00 0%, #00ff66 100%);
-            border: 4px solid #fff;
-            position: relative;
-            animation: gravityFlipEffect 2.5s ease-in-out infinite;
-            box-shadow: 
-                0 0 20px rgba(102, 255, 0, 0.6),
-                inset 0 0 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .logo-gravity-flip::before {
-            content: '';
-            position: absolute;
-            top: 20%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-bottom: 20px solid #fff;
-            transform: translateX(-50%);
-            animation: gravityArrowUp 2.5s ease-in-out infinite;
-        }
-
-        .logo-gravity-flip::after {
-            content: '';
-            position: absolute;
-            bottom: 20%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-top: 20px solid #fff;
-            transform: translateX(-50%);
-            animation: gravityArrowDown 2.5s ease-in-out infinite;
-        }
-
-        @keyframes gravityFlipEffect {
-            0%, 100% { 
-                transform: rotate(0deg);
-                background: linear-gradient(180deg, #66ff00 0%, #00ff66 100%);
-            }
-            50% { 
-                transform: rotate(180deg);
-                background: linear-gradient(180deg, #00ff66 0%, #66ff00 100%);
-            }
-        }
-
-        @keyframes gravityArrowUp {
-            0%, 50% { 
-                opacity: 1;
-                transform: translateX(-50%) translateY(0px);
-            }
-            51%, 100% { 
-                opacity: 0.3;
-                transform: translateX(-50%) translateY(10px);
-            }
-        }
-
-        @keyframes gravityArrowDown {
-            0%, 50% { 
-                opacity: 0.3;
-                transform: translateX(-50%) translateY(-10px);
-            }
-            51%, 100% { 
-                opacity: 1;
-                transform: translateX(-50%) translateY(0px);
-            }
-        }
-
-        /* DRAGON LEGENDS Logo - Pixelated Dragon */
-        .logo-dragon-legends {
-            background: linear-gradient(45deg, #ff3300, #ff6600);
-            border: 4px solid #ffaa00;
-            position: relative;
-            animation: dragonBreathGlow 2.5s ease-in-out infinite alternate;
-            box-shadow: 
-                0 0 25px rgba(255, 51, 0, 0.6),
-                inset 0 0 20px rgba(255, 170, 0, 0.2);
-        }
-
-        .logo-dragon-legends::before {
-            content: '';
-            position: absolute;
-            top: 25%;
-            left: 25%;
-            right: 25%;
-            bottom: 25%;
-            background: 
-                linear-gradient(45deg, 
-                    #ffaa00 0%, #ffaa00 20%,
-                    transparent 20%, transparent 40%,
-                    #ffaa00 40%, #ffaa00 60%,
-                    transparent 60%, transparent 80%,
-                    #ffaa00 80%, #ffaa00 100%);
-            animation: dragonScales 3s linear infinite;
-        }
-
-        .logo-dragon-legends::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            background: #fff;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 
-                0 0 15px #ffaa00,
-                inset 0 0 10px #ff3300;
-            animation: dragonEye 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes dragonBreathGlow {
-            from { 
-                box-shadow: 
-                    0 0 25px rgba(255, 51, 0, 0.6),
-                    inset 0 0 20px rgba(255, 170, 0, 0.2);
-            }
-            to { 
-                box-shadow: 
-                    0 0 40px rgba(255, 51, 0, 0.9),
-                    0 0 60px rgba(255, 170, 0, 0.5),
-                    inset 0 0 30px rgba(255, 170, 0, 0.3);
-            }
-        }
-
-        @keyframes dragonScales {
-            from { opacity: 0.5; }
-            to { opacity: 0.9; }
-        }
-
-        @keyframes dragonEye {
-            from { 
-                background: #fff;
-                box-shadow: 0 0 15px #ffaa00;
-            }
-            to { 
-                background: #ff3300;
-                box-shadow: 0 0 25px #ff3300, 0 0 35px #ffaa00;
-            }
-        }
-
-        /* TURBO RACING Logo - Racing Stripes */
-        .logo-turbo-racing {
-            background: linear-gradient(90deg, 
-                #ffff00 0%, #ffff00 20%,
-                #ff6600 20%, #ff6600 40%,
-                #ffff00 40%, #ffff00 60%,
-                #ff6600 60%, #ff6600 80%,
-                #ffff00 80%, #ffff00 100%);
-            border: 4px solid #fff;
-            position: relative;
-            animation: racingSpeed 1.5s linear infinite;
-            box-shadow: 
-                0 0 20px rgba(255, 255, 0, 0.6),
-                inset 0 0 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .logo-turbo-racing::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 8px;
-            background: linear-gradient(90deg, 
-                transparent 0%,
-                rgba(255, 255, 255, 0.8) 50%,
-                transparent 100%);
-            transform: translateY(-50%);
-            animation: racingStreak 2s linear infinite;
-        }
-
-        .logo-turbo-racing::after {
-            content: '';
-            position: absolute;
-            right: 15%;
-            top: 50%;
-            width: 0;
-            height: 0;
-            border-top: 12px solid transparent;
-            border-bottom: 12px solid transparent;
-            border-left: 20px solid #fff;
-            transform: translateY(-50%);
-            animation: racingArrow 1.5s ease-in-out infinite;
-        }
-
-        @keyframes racingSpeed {
-            0% { 
-                background-position: 0% 0%;
-                transform: translateX(0px);
-            }
-            25% { 
-                transform: translateX(2px);
-            }
-            50% { 
-                transform: translateX(0px);
-            }
-            75% { 
-                transform: translateX(-2px);
-            }
-            100% { 
-                background-position: 100% 0%;
-                transform: translateX(0px);
-            }
-        }
-
-        @keyframes racingStreak {
-            0% { 
-                left: -100%;
-                opacity: 0;
-            }
-            50% { 
-                opacity: 1;
-            }
-            100% { 
-                left: 100%;
-                opacity: 0;
-            }
-        }
-
-        @keyframes racingArrow {
-            0%, 100% { 
-                transform: translateY(-50%) scale(1);
-                filter: brightness(1);
-            }
-            50% { 
-                transform: translateY(-50%) scale(1.2);
-                filter: brightness(1.5);
-            }
-        }
-
-        /* KINGDOM BUILDER Logo - Castle Silhouette */
-        .logo-kingdom-builder {
-            background: linear-gradient(180deg, #9966ff, #6633cc);
-            border: 4px solid #bb88ff;
-            position: relative;
-            animation: castleGlowEffect 3s ease-in-out infinite alternate;
-            box-shadow: 
-                0 0 20px rgba(153, 102, 255, 0.6),
-                inset 0 0 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .logo-kingdom-builder::before {
-            content: '';
-            position: absolute;
-            bottom: 20%;
-            left: 20%;
-            right: 20%;
-            height: 40%;
-            background: #bb88ff;
-            clip-path: polygon(
-                0% 100%, 15% 100%, 15% 60%, 25% 60%, 25% 100%,
-                35% 100%, 35% 40%, 45% 40%, 45% 100%, 55% 100%,
-                55% 40%, 65% 40%, 65% 100%, 75% 100%, 75% 60%,
-                85% 60%, 85% 100%, 100% 100%, 100% 80%, 0% 80%
-            );
-            animation: castleTowers 4s ease-in-out infinite;
-        }
-
-        .logo-kingdom-builder::after {
-            content: '';
-            position: absolute;
-            top: 25%;
-            left: 50%;
-            width: 8px;
-            height: 8px;
-            background: #fff;
-            border-radius: 50%;
-            transform: translateX(-50%);
-            box-shadow: 
-                0 0 10px #bb88ff,
-                -15px 10px 0 -2px #fff,
-                15px 10px 0 -2px #fff;
-            animation: castleWindows 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes castleGlowEffect {
-            from { 
-                box-shadow: 
-                    0 0 20px rgba(153, 102, 255, 0.6),
-                    inset 0 0 15px rgba(0, 0, 0, 0.3);
-            }
-            to { 
-                box-shadow: 
-                    0 0 35px rgba(153, 102, 255, 0.8),
-                    0 0 50px rgba(187, 136, 255, 0.4),
-                    inset 0 0 25px rgba(0, 0, 0, 0.2);
-            }
-        }
-
-        @keyframes castleTowers {
-            0%, 100% { 
-                opacity: 0.8;
-                transform: scale(1);
-            }
-            50% { 
-                opacity: 1;
-                transform: scale(1.05);
-            }
-        }
-
-        @keyframes castleWindows {
-            from { 
-                box-shadow: 
-                    0 0 10px #bb88ff,
-                    -15px 10px 0 -2px #fff,
-                    15px 10px 0 -2px #fff;
-            }
-            to { 
-                box-shadow: 
-                    0 0 20px #bb88ff,
-                    -15px 10px 0 -2px #ffaa00,
-                    15px 10px 0 -2px #ffaa00;
-            }
-        }
-
-        /* SNIPER ELITE Logo - Crosshair Target */
-        .logo-sniper-elite {
-            background: radial-gradient(circle, #003366, #001133);
-            border: 4px solid #00ffff;
-            position: relative;
-            animation: targetLockEffect 2s ease-in-out infinite;
-            box-shadow: 
-                0 0 20px rgba(0, 255, 255, 0.6),
-                inset 0 0 15px rgba(0, 255, 255, 0.1);
-        }
-
-        .logo-sniper-elite::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 50px;
-            height: 50px;
-            border: 3px solid #00ffff;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 
-                0 0 15px #00ffff,
-                inset 0 0 10px rgba(0, 255, 255, 0.2);
-            animation: targetRing 3s linear infinite;
-        }
-
-        .logo-sniper-elite::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 60px;
-            height: 2px;
-            background: #00ffff;
-            transform: translate(-50%, -50%);
-            box-shadow: 
-                0 -30px 0 #00ffff,
-                0 30px 0 #00ffff,
-                -30px 0 0 #00ffff,
-                30px 0 0 #00ffff,
-                0 0 10px #00ffff;
-            animation: targetCrosshair 2s ease-in-out infinite;
-        }
-
-        @keyframes targetLockEffect {
-            0%, 100% { 
-                transform: scale(1) rotate(0deg);
-                box-shadow: 
-                    0 0 20px rgba(0, 255, 255, 0.6),
-                    inset 0 0 15px rgba(0, 255, 255, 0.1);
-            }
-            25% { 
-                transform: scale(0.95) rotate(-2deg);
-            }
-            50% { 
-                transform: scale(1.05) rotate(0deg);
-                box-shadow: 
-                    0 0 30px rgba(0, 255, 255, 0.8),
-                    inset 0 0 20px rgba(0, 255, 255, 0.2);
-            }
-            75% { 
-                transform: scale(0.95) rotate(2deg);
-            }
-        }
-
-        @keyframes targetRing {
-            0% { 
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-            }
-            50% { 
-                transform: translate(-50%, -50%) scale(1.2);
-                opacity: 0.5;
-            }
-            100% { 
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-            }
-        }
-
-        @keyframes targetCrosshair {
-            0%, 100% { 
-                opacity: 1;
-                box-shadow: 
-                    0 -30px 0 #00ffff,
-                    0 30px 0 #00ffff,
-                    -30px 0 0 #00ffff,
-                    30px 0 0 #00ffff,
-                    0 0 10px #00ffff;
-            }
-            50% { 
-                opacity: 0.7;
-                box-shadow: 
-                    0 -30px 0 #99ffff,
-                    0 30px 0 #99ffff,
-                    -30px 0 0 #99ffff,
-                    30px 0 0 #99ffff,
-                    0 0 20px #00ffff;
-            }
-        }
-/* COLOR TIDE Logo - Ocean Wave with Color Spectrum */
-.logo-color-tide {
-    background: linear-gradient(180deg, 
-        #00ccff 0%, #00ccff 20%,
-        #0099ff 20%, #0099ff 40%,
-        #0066ff 40%, #0066ff 60%,
-        #003399 60%, #003399 80%,
-        #001166 80%, #001166 100%);
-    border: 4px solid #00ffff;
-    position: relative;
-    animation: tideWaveEffect 3s ease-in-out infinite;
-    box-shadow: 
-        0 0 25px rgba(0, 204, 255, 0.6),
-        inset 0 0 20px rgba(0, 255, 255, 0.1);
-    overflow: hidden;
-}
-
-.logo-color-tide::before {
-    content: '';
-    position: absolute;
-    top: 60%;
-    left: 0;
-    right: 0;
-    height: 40%;
-    background: linear-gradient(90deg, 
-        #ff6600 0%, #ff6600 16.66%,
-        #ffaa00 16.66%, #ffaa00 33.33%,
-        #ffff00 33.33%, #ffff00 50%,
-        #66ff00 50%, #66ff00 66.66%,
-        #00ff66 66.66%, #00ff66 83.33%,
-        #00ffff 83.33%, #00ffff 100%);
-    clip-path: polygon(
-        0% 60%, 10% 40%, 20% 50%, 30% 30%, 40% 45%, 
-        50% 25%, 60% 40%, 70% 20%, 80% 35%, 90% 15%, 
-        100% 30%, 100% 100%, 0% 100%
-    );
-    animation: tideColorWave 4s ease-in-out infinite;
-    opacity: 0.8;
-}
-
-.logo-color-tide::after {
-    content: '';
-    position: absolute;
-    top: 70%;
-    left: 0;
-    right: 0;
-    height: 30%;
-    background: linear-gradient(90deg, 
-        rgba(255, 255, 255, 0.6) 0%,
-        rgba(255, 255, 255, 0.3) 50%,
-        rgba(255, 255, 255, 0.6) 100%);
-    clip-path: polygon(
-        0% 80%, 15% 60%, 25% 70%, 35% 50%, 45% 65%, 
-        55% 45%, 65% 60%, 75% 40%, 85% 55%, 95% 35%, 
-        100% 50%, 100% 100%, 0% 100%
-    );
-    animation: tideFoam 2.5s ease-in-out infinite;
-}
-
-/* Floating bubbles effect */
-.logo-color-tide .tide-bubble {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 50%;
-    animation: tideBubbleFloat 3s linear infinite;
-    box-shadow: 
-        0 0 5px rgba(0, 255, 255, 0.5),
-        inset 0 0 5px rgba(255, 255, 255, 0.3);
-}
-
-.logo-color-tide .tide-bubble:nth-child(1) {
-    width: 4px;
-    height: 4px;
-    left: 15%;
-    bottom: 10%;
-    animation-delay: 0s;
-    animation-duration: 2.5s;
-}
-
-.logo-color-tide .tide-bubble:nth-child(2) {
-    width: 6px;
-    height: 6px;
-    left: 35%;
-    bottom: 15%;
-    animation-delay: 0.8s;
-    animation-duration: 3s;
-}
-
-.logo-color-tide .tide-bubble:nth-child(3) {
-    width: 3px;
-    height: 3px;
-    left: 65%;
-    bottom: 12%;
-    animation-delay: 1.5s;
-    animation-duration: 2.8s;
-}
-
-.logo-color-tide .tide-bubble:nth-child(4) {
-    width: 5px;
-    height: 5px;
-    left: 80%;
-    bottom: 8%;
-    animation-delay: 2.2s;
-    animation-duration: 3.2s;
-}
-
-@keyframes tideWaveEffect {
-    0%, 100% { 
-        transform: scale(1) rotate(0deg);
-        box-shadow: 
-            0 0 25px rgba(0, 204, 255, 0.6),
-            inset 0 0 20px rgba(0, 255, 255, 0.1);
-    }
-    25% { 
-        transform: scale(1.02) rotate(-1deg);
-    }
-    50% { 
-        transform: scale(1.05) rotate(0deg);
-        box-shadow: 
-            0 0 35px rgba(0, 204, 255, 0.8),
-            0 0 45px rgba(0, 255, 255, 0.4),
-            inset 0 0 25px rgba(0, 255, 255, 0.2);
-    }
-    75% { 
-        transform: scale(1.02) rotate(1deg);
-    }
-}
-
-@keyframes tideColorWave {
-    0% { 
-        clip-path: polygon(
-            0% 60%, 10% 40%, 20% 50%, 30% 30%, 40% 45%, 
-            50% 25%, 60% 40%, 70% 20%, 80% 35%, 90% 15%, 
-            100% 30%, 100% 100%, 0% 100%
-        );
-        opacity: 0.8;
-    }
-    50% { 
-        clip-path: polygon(
-            0% 40%, 10% 60%, 20% 30%, 30% 50%, 40% 25%, 
-            50% 45%, 60% 20%, 70% 40%, 80% 15%, 90% 35%, 
-            100% 10%, 100% 100%, 0% 100%
-        );
-        opacity: 0.9;
-    }
-    100% { 
-        clip-path: polygon(
-            0% 60%, 10% 40%, 20% 50%, 30% 30%, 40% 45%, 
-            50% 25%, 60% 40%, 70% 20%, 80% 35%, 90% 15%, 
-            100% 30%, 100% 100%, 0% 100%
-        );
-        opacity: 0.8;
-    }
-}
-
-@keyframes tideFoam {
-    0% { 
-        opacity: 0.6;
-        transform: translateY(2px);
-    }
-    50% { 
-        opacity: 0.9;
-        transform: translateY(-2px);
-    }
-    100% { 
-        opacity: 0.6;
-        transform: translateY(2px);
-    }
-}
-
-@keyframes tideBubbleFloat {
-    0% {
-        bottom: 0%;
-        opacity: 0;
-        transform: scale(0) rotate(0deg);
-    }
-    10% {
-        opacity: 1;
-        transform: scale(1) rotate(45deg);
-    }
-    90% {
-        opacity: 1;
-        transform: scale(1) rotate(315deg);
-    }
-    100% {
-        bottom: 90%;
-        opacity: 0;
-        transform: scale(0) rotate(360deg);
-    }
-}
-
-/* CIRCUIT PUZZLE Logo - Animated Circuit Board */
-.logo-circuit-puzzle {
-    background: linear-gradient(135deg, #001a1a, #003333);
-    border: 4px solid #00ffaa;
-    position: relative;
-    animation: circuitPowerEffect 3s ease-in-out infinite;
-    box-shadow: 
-        0 0 25px rgba(0, 255, 170, 0.6),
-        inset 0 0 20px rgba(0, 255, 170, 0.1);
-    overflow: hidden;
-}
-
-/* Circuit board traces */
-.logo-circuit-puzzle::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-        /* Horizontal traces */
-        linear-gradient(90deg, transparent 20%, #00ffaa 25%, #00ffaa 30%, transparent 35%),
-        linear-gradient(90deg, transparent 65%, #00ffaa 70%, #00ffaa 75%, transparent 80%),
-        /* Vertical traces */
-        linear-gradient(0deg, transparent 30%, #00ffaa 35%, #00ffaa 40%, transparent 45%),
-        linear-gradient(0deg, transparent 55%, #00ffaa 60%, #00ffaa 65%, transparent 70%);
-    background-size: 100% 25%, 100% 25%, 25% 100%, 25% 100%;
-    background-position: 0 25%, 0 75%, 25% 0, 75% 0;
-    opacity: 0.6;
-    animation: circuitTraceFlow 2s linear infinite;
-}
-
-/* Circuit components */
-.logo-circuit-puzzle::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 12px;
-    background: #333333;
-    border: 2px solid #00ffaa;
-    transform: translate(-50%, -50%);
-    box-shadow: 
-        -20px -15px 0 -6px #00ffaa,
-        20px -15px 0 -6px #00ffaa,
-        -20px 15px 0 -6px #00ffaa,
-        20px 15px 0 -6px #00ffaa,
-        0 0 10px #00ffaa;
-    animation: circuitComponentGlow 2.5s ease-in-out infinite alternate;
-}
-
-/* Circuit connection nodes */
-.circuit-node {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: #00ffaa;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #00ffaa;
-    animation: circuitNodePulse 1.8s ease-in-out infinite;
-}
-
-.circuit-node:nth-child(1) { top: 20%; left: 20%; animation-delay: 0s; }
-.circuit-node:nth-child(2) { top: 20%; right: 20%; animation-delay: 0.3s; }
-.circuit-node:nth-child(3) { bottom: 20%; left: 20%; animation-delay: 0.6s; }
-.circuit-node:nth-child(4) { bottom: 20%; right: 20%; animation-delay: 0.9s; }
-.circuit-node:nth-child(5) { top: 50%; left: 10%; animation-delay: 1.2s; }
-.circuit-node:nth-child(6) { top: 50%; right: 10%; animation-delay: 1.5s; }
-
-@keyframes circuitPowerEffect {
-    0%, 100% { 
-        box-shadow: 0 0 25px rgba(0, 255, 170, 0.6), inset 0 0 20px rgba(0, 255, 170, 0.1);
-        border-color: #00ffaa;
-    }
-    50% { 
-        box-shadow: 0 0 40px rgba(0, 255, 255, 0.9), 0 0 55px rgba(0, 255, 170, 0.5), inset 0 0 30px rgba(0, 255, 255, 0.2);
-        border-color: #66ffcc;
-    }
-}
-
-@keyframes circuitTraceFlow {
-    0% { opacity: 0.6; filter: brightness(1); }
-    50% { opacity: 1; filter: brightness(1.5); }
-    100% { opacity: 0.6; filter: brightness(1); }
-}
-
-@keyframes circuitComponentGlow {
-    from { 
-        box-shadow: -20px -15px 0 -6px #00ffaa, 20px -15px 0 -6px #00ffaa, -20px 15px 0 -6px #00ffaa, 20px 15px 0 -6px #00ffaa, 0 0 10px #00ffaa;
-        background: #333333;
-    }
-    to { 
-        box-shadow: -20px -15px 0 -6px #66ffcc, 20px -15px 0 -6px #66ffcc, -20px 15px 0 -6px #66ffcc, 20px 15px 0 -6px #66ffcc, 0 0 20px #00ffaa, 0 0 30px #66ffcc;
-        background: #004444;
-    }
-}
-
-@keyframes circuitNodePulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 8px #00ffaa; background: #00ffaa; }
-    50% { transform: scale(1.5); box-shadow: 0 0 15px #00ffaa, 0 0 25px #66ffcc; background: #66ffcc; }
-}
-        .game-title {
-            font-size: 16px;
-            margin-bottom: 15px;
-            color: #00ff00;
-            text-shadow: 1px 1px 0px #000;
-        }
-
-        .game-description {
-            font-size: 10px;
-            color: #cccccc;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
-        .game-status {
-            display: inline-block;
-            padding: 8px 15px;
-            font-size: 10px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
-
-        .free {
-            background: #00ff00;
-            color: #000;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-        }
-
-        .premium {
-            background: #ff6b00;
-            color: #000;
-            box-shadow: 0 0 10px rgba(255, 107, 0, 0.5);
-        }
-
-        .coming-soon {
-            background: #9966ff;
-            color: #000;
-            box-shadow: 0 0 10px rgba(153, 102, 255, 0.5);
-            animation: comingSoonPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes comingSoonPulse {
-            0%, 100% { 
-                background: #9966ff; 
-                box-shadow: 0 0 10px rgba(153, 102, 255, 0.5);
-            }
-            50% { 
-                background: #bb88ff; 
-                box-shadow: 0 0 15px rgba(153, 102, 255, 0.8);
-            }
-        }
-
-        .play-btn {
-            background: #333333;
-            color: #00ff00;
-            border: 2px solid #00ff00;
-            padding: 12px 20px;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            text-transform: uppercase;
-        }
-
-        .play-btn:hover {
-            background: #00ff00;
-            color: #000;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
-        }
-
-        .play-btn:disabled {
-            background: #222222;
-            color: #666666;
-            border-color: #666666;
-            cursor: not-allowed;
-        }
-
-        .play-btn.premium-btn {
-            border-color: #ff6b00;
-            color: #ff6b00;
-        }
-
-        .play-btn.premium-btn:hover {
-            background: #ff6b00;
-            color: #000;
-            box-shadow: 0 0 15px rgba(255, 107, 0, 0.5);
-        }
-
-        .play-btn.coming-soon-btn {
-            border-color: #9966ff;
-            color: #9966ff;
-            background: linear-gradient(145deg, #333333, #2a2a2a);
-            animation: comingSoonBtnPulse 2s ease-in-out infinite;
-        }
-
-        .play-btn.coming-soon-btn:hover {
-            background: linear-gradient(145deg, #9966ff, #bb88ff);
-            color: #000;
-            box-shadow: 
-                0 0 25px rgba(153, 102, 255, 0.8),
-                inset 0 0 20px rgba(0, 0, 0, 0.1);
-            transform: translateY(-3px);
-        }
-
-        @keyframes comingSoonBtnPulse {
-            0%, 100% { 
-                border-color: #9966ff;
-                color: #9966ff;
-                box-shadow: 0 0 10px rgba(153, 102, 255, 0.3);
-            }
-            50% { 
-                border-color: #bb88ff;
-                color: #bb88ff;
-                box-shadow: 0 0 20px rgba(153, 102, 255, 0.6);
-            }
-        }
-
-        /* Pixel Grid Background */
-        .pixel-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
-            background-size: 20px 20px;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        /* Footer */
-        footer {
-            background: #0a0a0a;
-            border-top: 4px solid #00ff00;
-            padding: 40px 0;
-            text-align: center;
-            margin-top: 60px;
-        }
-
-        .footer-content {
-            font-size: 10px;
-            color: #666666;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-            
-            .hero {
-                padding: 60px 0;
-            }
-            
-            .hero h1 {
-                font-size: 20px;
-            }
-            
-            .hero p {
-                font-size: 12px;
-            }
-            
-            .games-grid {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-            
-            .container {
-                padding: 0 15px;
-            }
-        }
-
-        /* Retro animations */
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
-        }
-
-        .blinking {
-            animation: blink 1s infinite;
-        }
-    </style>
+    <title>PixelAddict – Retro Browser Games</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%235cf1a8'/%3E%3Cstop offset='1' stop-color='%2357b8ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='48' height='48' rx='10' fill='%230c111f'/%3E%3Cpath d='M12 12h8v8h-8zm16 0h8v8h-8zM12 28h8v8h-8zm16 0h8v8h-8z' fill='url(%23g)'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/styles/main.css">
+    <script src="assets/scripts/main.js" defer></script>
 </head>
 <body>
-    <div class="pixel-bg"></div>
-    <div class="scanlines"></div>
-    
+    <a class="sr-only" href="#games">Skip to games</a>
     <header>
-        <nav class="container">
-            <div class="logo">PIXELADDICT</div>
-            <ul class="nav-links">
-                <li><a href="login">LOGIN</a></li>
-                <li><a href="about">ABOUT</a></li>
-                <li><a href="contact">CONTACT</a></li>
-                <li><a href="premium">PREMIUM</a></li>
-            </ul>
-        </nav>
+        <div class="container site-header">
+            <a class="brand" href="index.html">
+                <span class="brand__mark" aria-hidden="true"></span>
+                <span class="brand__text">PixelAddict</span>
+            </a>
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+                <span class="sr-only">Toggle navigation</span>
+                Menu
+            </button>
+            <nav class="primary-nav" id="primary-navigation">
+                <ul class="primary-nav__list" role="list">
+                    <li><a class="primary-nav__link" href="index.html" aria-current="page">Home</a></li>
+                    <li><a class="primary-nav__link" href="about.html">About</a></li>
+                    <li><a class="primary-nav__link" href="premium.html">Premium</a></li>
+                    <li><a class="primary-nav__link" href="contact.html">Contact</a></li>
+                    <li><a class="primary-nav__link" href="login.html">Login</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
-    <section class="hero">
-        <div class="container">
-            <h1>RETRO BROWSER GAMING</h1>
-            <p>Experience the golden age of gaming with our collection of pixel-perfect browser games. No downloads required , Completely ad-free - just pure nostalgic fun!</p>
-            <button class="crt-button" onclick="document.getElementById('games').scrollIntoView({behavior: 'smooth'})">
-                START PLAYING
-            </button>
-        </div>
-    </section>
+    <main>
+        <section class="hero">
+            <div class="container hero__content">
+                <p class="hero__eyebrow">CRT mode: engaged</p>
+                <h1 class="hero__headline">Jack into the <span>greenline grid</span> of browser-ready arcades.</h1>
+                <p class="hero__description">PixelAddict beams handcrafted retro adventures straight through the scanlines. Dive into neon showdowns, gravity-flipped platformers, and couch co-op classics with zero downloads required.</p>
+                <div class="hero__cta-group">
+                    <a class="hero__cta hero__cta--primary" href="#games">Start playing</a>
+                    <a class="hero__cta hero__cta--ghost" href="#updates">See what's new</a>
+                </div>
+                <ul class="hero__list" role="list">
+                    <li>Instant boot, no installs, no nonsense</li>
+                    <li>Weekly drops with leaderboard resets</li>
+                    <li>Controller, keyboard, and touch ready</li>
+                </ul>
+            </div>
+        </section>
 
-    <section class="games-section" id="games">
-        <div class="container">
-            <h2 class="section-title">GAME COLLECTION</h2>
-            <p class="section-subtitle">▶ CHOOSE YOUR ADVENTURE ◀</p>
-            <div class="games-grid">
-                <!-- Free Games -->
-                <div class="game-card" onclick="playGame('colour-dash')">
-                    <div class="particles">
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
+        <section id="games" class="games">
+            <div class="container">
+                <div class="games__intro">
+                    <p class="games__eyebrow">Game Library</p>
+                    <h2 class="games__title">Fresh quarters, ready to drop</h2>
+                    <p class="games__subtitle">Every cabinet here is ready to play for free—use quick genre filters and search to find your next obsession.</p>
+                </div>
+                <div class="games-toolbar" role="toolbar" aria-label="Game filters">
+                    <div class="games-toolbar__search">
+                        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15.5 15.5L20 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        <label class="sr-only" for="game-search">Search games</label>
+                        <input id="game-search" type="search" placeholder="Search by name or tag" autocomplete="off">
                     </div>
-                    <div class="scan-line"></div>
-                    <div class="game-icon">
-                        <div class="retro-logo logo-colour-dash"></div>
+                    <div class="filter-group" role="group" aria-label="Filter games by genre">
+                        <button class="filter-button" type="button" data-filter="all" aria-pressed="true">All</button>
+                        <button class="filter-button" type="button" data-filter="arcade">Arcade</button>
+                        <button class="filter-button" type="button" data-filter="puzzle">Puzzle</button>
+                        <button class="filter-button" type="button" data-filter="action">Action</button>
+                        <button class="filter-button" type="button" data-filter="shooter">Shooter</button>
+                        <button class="filter-button" type="button" data-filter="coming-soon">Coming Soon</button>
                     </div>
-                    <h3 class="game-title">COLOUR DASH</h3>
-                    <p class="game-description">Fast-paced color-matching game where you dash through vibrant pixel landscapes. Match colors to survive!</p>
-                    <span class="game-status free">FREE</span>
-                    <button class="play-btn">PLAY NOW</button>
                 </div>
 
-                <div class="game-card" onclick="playGame('cyber-pong')">
-                    <div class="particles">
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                    </div>
-                    <div class="scan-line"></div>
-                    <div class="game-icon">
-                        <div class="retro-logo logo-cyber-pong">
-                            <div class="pong-ball"></div>
+                <div class="games-grid" data-game-grid>
+                    <a class="game-card" href="ColourDash/index.html" data-genre="arcade" data-tags="speedrun neon" data-access="free">
+                        <div class="game-card__header">
+                            <div class="game-card__media" aria-hidden="true">🎨</div>
+                            <div>
+                                <h3 class="game-card__title">Colour Dash</h3>
+                                <div class="game-card__meta"><span>Arcade</span><span>Speedrunner</span></div>
+                            </div>
                         </div>
-                    </div>
-                    <h3 class="game-title">CYBER PONG</h3>
-                    <p class="game-description">Classic pong reimagined with neon cyberpunk aesthetics and power-ups. Beat the AI!</p>
-                    <span class="game-status free">FREE</span>
-                    <button class="play-btn">PLAY NOW</button>
-                </div>
+                        <p class="game-card__description">Sprint through prismatic cityscapes, matching gates in rhythm to stay alive and keep your streak blazing.</p>
+                        <div class="game-card__footer">
+                            <span class="tag tag--free">Free</span>
+                            <span>High score ladders live now</span>
+                        </div>
+                    </a>
 
-                <div class="game-card" onclick="playGame('cyber-twist')">
-                    <div class="particles">
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                    </div>
-                    <div class="scan-line"></div>
-                    <div class="game-icon">
-                        <div class="retro-logo logo-cyber-twist"></div>
-                    </div>
-                    <h3 class="game-title">RETRO RUNNER</h3>
-                    <p class="game-description">Endless auto-running platformer. Jump over obstacles, slide under birds, collect coins. Simple controls, retro graphics, increasing difficulty.</p>
-                    <span class="game-status free">FREE</span>
-                    <button class="play-btn">PLAY NOW</button>
-                </div>
+                    <a class="game-card" href="CyberPong/index.html" data-genre="arcade" data-tags="multiplayer pong" data-access="free">
+                        <div class="game-card__header">
+                            <div class="game-card__media" aria-hidden="true">🕹️</div>
+                            <div>
+                                <h3 class="game-card__title">Cyber Pong</h3>
+                                <div class="game-card__meta"><span>Arcade</span><span>Versus</span></div>
+                            </div>
+                        </div>
+                        <p class="game-card__description">A neon reboot of the classic duel. Power serves, orbiting projectiles, and local multiplayer for instant rivalries.</p>
+                        <div class="game-card__footer">
+                            <span class="tag tag--free">Free</span>
+                            <span>2 players • controller support</span>
+                        </div>
+                    </a>
 
-                <div class="game-card" onclick="playGame('gravity-flip')">
-                    <div class="particles">
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                    </div>
-                    <div class="scan-line"></div>
-                    <div class="game-icon">
-                        <div class="retro-logo logo-gravity-flip"></div>
-                    </div>
-                    <h3 class="game-title">GRAVITY FLIP</h3>
-                    <p class="game-description">Mind-bending platformer where you control gravity! Flip up and down to navigate through challenging pixel worlds.</p>
-                    <span class="game-status free">FREE</span>
-                    <button class="play-btn">PLAY NOW</button>
-                </div>
+                    <a class="game-card" href="CyberTwist/index.html" data-genre="puzzle" data-tags="logic vortex" data-access="free">
+                        <div class="game-card__header">
+                            <div class="game-card__media" aria-hidden="true">🧩</div>
+                            <div>
+                                <h3 class="game-card__title">Cyber Twist</h3>
+                                <div class="game-card__meta"><span>Puzzle</span><span>Dimensional</span></div>
+                            </div>
+                        </div>
+                        <p class="game-card__description">Slide panels inside a spinning singularity to realign circuits before the synthwave timer flatlines.</p>
+                        <div class="game-card__footer">
+                            <span class="tag tag--free">Free</span>
+                            <span>New weekly puzzle packs</span>
+                        </div>
+                    </a>
 
-                <!-- Premium Games -->
-                <div class="game-card" onclick="playGame('dragon-flight')">
-                    <div class="particles">
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                    </div>
-                    <div class="scan-line"></div>
-                    <div class="game-icon">
-                        <div class="retro-logo logo-dragon-legends"></div>
-                    </div>
-                    <h3 class="game-title">DRAGON FLIGHT</h3>
-                    <p class="game-description">Epic adventure with dragon, Fly, dodge, survive — how far can you go?</p>
-                    <span class="game-status free">FREE</span>
-                    <button class="play-btn">PLAY NOW</button>
-                </div>
+                    <a class="game-card" href="GravityFlip/index.html" data-genre="arcade" data-tags="platformer gravity" data-access="free">
+                        <div class="game-card__header">
+                            <div class="game-card__media" aria-hidden="true">🔁</div>
+                            <div>
+                                <h3 class="game-card__title">Gravity Flip</h3>
+                                <div class="game-card__meta"><span>Arcade</span><span>Platformer</span></div>
+                            </div>
+                        </div>
+                        <p class="game-card__description">Flip gravity mid-run to avoid spikes, rescue crew members, and race against the collapsing reactor core.</p>
+                        <div class="game-card__footer">
+                            <span class="tag tag--free">Free</span>
+                            <span>Daily time trials</span>
+                        </div>
+                    </a>
 
-                <div class="game-card" onclick="playGame('geo-dash')">
-                    <div class="particles">
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                    </div>
-                    <div class="scan-line"></div>
-                    <div class="game-icon">
-                        <div class="retro-logo logo-turbo-racing"></div>
-                    </div>
-                    <h3 class="game-title">GEO DASH</h3>
-                    <p class="game-description">Jump over neon geometric obstacles in this endless runner. 12 different shapes, retro visuals, beat your high score!</p>
-                    <span class="game-status free">FREE</span>
-                    <button class="play-btn">PLAY NOW</button>
-                </div>
+                    <a class="game-card" href="DragonFlight/index.html" data-genre="action" data-tags="flight dragon" data-access="free">
+                        <div class="game-card__header">
+                            <div class="game-card__media" aria-hidden="true">🐉</div>
+                            <div>
+                                <h3 class="game-card__title">Dragon Flight</h3>
+                                <div class="game-card__meta"><span>Action</span><span>Roguelite</span></div>
+                            </div>
+                        </div>
+                        <p class="game-card__description">Soar through pixel skies, hoard elemental upgrades, and unleash firestorms across endless kingdoms.</p>
+                        <div class="game-card__footer">
+                            <span class="tag tag--free">Free</span>
+                            <span>Co-op campaign in beta</span>
+                        </div>
+                    </a>
 
-                <div class="game-card" onclick="playGame('astro-belt')">
-                    <div class="particles">
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                    </div>
-                    <div class="scan-line"></div>
-                    <div class="game-icon">
-                        <div class="retro-logo logo-kingdom-builder"></div>
-                    </div>
-                    <h3 class="game-title">Astro Belt</h3>
-                    <p class="game-description">Astro Belt is a retro space shooter where you dodge asteroids, blast enemies, and chase high scores.</p>
-                   <span class="game-status free">FREE</span>
-                    <button class="play-btn">PLAY NOW</button>
-                </div>
+                    <a class="game-card" href="GeoDash/index.html" data-genre="arcade" data-tags="rhythm dash" data-access="free">
+                        <div class="game-card__header">
+                            <div class="game-card__media" aria-hidden="true">📐</div>
+                            <div>
+                                <h3 class="game-card__title">Geo Dash</h3>
+                                <div class="game-card__meta"><span>Arcade</span><span>Rhythm</span></div>
+                            </div>
+                        </div>
+                        <p class="game-card__description">Dash, jump, and slide through geometric gauntlets choreographed to a chiptune soundtrack.</p>
+                        <div class="game-card__footer">
+                            <span class="tag tag--free">Free</span>
+                            <span>Season 3 soundtrack out now</span>
+                        </div>
+                    </a>
 
-                <div class="game-card" onclick="playGame('sniper-elite')">
-                    <div class="particles">
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                        <div class="particle"></div>
-                    </div>
-                    <div class="scan-line"></div>
-                    <div class="game-icon">
-                        <div class="retro-logo logo-sniper-elite"></div>
-                    </div>
-                    <h3 class="game-title">SNIPER ELITE</h3>
-                    <p class="game-description">Pixel precision shooting with challenging missions and retro-style graphics.</p>
-                  <span class="game-status free">FREE</span>
-                    <button class="play-btn">PLAY NOW</button>
+                    <a class="game-card" href="AstroBelt/index.html" data-genre="coming-soon" data-tags="space roguelike" data-access="free">
+                        <div class="game-card__header">
+                            <div class="game-card__media" aria-hidden="true">🪐</div>
+                            <div>
+                                <h3 class="game-card__title">Astro Belt</h3>
+                                <div class="game-card__meta"><span>Coming Soon</span><span>Space</span></div>
+                            </div>
+                        </div>
+                        <p class="game-card__description">Chart rogue asteroid belts in a tactical roguelike where every orbit unlocks new loadouts.</p>
+                        <div class="game-card__footer">
+                            <span class="tag tag--free">Free</span>
+                            <span>Early access opens May</span>
+                        </div>
+                    </a>
+
+                    <a class="game-card" href="SniperElite/index.html" data-genre="shooter" data-tags="shooter stealth" data-access="free">
+                        <div class="game-card__header">
+                            <div class="game-card__media" aria-hidden="true">🎯</div>
+                            <div>
+                                <h3 class="game-card__title">Sniper Elite</h3>
+                                <div class="game-card__meta"><span>Shooter</span><span>Stealth</span></div>
+                            </div>
+                        </div>
+                        <p class="game-card__description">Line up impossible shots in a stealth shooter featuring wind physics, ricochet tricks, and replay cams.</p>
+                        <div class="game-card__footer">
+                            <span class="tag tag--free">Free</span>
+                            <span>Competitive ladders active</span>
+                        </div>
+                    </a>
+
+                    <a class="game-card" href="ColorTide/index.html" data-genre="puzzle" data-tags="relaxing zen" data-access="free">
+                        <div class="game-card__header">
+                            <div class="game-card__media" aria-hidden="true">🌊</div>
+                            <div>
+                                <h3 class="game-card__title">Color Tide</h3>
+                                <div class="game-card__meta"><span>Puzzle</span><span>Zen</span></div>
+                            </div>
+                        </div>
+                        <p class="game-card__description">Restore calm to a shifting seascape by blending hues, matching tides, and soothing the pixel waves.</p>
+                        <div class="game-card__footer">
+                            <span class="tag tag--free">Free</span>
+                            <span>Meditative playlists included</span>
+                        </div>
+                    </a>
+
+                    <a class="game-card" href="CircuitPuzzle/index.html" data-genre="puzzle" data-tags="circuit logic" data-access="free">
+                        <div class="game-card__header">
+                            <div class="game-card__media" aria-hidden="true">⚡</div>
+                            <div>
+                                <h3 class="game-card__title">Circuit Puzzle</h3>
+                                <div class="game-card__meta"><span>Puzzle</span><span>Logic</span></div>
+                            </div>
+                        </div>
+                        <p class="game-card__description">Rewire the grid using magnetic nodes to keep the synth city powered before the lights go out.</p>
+                        <div class="game-card__footer">
+                            <span class="tag tag--free">Free</span>
+                            <span>Sandbox mode unlocked</span>
+                        </div>
+                    </a>
                 </div>
-<div class="game-card" onclick="playGame('color-tide')">
-    <div class="particles">
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-    </div>
-    <div class="scan-line"></div>
-    <div class="game-icon">
-        <div class="retro-logo logo-color-tide">
-            <div class="tide-bubble"></div>
-            <div class="tide-bubble"></div>
-            <div class="tide-bubble"></div>
-            <div class="tide-bubble"></div>
-        </div>
-    </div>
-    <h3 class="game-title">COLOR TIDE</h3>
-    <p class="game-description">Surf through waves of vibrant colors in this mesmerizing endless runner. Ride the tide and avoid obstacles!</p>
-    <span class="game-status free">FREE</span>
-    <button class="play-btn">PLAY NOW</button>
-</div>
-<div class="game-card" onclick="playGame('circuit-puzzle')">
-    <div class="particles">
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-    </div>
-    <div class="scan-line"></div>
-    <div class="game-icon">
-        <div class="retro-logo logo-circuit-puzzle">
-            <div class="circuit-node"></div>
-            <div class="circuit-node"></div>
-            <div class="circuit-node"></div>
-            <div class="circuit-node"></div>
-            <div class="circuit-node"></div>
-            <div class="circuit-node"></div>
-        </div>
-    </div>
-    <h3 class="game-title">CIRCUIT PUZZLE</h3>
-    <p class="game-description">Connect electrical circuits to power up systems. Use logic gates and strategic wiring to complete each level!</p>
-    <span class="game-status free">FREE</span>
-    <button class="play-btn">PLAY NOW</button>
-</div>
-        </div>
-    </section>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <div class="games__intro">
+                    <p class="games__eyebrow">Why PixelAddict</p>
+                    <h2 class="games__title">Built for players, tuned for nostalgia</h2>
+                    <p class="games__subtitle">Every cabinet is tuned for pixel-perfect timing, responsive controls, and accessibility passes so the glow never fades.</p>
+                </div>
+                <div class="features__grid">
+                    <article class="feature-card">
+                        <div class="feature-card__icon" aria-hidden="true">🎮</div>
+                        <h3 class="feature-card__title">Controller ready</h3>
+                        <p>Plug-and-play support for Xbox, PlayStation, and Switch controllers with remappable bindings.</p>
+                    </article>
+                    <article class="feature-card">
+                        <div class="feature-card__icon" aria-hidden="true">🌐</div>
+                        <h3 class="feature-card__title">Cloud saves</h3>
+                        <p>Pick up progress on any device with cloud save syncing and cross-platform leaderboards.</p>
+                    </article>
+                    <article class="feature-card">
+                        <div class="feature-card__icon" aria-hidden="true">🛡️</div>
+                        <h3 class="feature-card__title">Fair &amp; friendly</h3>
+                        <p>No ads, no loot boxes. Just honest upgrades and generous free rotations every month.</p>
+                    </article>
+                    <article class="feature-card">
+                        <div class="feature-card__icon" aria-hidden="true">♿</div>
+                        <h3 class="feature-card__title">Accessibility first</h3>
+                        <p>Colorblind-safe palettes, full keyboard navigation, and motion controls that respect your settings.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="updates" class="updates">
+            <div class="container">
+                <div class="games__intro">
+                    <p class="games__eyebrow">Latest updates</p>
+                    <h2 class="games__title">New drops &amp; patch notes</h2>
+                    <p class="games__subtitle">We keep the cabinets fresh, rotating in new synth-soaked challenges every reset.</p>
+                </div>
+                <div class="updates__grid">
+                    <article class="update-card">
+                        <span class="update-card__date">Apr 2, 2024</span>
+                        <h3>Gravity Flip Challenge Sprints</h3>
+                        <p>Added weekly sprint playlists with unique modifiers plus a dedicated leaderboard for time hunters.</p>
+                    </article>
+                    <article class="update-card">
+                        <span class="update-card__date">Mar 24, 2024</span>
+                        <h3>Accessibility presets</h3>
+                        <p>Introduced global presets for reduced motion, high contrast UI, and remappable key profiles.</p>
+                    </article>
+                    <article class="update-card">
+                        <span class="update-card__date">Mar 18, 2024</span>
+                        <h3>Arcade unlocked</h3>
+                        <p>Dragon Flight, Cyber Twist, and the rest of the line-up now launch free for everyone. Queue up and start chasing highscores.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="testimonials">
+            <div class="container">
+                <div class="games__intro">
+                    <p class="games__eyebrow">Player love</p>
+                    <h2 class="games__title">Voices from the arcade</h2>
+                    <p class="games__subtitle">Our players fuel the glow with feedback, fan art, and fierce midnight tournaments.</p>
+                </div>
+                <div class="testimonials__grid">
+                    <article class="testimonial-card">
+                        <blockquote>“PixelAddict nails the late-night arcade vibe. Controller support means my couch battles are legendary.”</blockquote>
+                        <footer>— Quinn, Seattle</footer>
+                    </article>
+                    <article class="testimonial-card">
+                        <blockquote>“Weekly puzzle drops keep me coming back every Sunday—and the fact they’re free means I can invite the whole crew.”</blockquote>
+                        <footer>— Aiko, Tokyo</footer>
+                    </article>
+                    <article class="testimonial-card">
+                        <blockquote>“As a streamer, quick browser launches and accessible settings make PixelAddict my go-to showcase.”</blockquote>
+                        <footer>— Jax, Toronto</footer>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <footer>
-        <div class="container">
-            <div class="footer-content">
-                <p>&copy; 2024 PIXELADDICT - RETRO GAMING EXPERIENCE</p>
-                <p style="margin: 10px 0; color: #00ff00;">CONTACT: <a href="mailto:contact@pixeladdict.tech" style="color: #ff6b00; text-decoration: none;">contact@pixeladdict.tech</a></p>
-                <p class="blinking">PRESS START TO CONTINUE</p>
-            </div>
+        <div class="container footer__content">
+            <p>&copy; 2024 PixelAddict. Built with heart for retro revivalists.</p>
+            <nav aria-label="Footer links">
+                <div class="footer__links">
+                    <a href="about.html">About</a>
+                    <a href="contact.html">Contact</a>
+                    <a href="login.html">Login</a>
+                </div>
+            </nav>
         </div>
     </footer>
-
-    <script>
-        // Game play function
-        function playGame(gameId) {
-            const gameCard = event.currentTarget;
-            if (gameCard.classList.contains('locked')) {
-                // Retro-style alert for premium games
-                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+juwmnEBjGH1O/JeCMFl2+z4s15KgUP');
-                audio.play();
-                
-                const originalContent = gameCard.innerHTML;
-                gameCard.style.border = '3px solid #9966ff';
-                gameCard.innerHTML = '<div style="padding: 50px; text-align: center; color: #9966ff; font-size: 14px;">COMING SOON<br><br>STAY TUNED!</div>';
-                
-                setTimeout(() => {
-                    gameCard.innerHTML = originalContent;
-                    gameCard.style.border = '3px solid #666666';
-                }, 2000);
-                return;
-            }
-            
-            // Add retro click effect
-            gameCard.style.transform = 'scale(0.95)';
-            gameCard.style.filter = 'brightness(1.5)';
-            
-            setTimeout(() => {
-                gameCard.style.transform = '';
-                gameCard.style.filter = '';
-            }, 150);
-            
-            // Game folder paths - Clean URLs without index.html
-            const gamePaths = {
-                'colour-dash': './ColourDash/',
-                'cyber-pong': './CyberPong/',
-                'cyber-twist': './CyberTwist/',
-                'gravity-flip': './GravityFlip/',
-                'dragon-flight': './DragonFlight/',
-                'geo-dash': './GeoDash/',
-                'astro-belt': './AstroBelt/',
-                'sniper-elite': './SniperElite/',
-                'color-tide': './ColorTide/',
-                'circuit-puzzle': './CircuitPuzzle/'
-            };
-            
-            // Open the game in a new window/tab
-            if (gamePaths[gameId]) {
-                // Show loading effect
-                const originalContent = gameCard.innerHTML;
-                gameCard.innerHTML = '<div style="padding: 50px; text-align: center; color: #00ff00; font-size: 12px;">LOADING...<br><br>████████████</div>';
-                
-                setTimeout(() => {
-                    gameCard.innerHTML = originalContent;
-                    // Open game in new tab - the server will automatically serve index.html
-                    window.open(gamePaths[gameId], '_blank');
-                }, 1000);
-            } else {
-                alert(`GAME FILE NOT FOUND: ${gameId.toUpperCase()}\n\nPlease add the game file to: ${gamePaths[gameId] || './games/' + gameId + '/'}index.html`);
-            }
-        }
-
-        // Add retro sound effects (placeholder)
-        function playBeep() {
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+juwmnEBjGH1O/JeCMFl2+z4s15KgUP');
-            audio.play();
-        }
-
-        // Add hover sound effects to buttons
-        document.querySelectorAll('.play-btn, .crt-button').forEach(button => {
-            button.addEventListener('mouseenter', () => {
-                button.style.transform = 'scale(1.05)';
-            });
-            
-            button.addEventListener('mouseleave', () => {
-                button.style.transform = '';
-            });
-        });
-
-        // Add keyboard navigation (retro gaming style)
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                document.getElementById('games').scrollIntoView({behavior: 'smooth'});
-            }
-        });
-    </script>
 </body>
 </html>
