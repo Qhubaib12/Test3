@@ -4,916 +4,147 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premium - PixelAddict</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <style>
-        /* Base styling */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
-        }
-
-        body {
-            font-family: 'Press Start 2P', monospace;
-            background: #0a0a0a;
-            color: #00ff00;
-            min-height: 100vh;
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
-
-        .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(0, 255, 0, 0.03) 2px,
-                rgba(0, 255, 0, 0.03) 4px
-            );
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        header {
-            background: #1a1a1a;
-            border-bottom: 4px solid #00ff00;
-            padding: 20px 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 24px;
-            color: #00ff00;
-            text-shadow: 2px 2px 0px #000, 0 0 10px #00ff00;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from { text-shadow: 2px 2px 0px #000, 0 0 10px #00ff00; }
-            to { text-shadow: 2px 2px 0px #000, 0 0 20px #00ff00, 0 0 30px #00ff00; }
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: #00ff00;
-            text-decoration: none;
-            font-size: 12px;
-            transition: all 0.3s ease;
-            padding: 8px 12px;
-            border: 2px solid transparent;
-        }
-
-        .nav-links a:hover {
-            color: #ff6b00;
-            border: 2px solid #ff6b00;
-            box-shadow: 0 0 10px #ff6b00;
-        }
-
-        .hero {
-            text-align: center;
-            padding: 80px 0;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(0, 255, 0, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 107, 0, 0.1) 0%, transparent 50%);
-        }
-
-        .hero h1 {
-            font-size: clamp(16px, 4vw, 32px);
-            margin-bottom: 30px;
-            text-shadow: 3px 3px 0px #000;
-            animation: pixelPulse 3s ease-in-out infinite;
-        }
-
-        @keyframes pixelPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .hero p {
-            font-size: 14px;
-            max-width: 600px;
-            margin: 0 auto 40px;
-            color: #cccccc;
-            line-height: 1.8;
-        }
-
-        .premium-section {
-            padding: 80px 0;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
-            text-align: center;
-        }
-
-        .premium-title {
-            font-size: 36px;
-            margin-bottom: 20px;
-            color: #ff6b00;
-            text-shadow: 3px 3px 0px #000, 0 0 20px #ff6b00;
-            animation: titleGlow 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes titleGlow {
-            from { text-shadow: 3px 3px 0px #000, 0 0 20px #ff6b00; }
-            to { text-shadow: 3px 3px 0px #000, 0 0 30px #ff6b00, 0 0 40px #ff6b00; }
-        }
-
-        .premium-text {
-            font-size: 12px;
-            max-width: 800px;
-            margin: 0 auto 40px;
-            color: #cccccc;
-            line-height: 1.8;
-            text-shadow: 1px 1px 0px #000;
-        }
-
-        .pricing-tiers {
-            display: flex;
-            gap: 40px;
-            justify-content: center;
-            margin: 60px 0;
-            flex-wrap: wrap;
-        }
-
-        .tier-card {
-            background: #1a1a1a;
-            border: 3px solid #00ff00;
-            padding: 30px 25px;
-            width: 300px;
-            text-align: center;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .tier-card:hover {
-            border-color: #ff6b00;
-            box-shadow: 0 0 30px rgba(255, 107, 0, 0.5);
-            transform: translateY(-5px);
-        }
-
-        .tier-card.annual {
-            border-color: #ff6b00;
-            box-shadow: 0 0 25px rgba(255, 107, 0, 0.4);
-        }
-
-        .tier-card.annual::before {
-            content: "BEST VALUE";
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ff6b00;
-            color: #000;
-            padding: 5px 15px;
-            font-size: 8px;
-            font-weight: bold;
-        }
-
-        .tier-title {
-            font-size: 18px;
-            color: #00ff00;
-            margin-bottom: 15px;
-        }
-
-        .tier-card.annual .tier-title {
-            color: #ff6b00;
-        }
-
-        .tier-price {
-            font-size: 24px;
-            color: #ffffff;
-            margin: 20px 0;
-        }
-
-        .tier-duration {
-            font-size: 10px;
-            color: #888;
-            margin-bottom: 20px;
-        }
-
-        .tier-features {
-            text-align: left;
-            margin: 20px 0;
-            font-size: 10px;
-            color: #ccc;
-            line-height: 1.6;
-        }
-
-        .tier-features li {
-            margin: 8px 0;
-            padding-left: 15px;
-            position: relative;
-        }
-
-        .tier-features li::before {
-            content: "▶";
-            position: absolute;
-            left: 0;
-            color: #00ff00;
-        }
-
-        .tier-card.annual .tier-features li::before {
-            color: #ff6b00;
-        }
-
-        .tier-button {
-            background: #00ff00;
-            color: #000;
-            border: none;
-            padding: 15px 25px;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 10px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
-        }
-
-        .tier-button:hover {
-            background: #ff6b00;
-            box-shadow: 0 0 25px rgba(255, 107, 0, 0.8);
-            transform: scale(1.05);
-        }
-
-        .tier-card.annual .tier-button {
-            background: #ff6b00;
-            box-shadow: 0 0 15px rgba(255, 107, 0, 0.5);
-        }
-
-        .tier-card.annual .tier-button:hover {
-            background: #00ff00;
-            box-shadow: 0 0 25px rgba(0, 255, 0, 0.8);
-        }
-
-        /* Payment Page Styles */
-        .payment-page {
-            display: none;
-            padding: 40px 0;
-        }
-
-        .payment-form {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #1a1a1a;
-            border: 3px solid #00ff00;
-            padding: 40px;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 10px;
-            color: #00ff00;
-            margin-bottom: 8px;
-        }
-
-        .form-group input {
-            width: 100%;
-            background: #0a0a0a;
-            border: 2px solid #333;
-            color: #00ff00;
-            padding: 12px;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 10px;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #00ff00;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
-        }
-
-        .form-row {
-            display: flex;
-            gap: 15px;
-        }
-
-        .form-row .form-group {
-            flex: 1;
-        }
-
-        .coupon-section {
-            background: #2a2a2a;
-            padding: 20px;
-            margin: 20px 0;
-            border: 2px solid #444;
-        }
-
-        .coupon-section h3 {
-            font-size: 12px;
-            color: #ff6b00;
-            margin-bottom: 15px;
-        }
-
-        .order-summary {
-            background: #2a2a2a;
-            padding: 20px;
-            margin: 20px 0;
-            border: 2px solid #00ff00;
-        }
-
-        .order-summary h3 {
-            font-size: 14px;
-            color: #00ff00;
-            margin-bottom: 15px;
-        }
-
-        .summary-line {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0;
-            font-size: 10px;
-        }
-
-        .total-line {
-            border-top: 2px solid #00ff00;
-            padding-top: 10px;
-            margin-top: 15px;
-            font-size: 12px;
-            color: #ffffff;
-        }
-
-        .pay-button {
-            background: #00ff00;
-            color: #000;
-            border: none;
-            padding: 20px;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 12px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 30px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
-        }
-
-        .pay-button:hover {
-            background: #ff6b00;
-            box-shadow: 0 0 30px rgba(255, 107, 0, 0.8);
-            transform: scale(1.02);
-        }
-
-        .back-button {
-            background: #333;
-            color: #00ff00;
-            border: 2px solid #00ff00;
-            padding: 15px 25px;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 10px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .back-button:hover {
-            background: #00ff00;
-            color: #000;
-        }
-
-        .error-message {
-            background: rgba(255, 0, 0, 0.1);
-            border: 2px solid #ff0000;
-            color: #ff6b6b;
-            padding: 20px;
-            margin: 20px 0;
-            font-size: 10px;
-            display: none;
-            border-radius: 4px;
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            flex-direction: column;
-            backdrop-filter: blur(5px);
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #333;
-            border-top: 3px solid #00ff00;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-bottom: 25px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-size: 11px;
-            color: #00ff00;
-            text-align: center;
-            margin: 8px 0;
-            font-family: 'Press Start 2P', monospace;
-        }
-
-        .processing-steps {
-            font-size: 9px;
-            color: #666;
-            text-align: left;
-            margin-top: 25px;
-            max-width: 400px;
-        }
-
-        .processing-step {
-            margin: 8px 0;
-            opacity: 0.4;
-            transition: all 0.6s ease;
-            padding: 4px 0;
-            display: flex;
-            align-items: center;
-        }
-
-        .processing-step.active {
-            opacity: 1;
-            color: #00ff00;
-        }
-
-        .processing-step.completed {
-            opacity: 0.8;
-            color: #888;
-        }
-
-        .processing-step.completed::before {
-            content: "✓ ";
-            color: #00ff00;
-            margin-right: 8px;
-        }
-
-        .processing-step.failed {
-            color: #ff6b6b;
-            opacity: 1;
-        }
-
-        .processing-step.failed::before {
-            content: "✗ ";
-            color: #ff6b6b;
-            margin-right: 8px;
-        }
-
-        .step-dot {
-            width: 6px;
-            height: 6px;
-            background: #333;
-            border-radius: 50%;
-            margin-right: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .processing-step.active .step-dot {
-            background: #00ff00;
-            box-shadow: 0 0 8px #00ff00;
-        }
-
-        .processing-step.completed .step-dot {
-            background: #00ff00;
-        }
-
-        .processing-step.failed .step-dot {
-            background: #ff6b6b;
-        }
-
-        footer {
-            background: #0a0a0a;
-            border-top: 4px solid #00ff00;
-            padding: 40px 0;
-            text-align: center;
-            margin-top: 60px;
-        }
-
-        .footer-content {
-            font-size: 10px;
-            color: #666666;
-        }
-
-        .blinking {
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
-        }
-
-        .pixel-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
-            background-size: 20px 20px;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .hero { padding: 60px 0; }
-            .hero h1 { font-size: 20px; }
-            .hero p { font-size: 12px; }
-            .premium-text { font-size: 11px; padding: 0 15px; }
-            .pricing-tiers { flex-direction: column; align-items: center; }
-            .tier-card { width: 90%; max-width: 350px; }
-            .payment-form { padding: 20px; margin: 0 10px; }
-            .form-row { flex-direction: column; }
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/styles/main.css">
+    <script src="assets/scripts/main.js" defer></script>
 </head>
-<body>
-    <div class="pixel-bg"></div>
-    <div class="scanlines"></div>
-    
+<body class="page">
+    <a class="sr-only" href="#main-content">Skip to content</a>
     <header>
-        <nav class="container">
-            <div class="logo">PIXELADDICT</div>
-            <ul class="nav-links">
-                <li><a href="https://pixeladdict.tech/">HOME</a></li>
-                <li><a href="about">ABOUT</a></li>
-                <li><a href="contact">CONTACT</a></li>
-                <li><a href="premium" style="color:#ff6b00; border:2px solid #ff6b00;">PREMIUM</a></li>
-            </ul>
-        </nav>
+        <div class="container site-header">
+            <a class="brand" href="index.html">
+                <span class="brand__mark" aria-hidden="true"></span>
+                <span class="brand__text">PixelAddict</span>
+            </a>
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+                <span class="sr-only">Toggle navigation</span>
+                Menu
+            </button>
+            <nav class="primary-nav" id="primary-navigation">
+                <ul class="primary-nav__list" role="list">
+                    <li><a class="primary-nav__link" href="index.html">Home</a></li>
+                    <li><a class="primary-nav__link" href="about.html">About</a></li>
+                    <li><a class="primary-nav__link" href="premium.html" aria-current="page">Premium</a></li>
+                    <li><a class="primary-nav__link" href="contact.html">Contact</a></li>
+                    <li><a class="primary-nav__link" href="login.html">Login</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
-    <!-- Premium Page -->
-    <div id="premium-page">
-        <section class="hero">
-            <div class="container">
-                <h1>PIXELADDICT PREMIUM</h1>
-                <p>Unlock the full retro experience – endless games, endless fun.</p>
-            </div>
-        </section>
-
-        <section class="premium-section">
-            <div class="container">
-                <h2 class="premium-title">WHY GO PREMIUM?</h2>
-                <p class="premium-text">
-                    What you see in our free section is just the beginning – only 0.1% of what PixelAddict truly offers.  
-                    Our **Premium Package** gives you access to **500+ mind-challenging, reaction-boosting games**,  
-                    covering every genre from retro puzzles to fast-paced arcade shooters.  
-                    <br><br>
-                    **New games are added every month**, keeping your experience fresh and exciting.  
-                    Plus get exclusive merchandise, physical game copies, posters, and premium goodies delivered to your door!
-                </p>
-
-                <div class="pricing-tiers">
-                    <div class="tier-card">
-                        <h3 class="tier-title">MONTHLY</h3>
-                        <div class="tier-price">$5.99</div>
-                        <div class="tier-duration">PER MONTH</div>
-                        <ul class="tier-features">
-                            <li>500+ Premium Games</li>
-                            <li>Monthly New Releases</li>
-                            <li>Ad-Free Experience</li>
-                            <li>Priority Support</li>
-                            <li>Exclusive Merchandise</li>
-                            <li>Physical Game Copies</li>
-                            <li>Premium Posters</li>
-                        </ul>
-                        <button class="tier-button" id="monthly-btn">START MONTHLY</button>
-                    </div>
-
-                    <div class="tier-card annual">
-                        <h3 class="tier-title">ANNUAL</h3>
-                        <div class="tier-price">$49.99</div>
-                        <div class="tier-duration">PER YEAR (SAVE 30%)</div>
-                        <ul class="tier-features">
-                            <li>500+ Premium Games</li>
-                            <li>Monthly New Releases</li>
-                            <li>Ad-Free Experience</li>
-                            <li>Priority Support</li>
-                            <li>Exclusive Merchandise</li>
-                            <li>Physical Game Copies</li>
-                            <li>Premium Posters</li>
-                            <li>Annual Collector's Box</li>
-                            <li>Limited Edition Items</li>
-                        </ul>
-                        <button class="tier-button" id="annual-btn">START ANNUAL</button>
-                    </div>
+    <main id="main-content">
+        <section class="page-hero">
+            <div class="container page-hero__content">
+                <p class="page-hero__eyebrow">Premium transmissions</p>
+                <h1 class="page-hero__headline">An invite-only tier for players who want even more neon in their night.</h1>
+                <p class="page-hero__description">Every game on PixelAddict remains free to play. Premium perks unlock early access builds, cosmetic drops, and deeper community events. We're testing the experience with a small crew before flipping the switch for everyone.</p>
+                <div class="page-hero__actions">
+                    <a class="button button--primary" href="mailto:contact@pixeladdict.tech?subject=Premium%20Waitlist">Join the waitlist</a>
+                    <a class="button button--ghost" href="index.html#games">Explore free library</a>
                 </div>
             </div>
         </section>
-    </div>
 
-    <!-- Payment Page -->
-    <div id="payment-page" class="payment-page">
-        <div class="container">
-            <button class="back-button" id="back-btn">◀ BACK TO PLANS</button>
-            
-            <div class="payment-form">
-                <h2 style="color: #ff6b00; margin-bottom: 30px; text-align: center;">COMPLETE YOUR ORDER</h2>
-                
-                <div class="order-summary">
-                    <h3>ORDER SUMMARY</h3>
-                    <div class="summary-line">
-                        <span>PixelAddict Premium (<span id="plan-type">Monthly</span>)</span>
-                        <span id="plan-price">$5.99</span>
-                    </div>
-                    <div class="summary-line">
-                        <span>Tax</span>
-                        <span id="tax-amount">$0.00</span>
-                    </div>
-                    <div class="summary-line total-line">
-                        <strong>TOTAL: <span id="total-amount">$5.99</span></strong>
-                    </div>
+        <section class="section">
+            <div class="container">
+                <div class="section__heading">
+                    <p class="section__eyebrow">What's cooking</p>
+                    <h2 class="section__title">Perks we are polishing right now</h2>
+                    <p class="section__description">Our internal roadmap is packed with extras that respect the free-first philosophy while rewarding the players who keep the signal strong.</p>
                 </div>
-
-                <form id="payment-form">
-                    <div class="form-group">
-                        <label>EMAIL ADDRESS</label>
-                        <input type="email" id="email" required placeholder="your@email.com">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>FIRST NAME</label>
-                            <input type="text" id="firstName" required placeholder="John">
-                        </div>
-                        <div class="form-group">
-                            <label>LAST NAME</label>
-                            <input type="text" id="lastName" required placeholder="Doe">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>CARD NUMBER</label>
-                        <input type="text" id="cardNumber" required placeholder="1234 5678 9012 3456" maxlength="19">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>EXPIRY DATE</label>
-                            <input type="text" id="expiryDate" required placeholder="MM/YY" maxlength="5">
-                        </div>
-                        <div class="form-group">
-                            <label>CVV</label>
-                            <input type="text" id="cvv" required placeholder="123" maxlength="4">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>BILLING ADDRESS</label>
-                        <input type="text" id="address" required placeholder="123 Retro Street">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>CITY</label>
-                            <input type="text" id="city" required placeholder="Gaming City">
-                        </div>
-                        <div class="form-group">
-                            <label>ZIP CODE</label>
-                            <input type="text" id="zipCode" required placeholder="12345">
-                        </div>
-                    </div>
-
-                    <div class="coupon-section">
-                        <h3>HAVE A COUPON CODE?</h3>
-                        <div class="form-group">
-                            <input type="text" id="couponCode" placeholder="Enter coupon code">
-                        </div>
-                        <button type="button" class="back-button" id="apply-coupon-btn" style="margin-bottom: 0;">APPLY COUPON</button>
-                    </div>
-
-                    <div class="error-message" id="error-message">
-                        Payment failed, your payment was declined. Please try a different payment method or contact us at payment@pixeladdict.tech for assistance.
-                    </div>
-
-                    <button type="submit" class="pay-button">COMPLETE PAYMENT</button>
-                </form>
+                <div class="info-grid">
+                    <article class="info-card">
+                        <h3 class="info-card__title">Early access builds</h3>
+                        <p class="info-card__description">Playtest upcoming cabinets, give feedback directly to the dev team, and help balance before global launch.</p>
+                        <ul class="info-card__list">
+                            <li>Exclusive weekend play windows</li>
+                            <li>Private feedback threads with the devs</li>
+                            <li>Badges for top bug hunters</li>
+                        </ul>
+                    </article>
+                    <article class="info-card">
+                        <h3 class="info-card__title">Cosmetic drops</h3>
+                        <p class="info-card__description">Unlock animated avatars, retro HUD skins, and limited-time celebration effects that won't impact competitive balance.</p>
+                        <ul class="info-card__list">
+                            <li>Seasonal loot cycles tied to events</li>
+                            <li>Community-designed vanity rewards</li>
+                            <li>Sync cosmetics across all devices</li>
+                        </ul>
+                    </article>
+                    <article class="info-card">
+                        <h3 class="info-card__title">Deeper events</h3>
+                        <p class="info-card__description">Premium pilots can co-host tournaments, join dev AMAs, and vote on the next round of remasters.</p>
+                        <ul class="info-card__list">
+                            <li>Quarterly invitational tournaments</li>
+                            <li>Behind-the-scenes production streams</li>
+                            <li>Roadmap polling with weighted votes</li>
+                        </ul>
+                    </article>
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="loading-overlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Processing payment...</div>
-        <div class="processing-steps">
-            <div class="processing-step" id="step1">
-                <div class="step-dot"></div>
-                <span>Validating payment information</span>
+        <section class="section section--alt">
+            <div class="container">
+                <div class="section__heading">
+                    <p class="section__eyebrow">Planned tiers</p>
+                    <h2 class="section__title">Choose the lane that fits your arcade obsession</h2>
+                    <p class="section__description">Pricing and perks may shift before public release—we'll share final details with the community before anything goes live.</p>
+                </div>
+                <div class="pricing-grid">
+                    <article class="pricing-card">
+                        <span class="status-pill">In testing</span>
+                        <h3 class="pricing-card__title">Arcade+</h3>
+                        <p class="pricing-card__price">$6/mo</p>
+                        <p class="pricing-card__description">Support development and snag cosmetic rewards without changing gameplay balance.</p>
+                        <ul class="pricing-card__list">
+                            <li>Monthly cosmetic bundle</li>
+                            <li>Beta access to two upcoming games</li>
+                            <li>Private Discord lounge with dev Q&amp;As</li>
+                        </ul>
+                        <a class="button button--ghost" href="mailto:contact@pixeladdict.tech?subject=Arcade%2B%20interest">Request invite</a>
+                    </article>
+                    <article class="pricing-card">
+                        <span class="status-pill">Founders wave</span>
+                        <h3 class="pricing-card__title">Lifetime Signal</h3>
+                        <p class="pricing-card__price">$120 once</p>
+                        <p class="pricing-card__description">Limited slots for fans who want to back the project long term and influence the roadmap.</p>
+                        <ul class="pricing-card__list">
+                            <li>All Arcade+ perks unlocked forever</li>
+                            <li>Name in the PixelAddict supporter wall</li>
+                            <li>Annual founders summit &amp; merch drops</li>
+                        </ul>
+                        <a class="button button--ghost" href="mailto:contact@pixeladdict.tech?subject=Lifetime%20Signal">Apply for founders list</a>
+                    </article>
+                </div>
             </div>
-            <div class="processing-step" id="step2">
-                <div class="step-dot"></div>
-                <span>Connecting to secure payment gateway</span>
+        </section>
+
+        <section class="section">
+            <div class="container page-cta">
+                <h2 class="section__title">We build this with you</h2>
+                <p class="page-cta__description">Your feedback ensures Premium stays fair, optional, and worth the upgrade. Share what you want to see, and we'll fold it into the roadmap.</p>
+                <div class="page-cta__actions">
+                    <a class="button button--primary" href="mailto:contact@pixeladdict.tech?subject=Premium%20Feedback">Share feedback</a>
+                    <a class="button" href="about.html">Meet the team</a>
+                </div>
             </div>
-            <div class="processing-step" id="step3">
-                <div class="step-dot"></div>
-                <span>Contacting your bank for authorization</span>
-            </div>
-            <div class="processing-step" id="step4">
-                <div class="step-dot"></div>
-                <span>Finalizing transaction</span>
-            </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
     <footer>
-        <div class="container">
-            <div class="footer-content">
-                <p>&copy; 2024 PIXELADDICT - RETRO GAMING EXPERIENCE</p>
-                <p style="margin: 10px 0; color: #00ff00;">SUPPORT: <a href="mailto:support@pixeladdict.tech" style="color: #ff6b00; text-decoration: none;">support@pixeladdict.tech</a></p>
-                <p class="blinking">PRESS START TO CONTINUE</p>
-            </div>
+        <div class="container footer__content">
+            <nav class="footer__links" aria-label="Footer">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="premium.html" aria-current="page">Premium</a>
+                <a href="contact.html">Contact</a>
+                <a href="login.html">Login</a>
+            </nav>
+            <p>© PixelAddict. Broadcasting retro energy across the grid.</p>
         </div>
     </footer>
-
-    <script>
-        // Global variables
-        let selectedPlan = { type: 'monthly', price: 5.99 };
-
-        // Wait for DOM to load
-        document.addEventListener('DOMContentLoaded', function() {
-            
-            // Button event listeners
-            document.getElementById('monthly-btn').addEventListener('click', function() {
-                selectPlan('monthly', 5.99);
-            });
-
-            document.getElementById('annual-btn').addEventListener('click', function() {
-                selectPlan('annual', 49.99);
-            });
-
-            document.getElementById('back-btn').addEventListener('click', function() {
-                showPremiumPage();
-            });
-
-            document.getElementById('apply-coupon-btn').addEventListener('click', function() {
-                applyCoupon();
-            });
-
-            // Form submission
-            document.getElementById('payment-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                document.getElementById('error-message').style.display = 'none';
-                showProcessingAnimation();
-            });
-
-            // Format card number input
-            document.getElementById('cardNumber').addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-                let formattedValue = value.match(/.{1,4}/g)?.join(' ') || '';
-                e.target.value = formattedValue;
-            });
-
-            // Format expiry date input
-            document.getElementById('expiryDate').addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length >= 2) {
-                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
-                }
-                e.target.value = value;
-            });
-
-            // CVV input validation
-            document.getElementById('cvv').addEventListener('input', function(e) {
-                e.target.value = e.target.value.replace(/\D/g, '');
-            });
-
-            // Allow Enter key to apply coupon
-            document.getElementById('couponCode').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    applyCoupon();
-                }
-            });
-        });
-
-        // Functions
-        function selectPlan(planType, price) {
-            selectedPlan = { type: planType, price: price };
-            showPaymentPage();
-        }
-
-        function showPaymentPage() {
-            document.getElementById('premium-page').style.display = 'none';
-            document.getElementById('payment-page').style.display = 'block';
-            updateOrderSummary();
-            window.scrollTo(0, 0);
-        }
-
-        function showPremiumPage() {
-            document.getElementById('premium-page').style.display = 'block';
-            document.getElementById('payment-page').style.display = 'none';
-            window.scrollTo(0, 0);
-        }
-
-        function updateOrderSummary() {
-            document.getElementById('plan-type').textContent = selectedPlan.type.charAt(0).toUpperCase() + selectedPlan.type.slice(1);
-            document.getElementById('plan-price').textContent = '$' + selectedPlan.price.toFixed(2);
-            document.getElementById('total-amount').textContent = '$' + selectedPlan.price.toFixed(2);
-        }
-
-        function applyCoupon() {
-            const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
-            
-            if (couponCode && couponCode !== '') {
-                alert('INVALID COUPON CODE. TRY AGAIN!');
-            }
-        }
-
-        function showProcessingAnimation() {
-            const loadingOverlay = document.getElementById('loading-overlay');
-            const steps = ['step1', 'step2', 'step3', 'step4'];
-            
-            loadingOverlay.style.display = 'flex';
-            
-            let currentStep = 0;
-            
-            const processStep = () => {
-                if (currentStep > 0) {
-                    document.getElementById(steps[currentStep - 1]).classList.remove('active');
-                    document.getElementById(steps[currentStep - 1]).classList.add('completed');
-                }
-                
-                if (currentStep < steps.length) {
-                    document.getElementById(steps[currentStep]).classList.add('active');
-                    currentStep++;
-                    
-                    // Realistic timing for each step
-                    const delays = [1200, 2800, 3500, 1800];
-                    setTimeout(processStep, delays[currentStep - 1] || 1500);
-                } else {
-                    // Payment fails at the last step
-                    setTimeout(() => {
-                        // Mark last step as failed
-                        document.getElementById('step4').classList.remove('active');
-                        document.getElementById('step4').classList.add('failed');
-                        
-                        // Update loading text
-                        document.querySelector('.loading-text').textContent = 'Payment failed';
-                        document.querySelector('.loading-text').style.color = '#ff6b6b';
-                        
-                        // Hide overlay and show error after realistic delay
-                        setTimeout(() => {
-                            loadingOverlay.style.display = 'none';
-                            document.getElementById('error-message').style.display = 'block';
-                            document.getElementById('error-message').scrollIntoView({ behavior: 'smooth' });
-                            
-                            // Reset steps for next attempt
-                            steps.forEach(step => {
-                                document.getElementById(step).classList.remove('active', 'completed', 'failed');
-                            });
-                            
-                            // Reset loading text
-                            document.querySelector('.loading-text').textContent = 'Processing payment...';
-                            document.querySelector('.loading-text').style.color = '#00ff00';
-                        }, 1500);
-                    }, 800);
-                }
-            };
-            
-            // Start processing after short delay
-            setTimeout(processStep, 600);
-        }
-    </script>
 </body>
 </html>
