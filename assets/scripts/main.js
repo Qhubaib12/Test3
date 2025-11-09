@@ -60,6 +60,7 @@ ready(() => {
     } else if (gameGrid.parentElement) {
         gameGrid.parentElement.insertBefore(emptyState, gameGrid.nextSibling);
     }
+    gameGrid.after(emptyState);
 
     const applyFilters = () => {
         let visibleCount = 0;
