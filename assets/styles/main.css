@@ -1057,9 +1057,77 @@ header {
     gap: 1.5rem;
 }
 
+.auth-card--secondary {
+    background: rgba(6, 18, 13, 0.82);
+    border-color: rgba(57, 255, 156, 0.22);
+}
+
+.auth-feedback {
+    margin: 0;
+    text-align: center;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.auth-feedback--loading {
+    color: var(--accent-secondary);
+    text-shadow: 0 0 12px rgba(19, 246, 255, 0.45);
+}
+
+.auth-feedback--error {
+    color: #ff7a6b;
+    text-shadow: 0 0 14px rgba(255, 122, 107, 0.5);
+}
+
+.auth-support {
+    display: grid;
+    gap: 0.75rem;
+    justify-items: center;
+    font-size: 0.85rem;
+}
+
+.auth-support__hint {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.auth-recovery__description {
+    margin: 0;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.auth-blink {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.75rem;
+    color: var(--accent-tertiary);
+    animation: authBlink 1.1s steps(2) infinite;
+    text-align: center;
+}
+
+@keyframes authBlink {
+    0%,
+    49% {
+        opacity: 1;
+    }
+    50%,
+    100% {
+        opacity: 0;
+    }
+}
+
 .form-grid {
     display: grid;
     gap: 1.1rem;
+}
+
+.form-grid--split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
 }
 
 .form-field {
@@ -1156,6 +1224,25 @@ header {
     overflow: hidden;
 }
 
+.premium-plan-grid {
+    align-items: stretch;
+}
+
+.premium-plan {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.premium-plan:hover,
+.premium-plan:focus-within {
+    transform: translateY(-6px);
+    box-shadow: 0 28px 48px rgba(0, 35, 16, 0.6);
+}
+
+.premium-plan--highlight {
+    border-color: rgba(19, 246, 255, 0.35);
+    box-shadow: 0 28px 52px rgba(0, 40, 18, 0.65);
+}
+
 .pricing-card::before {
     content: '';
     position: absolute;
@@ -1237,6 +1324,201 @@ header {
     gap: 0.85rem;
     flex-wrap: wrap;
     justify-content: center;
+}
+
+.premium-payment {
+    display: grid;
+    gap: 1.8rem;
+}
+
+.premium-payment__back {
+    justify-self: start;
+}
+
+.premium-payment__grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+}
+
+.premium-payment__summary {
+    align-self: start;
+    gap: 1.25rem;
+}
+
+.premium-payment__lead {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.order-summary {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1.2rem 1.4rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(57, 255, 156, 0.25);
+    background: rgba(6, 22, 15, 0.68);
+}
+
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.summary-line--total {
+    padding-top: 0.6rem;
+    margin-top: 0.4rem;
+    border-top: 1px solid rgba(57, 255, 156, 0.2);
+    color: var(--text-primary);
+}
+
+.premium-payment__benefits {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 0.6rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.coupon-box {
+    padding: 1.2rem 1.4rem;
+    border-radius: var(--radius-md);
+    border: 1px dashed rgba(19, 246, 255, 0.35);
+    background: rgba(8, 26, 19, 0.7);
+    display: grid;
+    gap: 1rem;
+}
+
+.coupon-box__title {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.75rem;
+    color: var(--accent-secondary);
+}
+
+.form-alert {
+    margin: 0;
+    padding: 1.1rem 1.4rem;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: rgba(8, 10, 10, 0.65);
+}
+
+.form-alert--error {
+    border-color: rgba(255, 122, 107, 0.45);
+    background: rgba(255, 122, 107, 0.12);
+    color: #ff968b;
+    text-shadow: 0 0 12px rgba(255, 122, 107, 0.35);
+}
+
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(2, 5, 3, 0.95);
+    backdrop-filter: blur(6px);
+    z-index: 200;
+    padding: 2rem;
+}
+
+.loading-overlay[hidden] {
+    display: none;
+}
+
+.loading-overlay__panel {
+    display: grid;
+    gap: 1.4rem;
+    justify-items: center;
+    padding: 2rem 2.4rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(19, 246, 255, 0.28);
+    background: rgba(6, 22, 15, 0.92);
+    box-shadow: 0 32px 60px rgba(0, 25, 12, 0.65);
+}
+
+.loading-spinner {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    border: 3px solid rgba(19, 246, 255, 0.25);
+    border-top-color: var(--accent-secondary);
+    animation: spin 0.85s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-text {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 0.8rem;
+    color: var(--accent-primary);
+}
+
+.processing-steps {
+    display: grid;
+    gap: 0.75rem;
+    width: min(100%, 420px);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.processing-step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    opacity: 0.45;
+    transition: opacity 0.3s ease, color 0.3s ease;
+}
+
+.processing-step .step-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: rgba(57, 255, 156, 0.25);
+    box-shadow: 0 0 0 1px rgba(57, 255, 156, 0.25);
+}
+
+.processing-step.active {
+    opacity: 1;
+    color: var(--accent-primary);
+}
+
+.processing-step.active .step-dot {
+    background: var(--accent-primary);
+    box-shadow: 0 0 12px rgba(57, 255, 156, 0.6);
+}
+
+.processing-step.completed {
+    opacity: 0.7;
+}
+
+.processing-step.completed .step-dot {
+    background: rgba(57, 255, 156, 0.5);
+}
+
+.processing-step.failed {
+    opacity: 1;
+    color: #ff968b;
+}
+
+.processing-step.failed .step-dot {
+    background: #ff7a6b;
+    box-shadow: 0 0 12px rgba(255, 122, 107, 0.55);
 }
 
 footer {
@@ -1375,6 +1657,18 @@ footer::before {
 
     .button--block {
         width: 100%;
+    }
+
+    .form-grid--split {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .premium-payment__grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .premium-payment__back {
+        justify-self: stretch;
     }
 }
 

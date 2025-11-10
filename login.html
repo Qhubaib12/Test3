@@ -45,25 +45,49 @@
 
         <section class="section">
             <div class="container auth-wrapper">
-                <form class="auth-card" action="#" method="post">
+                <section class="auth-card" id="loginCard">
                     <h2 class="section__title">Welcome back, pilot</h2>
-                    <div class="form-grid">
-                        <div class="form-field">
-                            <label for="login-email">Email</label>
-                            <input id="login-email" name="email" type="email" autocomplete="email" required>
+                    <form id="loginForm" action="#" method="post" novalidate>
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label for="login-email">Email</label>
+                                <input id="login-email" name="email" type="email" autocomplete="email" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="login-password">Password</label>
+                                <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+                            </div>
                         </div>
+                        <button class="button button--primary button--block" type="submit">Log in</button>
+                    </form>
+                    <p class="auth-feedback auth-feedback--loading" id="loadingMsg" role="status" aria-live="polite" hidden>Verifying credentials... ████████████</p>
+                    <p class="auth-feedback auth-feedback--error" id="errorMsg" role="alert" hidden>Access denied — wrong ID/PIN.</p>
+                    <div class="auth-support" id="forgotLink">
+                        <a class="link-inline" href="#">Forgot Member ID or PIN?</a>
+                        <p class="auth-support__hint">Beta accounts are invite only. Need help? <a class="link-inline" href="contact.html">Ping support</a>.</p>
+                    </div>
+                    <p class="auth-blink" aria-hidden="true">Press start to continue</p>
+                </section>
+
+                <section class="auth-card auth-card--secondary" id="forgotForm" hidden>
+                    <p class="status-pill" aria-hidden="true">Recovery console</p>
+                    <h2 class="section__title">Password/ID recovery</h2>
+                    <p class="auth-recovery__description">Enter the email tied to your premium profile and we'll transmit reset steps straight to your inbox.</p>
+                    <form id="resetForm" novalidate>
                         <div class="form-field">
-                            <label for="login-password">Password</label>
-                            <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+                            <label for="resetEmail">Registered email address</label>
+                            <input id="resetEmail" name="resetEmail" type="email" autocomplete="email" placeholder="your.email@domain.com" required>
                         </div>
+                        <button class="button button--primary button--block" type="submit">Send reset instructions</button>
+                    </form>
+                    <p class="auth-feedback auth-feedback--loading" id="emailLoadingMsg" role="status" aria-live="polite" hidden>Searching database... ████████████</p>
+                    <div class="auth-feedback auth-feedback--error" id="emailErrorMsg" role="alert" hidden>
+                        Error: this email address is not registered with our system.<br>
+                        Double-check the spelling or contact <a class="link-inline" href="mailto:member@pixeladdict.tech">member@pixeladdict.tech</a> for support.
                     </div>
-                    <button class="button button--primary button--block" type="submit">Log in</button>
-                    <div class="form-meta">
-                        <a class="link-inline" href="#">Forgot access code?</a>
-                        <span aria-hidden="true">•</span>
-                        <a class="link-inline" href="contact.html">Need account help?</a>
-                    </div>
-                </form>
+                    <button class="button button--ghost button--block" type="button" id="backToLogin">Back to login</button>
+                </section>
+
                 <div class="page-cta">
                     <p class="status-pill" aria-hidden="true">Beta invite</p>
                     <h2 class="section__title">No account yet?</h2>

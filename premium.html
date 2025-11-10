@@ -86,49 +86,165 @@
             </div>
         </section>
 
-        <section class="section section--alt">
-            <div class="container">
-                <div class="section__heading">
-                    <p class="section__eyebrow">Planned tiers</p>
-                    <h2 class="section__title">Choose the lane that fits your arcade obsession</h2>
-                    <p class="section__description">Pricing and perks may shift before public release—we'll share final details with the community before anything goes live.</p>
+        <div id="premium-page">
+            <section class="section section--alt">
+                <div class="container">
+                    <div class="section__heading">
+                        <p class="section__eyebrow">Planned tiers</p>
+                        <h2 class="section__title">Choose the lane that fits your arcade obsession</h2>
+                        <p class="section__description">What you see in the free library is only 0.1% of the full PixelAddict vault. These plans unlock early builds, cosmetics, merch drops, and more once the premium wave opens.</p>
+                    </div>
+                    <div class="pricing-grid premium-plan-grid">
+                        <article class="pricing-card premium-plan">
+                            <span class="status-pill">Monthly access</span>
+                            <h3 class="pricing-card__title">Arcade Transmission</h3>
+                            <p class="pricing-card__price">$5.99</p>
+                            <p class="pricing-card__description">Keep your retro reactor charged with a rolling monthly pass.</p>
+                            <ul class="pricing-card__list">
+                                <li>500+ premium games</li>
+                                <li>Monthly new releases &amp; ad-free play</li>
+                                <li>Priority support &amp; exclusive merch</li>
+                                <li>Retro poster shipped each quarter</li>
+                            </ul>
+                            <button class="button button--primary button--block" type="button" id="monthly-btn">Start monthly</button>
+                        </article>
+                        <article class="pricing-card premium-plan premium-plan--highlight">
+                            <span class="status-pill">Best value</span>
+                            <h3 class="pricing-card__title">Signal Annual</h3>
+                            <p class="pricing-card__price">$49.99</p>
+                            <p class="pricing-card__description">Lock in the signal for a full year and join the founders circle.</p>
+                            <ul class="pricing-card__list">
+                                <li>All monthly perks for 30% less</li>
+                                <li>Annual collector's box &amp; limited items</li>
+                                <li>Founders badge &amp; private roadmap polls</li>
+                                <li>Invite-only community tournaments</li>
+                            </ul>
+                            <button class="button button--ghost button--block" type="button" id="annual-btn">Start annual</button>
+                        </article>
+                    </div>
                 </div>
-                <div class="pricing-grid">
-                    <article class="pricing-card">
-                        <span class="status-pill">In testing</span>
-                        <h3 class="pricing-card__title">Arcade+</h3>
-                        <p class="pricing-card__price">$6/mo</p>
-                        <p class="pricing-card__description">Support development and snag cosmetic rewards without changing gameplay balance.</p>
-                        <ul class="pricing-card__list">
-                            <li>Monthly cosmetic bundle</li>
-                            <li>Beta access to two upcoming games</li>
-                            <li>Private Discord lounge with dev Q&amp;As</li>
+            </section>
+
+            <section class="section">
+                <div class="container page-cta">
+                    <h2 class="section__title">We build this with you</h2>
+                    <p class="page-cta__description">Your feedback ensures Premium stays fair, optional, and worth the upgrade. Share what you want to see, and we'll fold it into the roadmap.</p>
+                    <div class="page-cta__actions">
+                        <a class="button button--primary" href="mailto:contact@pixeladdict.tech?subject=Premium%20Feedback">Share feedback</a>
+                        <a class="button" href="about.html">Meet the team</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section class="section" id="payment-page" hidden>
+            <div class="container premium-payment">
+                <button class="button button--ghost premium-payment__back" type="button" id="back-btn">Back to plans</button>
+                <div class="premium-payment__grid">
+                    <aside class="auth-card premium-payment__summary">
+                        <h2 class="section__title">Order summary</h2>
+                        <p class="premium-payment__lead">Complete the details below to activate your premium access.</p>
+                        <div class="order-summary">
+                            <div class="summary-line">
+                                <span>PixelAddict Premium (<span id="plan-type">Monthly</span>)</span>
+                                <span id="plan-price">$5.99</span>
+                            </div>
+                            <div class="summary-line">
+                                <span>Tax</span>
+                                <span id="tax-amount">$0.00</span>
+                            </div>
+                            <div class="summary-line summary-line--total">
+                                <strong>Total</strong>
+                                <strong id="total-amount">$5.99</strong>
+                            </div>
+                        </div>
+                        <ul class="premium-payment__benefits">
+                            <li>Early access play windows</li>
+                            <li>Community cosmetic drops</li>
+                            <li>Exclusive merch shipments</li>
                         </ul>
-                        <a class="button button--ghost" href="mailto:contact@pixeladdict.tech?subject=Arcade%2B%20interest">Request invite</a>
-                    </article>
-                    <article class="pricing-card">
-                        <span class="status-pill">Founders wave</span>
-                        <h3 class="pricing-card__title">Lifetime Signal</h3>
-                        <p class="pricing-card__price">$120 once</p>
-                        <p class="pricing-card__description">Limited slots for fans who want to back the project long term and influence the roadmap.</p>
-                        <ul class="pricing-card__list">
-                            <li>All Arcade+ perks unlocked forever</li>
-                            <li>Name in the PixelAddict supporter wall</li>
-                            <li>Annual founders summit &amp; merch drops</li>
-                        </ul>
-                        <a class="button button--ghost" href="mailto:contact@pixeladdict.tech?subject=Lifetime%20Signal">Apply for founders list</a>
-                    </article>
+                    </aside>
+                    <form class="auth-card premium-payment__form" id="payment-form" novalidate>
+                        <div class="form-field">
+                            <label for="email">Email address</label>
+                            <input type="email" id="email" name="email" autocomplete="email" placeholder="your@email.com" required>
+                        </div>
+                        <div class="form-grid form-grid--split">
+                            <div class="form-field">
+                                <label for="firstName">First name</label>
+                                <input type="text" id="firstName" name="firstName" autocomplete="given-name" placeholder="John" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="lastName">Last name</label>
+                                <input type="text" id="lastName" name="lastName" autocomplete="family-name" placeholder="Doe" required>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label for="cardNumber">Card number</label>
+                            <input type="text" id="cardNumber" name="cardNumber" inputmode="numeric" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        </div>
+                        <div class="form-grid form-grid--split">
+                            <div class="form-field">
+                                <label for="expiryDate">Expiry date</label>
+                                <input type="text" id="expiryDate" name="expiryDate" inputmode="numeric" placeholder="MM/YY" maxlength="5" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="cvv">CVV</label>
+                                <input type="text" id="cvv" name="cvv" inputmode="numeric" placeholder="123" maxlength="4" required>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label for="address">Billing address</label>
+                            <input type="text" id="address" name="address" autocomplete="street-address" placeholder="123 Retro Street" required>
+                        </div>
+                        <div class="form-grid form-grid--split">
+                            <div class="form-field">
+                                <label for="city">City</label>
+                                <input type="text" id="city" name="city" autocomplete="address-level2" placeholder="Gaming City" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="zipCode">ZIP code</label>
+                                <input type="text" id="zipCode" name="zipCode" inputmode="numeric" placeholder="12345" required>
+                            </div>
+                        </div>
+                        <div class="coupon-box">
+                            <h3 class="coupon-box__title">Have a coupon code?</h3>
+                            <div class="form-field">
+                                <label class="sr-only" for="couponCode">Coupon code</label>
+                                <input type="text" id="couponCode" name="couponCode" placeholder="Enter coupon code">
+                            </div>
+                            <button class="button button--subtle button--block" type="button" id="apply-coupon-btn">Apply coupon</button>
+                        </div>
+                        <div class="form-alert form-alert--error" id="error-message" role="alert" hidden>
+                            Payment failed, your payment was declined. Please try a different payment method or contact us at <a class="link-inline" href="mailto:payment@pixeladdict.tech">payment@pixeladdict.tech</a> for assistance.
+                        </div>
+                        <button class="button button--primary button--block" type="submit">Complete payment</button>
+                    </form>
                 </div>
             </div>
         </section>
+    </main>
 
-        <section class="section">
-            <div class="container page-cta">
-                <h2 class="section__title">We build this with you</h2>
-                <p class="page-cta__description">Your feedback ensures Premium stays fair, optional, and worth the upgrade. Share what you want to see, and we'll fold it into the roadmap.</p>
-                <div class="page-cta__actions">
-                    <a class="button button--primary" href="mailto:contact@pixeladdict.tech?subject=Premium%20Feedback">Share feedback</a>
-                    <a class="button" href="about.html">Meet the team</a>
+    <div class="loading-overlay" id="loading-overlay" hidden>
+        <div class="loading-overlay__panel">
+            <div class="loading-spinner" aria-hidden="true"></div>
+            <p class="loading-text" role="status">Processing payment...</p>
+            <div class="processing-steps">
+                <div class="processing-step" id="step1">
+                    <span class="step-dot" aria-hidden="true"></span>
+                    <span>Validating payment information</span>
+                </div>
+                <div class="processing-step" id="step2">
+                    <span class="step-dot" aria-hidden="true"></span>
+                    <span>Connecting to secure payment gateway</span>
+                </div>
+                <div class="processing-step" id="step3">
+                    <span class="step-dot" aria-hidden="true"></span>
+                    <span>Contacting your bank for authorization</span>
+                </div>
+                <div class="processing-step" id="step4">
+                    <span class="step-dot" aria-hidden="true"></span>
+                    <span>Finalizing transaction</span>
                 </div>
             </div>
         </section>
