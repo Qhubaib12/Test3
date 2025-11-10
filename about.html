@@ -3,245 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About - PixelAddict</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <style>
-        /* Same CSS from index.html */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
-        }
-
-        body {
-            font-family: 'Press Start 2P', monospace;
-            background: #0a0a0a;
-            color: #00ff00;
-            min-height: 100vh;
-            overflow-x: hidden;
-            line-height: 1.6;
-        }
-
-        .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(0, 255, 0, 0.03) 2px,
-                rgba(0, 255, 0, 0.03) 4px
-            );
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        header {
-            background: #1a1a1a;
-            border-bottom: 4px solid #00ff00;
-            padding: 20px 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
-        }
-
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 24px;
-            color: #00ff00;
-            text-shadow: 2px 2px 0px #000, 0 0 10px #00ff00;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from { text-shadow: 2px 2px 0px #000, 0 0 10px #00ff00; }
-            to { text-shadow: 2px 2px 0px #000, 0 0 20px #00ff00, 0 0 30px #00ff00; }
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: #00ff00;
-            text-decoration: none;
-            font-size: 12px;
-            transition: all 0.3s ease;
-            padding: 8px 12px;
-            border: 2px solid transparent;
-        }
-
-        .nav-links a:hover {
-            color: #ff6b00;
-            border: 2px solid #ff6b00;
-            box-shadow: 0 0 10px #ff6b00;
-        }
-
-        .hero {
-            text-align: center;
-            padding: 80px 0;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(0, 255, 0, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 107, 0, 0.1) 0%, transparent 50%);
-        }
-
-        .hero h1 {
-            font-size: clamp(16px, 4vw, 32px);
-            margin-bottom: 30px;
-            text-shadow: 3px 3px 0px #000;
-            animation: pixelPulse 3s ease-in-out infinite;
-        }
-
-        @keyframes pixelPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .hero p {
-            font-size: 14px;
-            max-width: 600px;
-            margin: 0 auto 40px;
-            color: #cccccc;
-            line-height: 1.8;
-        }
-
-        .about-section {
-            padding: 80px 0;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
-            text-align: center;
-        }
-
-        .about-title {
-            font-size: 36px;
-            margin-bottom: 20px;
-            color: #ff6b00;
-            text-shadow: 3px 3px 0px #000, 0 0 20px #ff6b00;
-            animation: titleGlow 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes titleGlow {
-            from { text-shadow: 3px 3px 0px #000, 0 0 20px #ff6b00; }
-            to { text-shadow: 3px 3px 0px #000, 0 0 30px #ff6b00, 0 0 40px #ff6b00; }
-        }
-
-        .about-text {
-            font-size: 12px;
-            max-width: 800px;
-            margin: 0 auto;
-            color: #cccccc;
-            line-height: 1.8;
-            text-shadow: 1px 1px 0px #000;
-        }
-
-        footer {
-            background: #0a0a0a;
-            border-top: 4px solid #00ff00;
-            padding: 40px 0;
-            text-align: center;
-            margin-top: 60px;
-        }
-
-        .footer-content {
-            font-size: 10px;
-            color: #666666;
-        }
-
-        .blinking {
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
-        }
-
-        .pixel-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
-            background-size: 20px 20px;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .hero { padding: 60px 0; }
-            .hero h1 { font-size: 20px; }
-            .hero p { font-size: 12px; }
-            .about-text { font-size: 11px; padding: 0 15px; }
-        }
-    </style>
+    <title>About PixelAddict</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/styles/main.css">
+    <script src="assets/scripts/main.js" defer></script>
 </head>
-<body>
-    <div class="pixel-bg"></div>
-    <div class="scanlines"></div>
-    
+<body class="page">
+    <a class="sr-only" href="#main-content">Skip to content</a>
     <header>
-        <nav class="container">
-            <div class="logo">PIXELADDICT</div>
-            <ul class="nav-links">
-                <li><a href="https://pixeladdict.tech/">HOME</a></li>
-                <li><a href="about" style="color:#ff6b00; border:2px solid #ff6b00;">ABOUT</a></li>
-                <li><a href="premium">PREMIUM</a></li>
-            </ul>
-        </nav>
+        <div class="container site-header">
+            <a class="brand" href="index.html">
+                <span class="brand__mark" aria-hidden="true"></span>
+                <span class="brand__text">PixelAddict</span>
+            </a>
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+                <span class="sr-only">Toggle navigation</span>
+                Menu
+            </button>
+            <nav class="primary-nav" id="primary-navigation">
+                <ul class="primary-nav__list" role="list">
+                    <li><a class="primary-nav__link" href="index.html">Home</a></li>
+                    <li><a class="primary-nav__link" href="about.html" aria-current="page">About</a></li>
+                    <li><a class="primary-nav__link" href="premium.html">Premium</a></li>
+                    <li><a class="primary-nav__link" href="contact.html">Contact</a></li>
+                    <li><a class="primary-nav__link" href="login.html">Login</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
-    <section class="hero">
-        <div class="container">
-            <h1>ABOUT PIXELADDICT</h1>
-            <p>Celebrating the golden era of gaming with modern browser tech – pure, nostalgic, pixel-perfect fun.</p>
-        </div>
-    </section>
+    <main id="main-content">
+        <section class="page-hero">
+            <div class="container page-hero__content">
+                <p class="page-hero__eyebrow">About PixelAddict</p>
+                <h1 class="page-hero__headline">We keep the <span>arcade signal</span> alive for every browser and every player.</h1>
+                <p class="page-hero__description">PixelAddict started as a late-night experiment to beam neon-drenched cabinet games straight through the scanlines. Today we ship handcrafted releases, community events, and retro challenges—all playable free in your browser with no downloads required.</p>
+                <div class="page-hero__actions">
+                    <a class="button button--primary" href="index.html#games">Jump to the library</a>
+                    <a class="button button--ghost" href="contact.html">Say hello</a>
+                </div>
+            </div>
+        </section>
 
-    <section class="about-section">
-        <div class="container">
-            <h2 class="about-title">OUR MISSION</h2>
-            <p class="about-text">
-                PixelAddict was born from a love for retro games – the kind that defined a generation. 
-                We bring timeless classics and modern pixel-inspired creations directly to your browser. 
-                No downloads, no clutter, just instant gameplay designed for players who appreciate the charm of 8-bit and 16-bit magic. <br><br>
-                Our games are **simple yet addictive**, perfect for a quick escape or hours of play. 
-                They aren’t just fun – they challenge your mind, sharpen your reflexes, and improve your reaction time, all while delivering that satisfying *one more round* feeling. <br><br>
-                Whether you're reliving childhood memories or discovering pixel art gaming for the first time, 
-                PixelAddict is your home for nostalgia-fueled entertainment. Press Start and join the arcade revolution – anytime, anywhere.
-            </p>
-        </div>
-    </section>
+        <section class="section">
+            <div class="container">
+                <div class="section__heading">
+                    <p class="section__eyebrow">What we build</p>
+                    <h2 class="section__title">A neon pipeline of retro-first experiments</h2>
+                    <p class="section__description">Our small team of pixel pushers, chiptune composers, and coffee-powered coders constantly prototype new riffs on classic arcade design. We ship fast, iterate faster, and keep every release tuned for modern controllers.</p>
+                </div>
+                <div class="info-grid">
+                    <article class="info-card">
+                        <h3 class="info-card__title">Weekly drops</h3>
+                        <p class="info-card__description">Fresh levels, seasonal playlists, and leaderboard resets beam into the library every week.</p>
+                        <ul class="info-card__list">
+                            <li>Arcade, puzzle, shooter, and co-op spotlights</li>
+                            <li>Patch notes with transparent balancing updates</li>
+                            <li>Community-voted remasters of cult classics</li>
+                        </ul>
+                    </article>
+                    <article class="info-card">
+                        <h3 class="info-card__title">Optimised for everyone</h3>
+                        <p class="info-card__description">Every cabinet is tuned for keyboard, controller, and touch, with accessibility toggles for motion and colour.</p>
+                        <ul class="info-card__list">
+                            <li>Instant boot with no installs or plugins</li>
+                            <li>Cross-device cloud saves on the roadmap</li>
+                            <li>Reduced-motion and high-contrast options</li>
+                        </ul>
+                    </article>
+                    <article class="info-card">
+                        <h3 class="info-card__title">Community powered</h3>
+                        <p class="info-card__description">Player requests steer our release schedule and event themes—we're always listening for the next throwback.</p>
+                        <ul class="info-card__list">
+                            <li>Monthly livestreams with dev behind-the-scenes</li>
+                            <li>Discord tournaments with exclusive cosmetics</li>
+                            <li>Creator spotlights highlighting indie collabs</li>
+                        </ul>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--alt">
+            <div class="container">
+                <div class="section__heading">
+                    <p class="section__eyebrow">Signal timeline</p>
+                    <h2 class="section__title">From basement lab to browser constellation</h2>
+                    <p class="section__description">A few highlights from our journey so far—and where we're pointed next.</p>
+                </div>
+                <ul class="timeline">
+                    <li class="timeline__item">
+                        <span class="timeline__time">2019</span>
+                        <h3 class="timeline__title">Prototype nights</h3>
+                        <p class="timeline__description">Two friends, an aging CRT, and an obsession with classic cabinets sparked the first PixelAddict proof-of-concept.</p>
+                    </li>
+                    <li class="timeline__item">
+                        <span class="timeline__time">2021</span>
+                        <h3 class="timeline__title">Library goes live</h3>
+                        <p class="timeline__description">We launched the public browser hub with rotating leaderboards, challenge modes, and controller support baked in.</p>
+                    </li>
+                    <li class="timeline__item">
+                        <span class="timeline__time">2024 &amp; beyond</span>
+                        <h3 class="timeline__title">Expanding the grid</h3>
+                        <p class="timeline__description">Co-op raids, soundtrack drops, and an invite-only premium tier are on deck as we scale the neon universe responsibly.</p>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container page-cta">
+                <p class="status-pill" aria-hidden="true">Always free to play</p>
+                <h2 class="section__title">Plug into the next drop</h2>
+                <p class="page-cta__description">Catch new cabinets the moment they unlock, share feedback with the devs, and help shape the roadmap for future PixelAddict experiments.</p>
+                <div class="page-cta__actions">
+                    <a class="button button--primary" href="index.html#updates">Track the update feed</a>
+                    <a class="button button--ghost" href="premium.html">Preview the premium roadmap</a>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <footer>
-        <div class="container">
-            <div class="footer-content">
-                <p>&copy; 2024 PIXELADDICT - RETRO GAMING EXPERIENCE</p>
-                <p style="margin: 10px 0; color: #00ff00;">CONTACT: <a href="mailto:contact@pixeladdict.tech" style="color: #ff6b00; text-decoration: none;">contact@pixeladdict.tech</a></p>
-                <p class="blinking">PRESS START TO CONTINUE</p>
-            </div>
+        <div class="container footer__content">
+            <nav class="footer__links" aria-label="Footer">
+                <a href="index.html">Home</a>
+                <a href="about.html" aria-current="page">About</a>
+                <a href="premium.html">Premium</a>
+                <a href="contact.html">Contact</a>
+                <a href="login.html">Login</a>
+            </nav>
+            <p>© PixelAddict. Broadcasting retro energy across the grid.</p>
         </div>
     </footer>
 </body>
