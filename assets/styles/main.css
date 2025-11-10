@@ -582,6 +582,83 @@ header {
     z-index: 0;
 }
 
+.game-card__media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: repeating-linear-gradient(
+            180deg,
+            rgba(19, 246, 255, 0.05) 0,
+            rgba(19, 246, 255, 0.05) 2px,
+            transparent 2px,
+            transparent 4px
+        );
+    mix-blend-mode: screen;
+    opacity: 0.45;
+    pointer-events: none;
+    z-index: 0;
+    transform: translate3d(0, 0, 0);
+    animation: scanline-pan 6s linear infinite;
+}
+
+.game-card__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(57, 255, 156, 0.35);
+    background: rgba(6, 26, 17, 0.78);
+    color: rgba(154, 255, 204, 0.88);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    width: fit-content;
+    position: relative;
+    z-index: 1;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    margin-top: 0.5rem;
+}
+
+.game-card__status[data-state="soon"] {
+    border-color: rgba(255, 203, 112, 0.4);
+    color: rgba(255, 235, 185, 0.92);
+    background: rgba(32, 26, 6, 0.82);
+}
+
+.game-card__status-light {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: rgba(57, 255, 156, 0.85);
+    box-shadow: 0 0 12px rgba(57, 255, 156, 0.65);
+    animation: status-pulse 1.8s ease-in-out infinite;
+}
+
+.game-card__status[data-state="soon"] .game-card__status-light {
+    background: rgba(255, 203, 112, 0.85);
+    box-shadow: 0 0 12px rgba(255, 203, 112, 0.55);
+}
+
+.game-card__status-text {
+    line-height: 1.2;
+}
+
+.game-card:hover .game-card__status,
+.game-card:focus-visible .game-card__status {
+    border-color: rgba(57, 255, 156, 0.7);
+    box-shadow: 0 0 18px rgba(57, 255, 156, 0.35);
+    color: rgba(214, 255, 239, 0.98);
+}
+
+.game-card:hover .game-card__status[data-state="soon"],
+.game-card:focus-visible .game-card__status[data-state="soon"] {
+    border-color: rgba(255, 203, 112, 0.65);
+    box-shadow: 0 0 18px rgba(255, 203, 112, 0.28);
+    color: rgba(255, 244, 223, 0.98);
+}
+
 .game-logo {
     position: relative;
     width: 100%;
@@ -1009,6 +1086,27 @@ header {
         opacity: 0.5;
     }
     50% {
+        opacity: 1;
+    }
+}
+
+@keyframes scanline-pan {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 0 12px;
+    }
+}
+
+@keyframes status-pulse {
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.85;
+    }
+    50% {
+        transform: scale(1.35);
         opacity: 1;
     }
 }
