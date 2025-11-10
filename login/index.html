@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Login - PixelAddict</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/styles/main.css">
+    <script src="/assets/scripts/main.js" defer></script>
+</head>
+<body class="page">
+    <a class="sr-only" href="#main-content">Skip to content</a>
+    <header>
+        <div class="container site-header">
+            <a class="brand" href="/">
+                <span class="brand__mark" aria-hidden="true"></span>
+                <span class="brand__text">PixelAddict</span>
+            </a>
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+                <span class="sr-only">Toggle navigation</span>
+                Menu
+            </button>
+            <nav class="primary-nav" id="primary-navigation">
+                <ul class="primary-nav__list" role="list">
+                    <li><a class="primary-nav__link" href="/">Home</a></li>
+                    <li><a class="primary-nav__link" href="/about">About</a></li>
+                    <li><a class="primary-nav__link" href="/premium">Premium</a></li>
+                    <li><a class="primary-nav__link" href="/contact">Contact</a></li>
+                    <li><a class="primary-nav__link" href="/login" aria-current="page">Login</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <section class="page-hero">
+            <div class="container page-hero__content">
+                <p class="page-hero__eyebrow">Player access</p>
+                <h1 class="page-hero__headline">Log in to sync your favourites and track the leaderboard climb.</h1>
+                <p class="page-hero__description">Accounts are optional for casual play—sign in when you're ready to chase seasons, collect cosmetics, and beam your progress across devices.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container auth-wrapper">
+                <section class="auth-card" id="loginCard">
+                    <h2 class="section__title">Welcome back, pilot</h2>
+                    <form id="loginForm" action="#" method="post" novalidate>
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label for="login-email">Email</label>
+                                <input id="login-email" name="email" type="email" autocomplete="email" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="login-password">Password</label>
+                                <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+                            </div>
+                        </div>
+                        <button class="button button--primary button--block" type="submit">Log in</button>
+                    </form>
+                    <p class="auth-feedback auth-feedback--loading" id="loadingMsg" role="status" aria-live="polite" hidden>Verifying credentials... ████████████</p>
+                    <p class="auth-feedback auth-feedback--error" id="errorMsg" role="alert" hidden>Wrong email or password.</p>
+                    <div class="auth-support" id="forgotSection">
+                        <button class="link-inline auth-support__trigger" type="button" id="forgotToggle" aria-expanded="false" aria-controls="recoveryPanel">Forgot email ID or password?</button>
+                        <p class="auth-support__hint">Beta accounts are invite only. Need help? <a class="link-inline" href="/contact">Ping support</a>.</p>
+                        <div class="auth-recovery" id="recoveryPanel" hidden>
+                            <p class="status-pill" aria-hidden="true">Recovery console</p>
+                            <h3 class="section__title">Password/ID recovery</h3>
+                            <p class="auth-recovery__description">Enter the email tied to your premium profile and we'll transmit reset steps straight to your inbox.</p>
+                            <form id="resetForm" novalidate>
+                                <div class="form-field">
+                                    <label for="resetEmail">Registered email address</label>
+                                    <input id="resetEmail" name="resetEmail" type="email" autocomplete="email" placeholder="your.email@domain.com" required>
+                                </div>
+                                <button class="button button--primary button--block" type="submit">Send reset instructions</button>
+                            </form>
+                            <p class="auth-feedback auth-feedback--loading" id="emailLoadingMsg" role="status" aria-live="polite" hidden>Searching database... ████████████</p>
+                            <div class="auth-feedback auth-feedback--error" id="emailErrorMsg" role="alert" hidden>
+                                Error: this email address is not registered with our system.<br>
+                                Double-check the spelling or contact <a class="link-inline" href="mailto:member@pixeladdict.tech">member@pixeladdict.tech</a> for support.
+                            </div>
+                            <button class="button button--ghost button--block" type="button" id="closeRecovery">Back to login</button>
+                        </div>
+                    </div>
+                    <p class="auth-blink" aria-hidden="true">Press start to continue</p>
+                </section>
+
+                <div class="page-cta">
+                    <p class="status-pill" aria-hidden="true">Beta invite</p>
+                    <h2 class="section__title">No account yet?</h2>
+                    <p class="page-cta__description">Player profiles are rolling out to community testers. Drop us a line and we'll let you know the moment the next wave of invites goes live.</p>
+                    <div class="page-cta__actions">
+                        <a class="button button--ghost" href="mailto:contact@pixeladdict.tech">Request an invite</a>
+                        <a class="button" href="/#games">Keep playing free</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer__content">
+            <nav class="footer__links" aria-label="Footer">
+                <a href="/">Home</a>
+                <a href="/about">About</a>
+                <a href="/premium">Premium</a>
+                <a href="/contact">Contact</a>
+                <a href="/login" aria-current="page">Login</a>
+            </nav>
+            <p>© PixelAddict. Broadcasting retro energy across the grid.</p>
+        </div>
+    </footer>
+</body>
+</html>
