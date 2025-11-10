@@ -72,8 +72,15 @@
                     var matchesFilter = activeFilter === 'all' || card.getAttribute('data-genre') === activeFilter;
                     var titleEl = card.querySelector('.game-card__title');
                     var title = titleEl ? titleEl.textContent.toLowerCase() : '';
+                    var descriptionEl = card.querySelector('.game-card__description');
+                    var description = descriptionEl ? descriptionEl.textContent.toLowerCase() : '';
                     var tags = (card.getAttribute('data-tags') || '').toLowerCase();
-                    var matchesSearch = !searchTerm || title.indexOf(searchTerm) !== -1 || tags.indexOf(searchTerm) !== -1;
+                    var genre = (card.getAttribute('data-genre') || '').toLowerCase();
+                    var matchesSearch = !searchTerm ||
+                        title.indexOf(searchTerm) !== -1 ||
+                        tags.indexOf(searchTerm) !== -1 ||
+                        description.indexOf(searchTerm) !== -1 ||
+                        genre.indexOf(searchTerm) !== -1;
                     var isVisible = matchesFilter && matchesSearch;
                     card.style.display = isVisible ? '' : 'none';
                     card.setAttribute('aria-hidden', isVisible ? 'false' : 'true');
@@ -118,6 +125,8 @@
         var emailLoadingMsg = document.getElementById('emailLoadingMsg');
         var emailErrorMsg = document.getElementById('emailErrorMsg');
         var closeRecovery = document.getElementById('closeRecovery');
+        var loginEmailInput = document.getElementById('login-email');
+        var loginPasswordInput = document.getElementById('login-password');
 
         function resetLoginState() {
             toggleDisplay(loadingMsg, false);
@@ -133,6 +142,27 @@
             loginForm.addEventListener('submit', function (event) {
                 event.preventDefault();
                 resetLoginState();
+
+                var emailValue = loginEmailInput ? loginEmailInput.value.replace(/\s+/g, ' ').trim() : '';
+                var passwordValue = loginPasswordInput ? loginPasswordInput.value : '';
+
+                if (!emailValue || !passwordValue) {
+                    if (errorMsg) {
+                        errorMsg.textContent = 'Enter your email and password to continue.';
+                        toggleDisplay(errorMsg, true, 'block');
+                    }
+                    if (!emailValue && loginEmailInput) {
+                        loginEmailInput.focus();
+                    } else if (loginPasswordInput) {
+                        loginPasswordInput.focus();
+                    }
+                    return;
+                }
+
+                if (errorMsg) {
+                    errorMsg.textContent = 'Wrong email or password.';
+                }
+
                 toggleDisplay(loadingMsg, true, 'block');
 
                 setTimeout(function () {
@@ -177,6 +207,7 @@
         }
 
         if (forgotToggle && recoveryPanel) {
+            toggleDisplay(recoveryPanel, false);
             forgotToggle.addEventListener('click', function (event) {
                 event.preventDefault();
                 var isExpanded = forgotToggle.getAttribute('aria-expanded') === 'true';
@@ -243,7 +274,9 @@
                 toggleDisplay(errorMessage, false);
             }
             updateOrderSummary();
-            window.scrollTo(0, 0);
+            if (paymentPage && typeof paymentPage.scrollIntoView === 'function') {
+                paymentPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
         function showPremiumPage() {
@@ -265,7 +298,9 @@
                     step.classList.remove('active', 'completed', 'failed');
                 }
             }
-            window.scrollTo(0, 0);
+            if (premiumPage && typeof premiumPage.scrollIntoView === 'function') {
+                premiumPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
         function selectPlan(type, price) {
