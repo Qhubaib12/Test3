@@ -14,7 +14,7 @@
     <a class="sr-only" href="#main-content">Skip to content</a>
     <header>
         <div class="container site-header">
-            <a class="brand" href="index.html">
+            <a class="brand" href="/">
                 <span class="brand__mark" aria-hidden="true"></span>
                 <span class="brand__text">PixelAddict</span>
             </a>
@@ -24,11 +24,11 @@
             </button>
             <nav class="primary-nav" id="primary-navigation">
                 <ul class="primary-nav__list" role="list">
-                    <li><a class="primary-nav__link" href="index.html">Home</a></li>
-                    <li><a class="primary-nav__link" href="about.html">About</a></li>
-                    <li><a class="primary-nav__link" href="premium.html">Premium</a></li>
-                    <li><a class="primary-nav__link" href="contact.html">Contact</a></li>
-                    <li><a class="primary-nav__link" href="login.html" aria-current="page">Login</a></li>
+                    <li><a class="primary-nav__link" href="/">Home</a></li>
+                    <li><a class="primary-nav__link" href="/about">About</a></li>
+                    <li><a class="primary-nav__link" href="/premium">Premium</a></li>
+                    <li><a class="primary-nav__link" href="/contact">Contact</a></li>
+                    <li><a class="primary-nav__link" href="/login" aria-current="page">Login</a></li>
                 </ul>
             </nav>
         </div>
@@ -62,30 +62,29 @@
                     </form>
                     <p class="auth-feedback auth-feedback--loading" id="loadingMsg" role="status" aria-live="polite" hidden>Verifying credentials... ████████████</p>
                     <p class="auth-feedback auth-feedback--error" id="errorMsg" role="alert" hidden>Access denied — wrong ID/PIN.</p>
-                    <div class="auth-support" id="forgotLink">
-                        <a class="link-inline" href="#">Forgot Member ID or PIN?</a>
-                        <p class="auth-support__hint">Beta accounts are invite only. Need help? <a class="link-inline" href="contact.html">Ping support</a>.</p>
+                    <div class="auth-support" id="forgotSection">
+                        <button class="link-inline auth-support__trigger" type="button" id="forgotToggle" aria-expanded="false" aria-controls="recoveryPanel">Forgot email ID or password?</button>
+                        <p class="auth-support__hint">Beta accounts are invite only. Need help? <a class="link-inline" href="/contact">Ping support</a>.</p>
+                        <div class="auth-recovery" id="recoveryPanel" hidden>
+                            <p class="status-pill" aria-hidden="true">Recovery console</p>
+                            <h3 class="section__title">Password/ID recovery</h3>
+                            <p class="auth-recovery__description">Enter the email tied to your premium profile and we'll transmit reset steps straight to your inbox.</p>
+                            <form id="resetForm" novalidate>
+                                <div class="form-field">
+                                    <label for="resetEmail">Registered email address</label>
+                                    <input id="resetEmail" name="resetEmail" type="email" autocomplete="email" placeholder="your.email@domain.com" required>
+                                </div>
+                                <button class="button button--primary button--block" type="submit">Send reset instructions</button>
+                            </form>
+                            <p class="auth-feedback auth-feedback--loading" id="emailLoadingMsg" role="status" aria-live="polite" hidden>Searching database... ████████████</p>
+                            <div class="auth-feedback auth-feedback--error" id="emailErrorMsg" role="alert" hidden>
+                                Error: this email address is not registered with our system.<br>
+                                Double-check the spelling or contact <a class="link-inline" href="mailto:member@pixeladdict.tech">member@pixeladdict.tech</a> for support.
+                            </div>
+                            <button class="button button--ghost button--block" type="button" id="closeRecovery">Back to login</button>
+                        </div>
                     </div>
                     <p class="auth-blink" aria-hidden="true">Press start to continue</p>
-                </section>
-
-                <section class="auth-card auth-card--secondary" id="forgotForm" hidden>
-                    <p class="status-pill" aria-hidden="true">Recovery console</p>
-                    <h2 class="section__title">Password/ID recovery</h2>
-                    <p class="auth-recovery__description">Enter the email tied to your premium profile and we'll transmit reset steps straight to your inbox.</p>
-                    <form id="resetForm" novalidate>
-                        <div class="form-field">
-                            <label for="resetEmail">Registered email address</label>
-                            <input id="resetEmail" name="resetEmail" type="email" autocomplete="email" placeholder="your.email@domain.com" required>
-                        </div>
-                        <button class="button button--primary button--block" type="submit">Send reset instructions</button>
-                    </form>
-                    <p class="auth-feedback auth-feedback--loading" id="emailLoadingMsg" role="status" aria-live="polite" hidden>Searching database... ████████████</p>
-                    <div class="auth-feedback auth-feedback--error" id="emailErrorMsg" role="alert" hidden>
-                        Error: this email address is not registered with our system.<br>
-                        Double-check the spelling or contact <a class="link-inline" href="mailto:member@pixeladdict.tech">member@pixeladdict.tech</a> for support.
-                    </div>
-                    <button class="button button--ghost button--block" type="button" id="backToLogin">Back to login</button>
                 </section>
 
                 <div class="page-cta">
@@ -94,7 +93,7 @@
                     <p class="page-cta__description">Player profiles are rolling out to community testers. Drop us a line and we'll let you know the moment the next wave of invites goes live.</p>
                     <div class="page-cta__actions">
                         <a class="button button--ghost" href="mailto:contact@pixeladdict.tech">Request an invite</a>
-                        <a class="button" href="index.html#games">Keep playing free</a>
+                        <a class="button" href="/#games">Keep playing free</a>
                     </div>
                 </div>
             </div>
@@ -104,11 +103,11 @@
     <footer>
         <div class="container footer__content">
             <nav class="footer__links" aria-label="Footer">
-                <a href="index.html">Home</a>
-                <a href="about.html">About</a>
-                <a href="premium.html">Premium</a>
-                <a href="contact.html">Contact</a>
-                <a href="login.html" aria-current="page">Login</a>
+                <a href="/">Home</a>
+                <a href="/about">About</a>
+                <a href="/premium">Premium</a>
+                <a href="/contact">Contact</a>
+                <a href="/login" aria-current="page">Login</a>
             </nav>
             <p>© PixelAddict. Broadcasting retro energy across the grid.</p>
         </div>

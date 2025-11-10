@@ -8,6 +8,6 @@ This repository hosts the static front-end for the PixelAddict arcade homepage a
    ```bash
    python3 -m http.server 8000
    ```
-2. Visit [http://localhost:8000/index.html](http://localhost:8000/index.html) in your browser to explore the CRT-styled homepage with neon theme.
+2. Visit [http://localhost:8000/](http://localhost:8000/) in your browser to explore the CRT-styled homepage with neon theme.
 
 Screenshots and preview assets can be captured by running a server locally and using a browser automation tool such as Playwright.

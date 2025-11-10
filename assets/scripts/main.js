@@ -112,12 +112,12 @@
         var loginForm = document.getElementById('loginForm');
         var loadingMsg = document.getElementById('loadingMsg');
         var errorMsg = document.getElementById('errorMsg');
-        var forgotLinkContainer = document.getElementById('forgotLink');
-        var forgotForm = document.getElementById('forgotForm');
+        var forgotToggle = document.getElementById('forgotToggle');
+        var recoveryPanel = document.getElementById('recoveryPanel');
         var resetForm = document.getElementById('resetForm');
         var emailLoadingMsg = document.getElementById('emailLoadingMsg');
         var emailErrorMsg = document.getElementById('emailErrorMsg');
-        var backToLogin = document.getElementById('backToLogin');
+        var closeRecovery = document.getElementById('closeRecovery');
 
         function resetLoginState() {
             toggleDisplay(loadingMsg, false);
@@ -142,45 +142,55 @@
             });
         }
 
-        if (forgotLinkContainer) {
-            var forgotLink = forgotLinkContainer.querySelector('a');
-            if (forgotLink) {
-                forgotLink.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    if (loginForm) {
-                        toggleDisplay(loginForm, false);
-                    }
-                    toggleDisplay(forgotLinkContainer, false);
-                    toggleDisplay(forgotForm, true, 'block');
-                    resetLoginState();
-                    resetRecoveryState();
-                    if (resetForm) {
-                        resetForm.reset();
-                    }
-                    var resetEmail = document.getElementById('resetEmail');
-                    if (resetEmail) {
-                        resetEmail.focus();
-                    }
-                });
-            }
-        }
-
-        if (backToLogin) {
-            backToLogin.addEventListener('click', function () {
-                if (loginForm) {
-                    toggleDisplay(loginForm, true, 'block');
-                }
-                toggleDisplay(forgotLinkContainer, true, 'block');
-                toggleDisplay(forgotForm, false);
+        function showRecoveryPanel() {
+            if (recoveryPanel && forgotToggle) {
                 resetLoginState();
                 resetRecoveryState();
                 if (resetForm) {
                     resetForm.reset();
                 }
-                var firstInput = loginForm ? loginForm.querySelector('input') : null;
-                if (firstInput) {
-                    firstInput.focus();
+                toggleDisplay(recoveryPanel, true, 'block');
+                forgotToggle.setAttribute('aria-expanded', 'true');
+                var resetEmail = document.getElementById('resetEmail');
+                if (resetEmail) {
+                    resetEmail.focus();
                 }
+            }
+        }
+
+        function hideRecoveryPanel() {
+            if (recoveryPanel && forgotToggle) {
+                resetLoginState();
+                resetRecoveryState();
+                if (resetForm) {
+                    resetForm.reset();
+                }
+                toggleDisplay(recoveryPanel, false);
+                forgotToggle.setAttribute('aria-expanded', 'false');
+                if (loginForm) {
+                    var firstInput = loginForm.querySelector('input');
+                    if (firstInput) {
+                        firstInput.focus();
+                    }
+                }
+            }
+        }
+
+        if (forgotToggle && recoveryPanel) {
+            forgotToggle.addEventListener('click', function (event) {
+                event.preventDefault();
+                var isExpanded = forgotToggle.getAttribute('aria-expanded') === 'true';
+                if (isExpanded) {
+                    hideRecoveryPanel();
+                } else {
+                    showRecoveryPanel();
+                }
+            });
+        }
+
+        if (closeRecovery) {
+            closeRecovery.addEventListener('click', function () {
+                hideRecoveryPanel();
             });
         }
 
