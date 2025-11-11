@@ -1772,6 +1772,7 @@ header {
 
 #loginForm .form-grid {
     gap: 1rem;
+    grid-template-columns: minmax(0, 1fr);
 }
 
 #loginForm .button--primary {
@@ -1803,6 +1804,25 @@ header {
     gap: 0.75rem;
     justify-items: center;
     font-size: 0.85rem;
+}
+
+.auth-support__trigger {
+    background: transparent;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: var(--accent-secondary);
+    border-bottom: 1px dashed rgba(19, 246, 255, 0.45);
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
+}
+
+.auth-support__trigger:hover,
+.auth-support__trigger:focus-visible {
+    color: var(--accent-primary);
+    border-bottom-color: rgba(57, 255, 156, 0.65);
+    outline: none;
+    filter: drop-shadow(0 0 6px rgba(57, 255, 156, 0.4));
 }
 
 .auth-support__hint {
@@ -1945,20 +1965,18 @@ header {
 
 @media (min-width: 640px) {
     #loginForm {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        align-items: end;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     #loginForm .form-grid {
         grid-column: 1 / -1;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 1fr);
         gap: 1.25rem;
     }
 
     #loginForm .button--block {
-        width: auto;
-        justify-self: end;
-        padding-inline: 2.75rem;
+        width: 100%;
+        justify-self: stretch;
     }
 }
 
