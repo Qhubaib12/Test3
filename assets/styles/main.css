@@ -1711,11 +1711,72 @@ header {
     box-shadow: 0 24px 40px rgba(0, 25, 12, 0.55);
     display: grid;
     gap: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    z-index: 0;
 }
 
 .auth-card--secondary {
     background: rgba(6, 18, 13, 0.82);
     border-color: rgba(57, 255, 156, 0.22);
+}
+
+.auth-card::before,
+.auth-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.auth-card::before {
+    background:
+        radial-gradient(120% 140% at 15% 25%, rgba(19, 246, 255, 0.22), transparent 60%),
+        radial-gradient(120% 120% at 85% 15%, rgba(57, 255, 156, 0.18), transparent 55%),
+        linear-gradient(165deg, rgba(9, 34, 24, 0.85), rgba(2, 8, 5, 0.65));
+    mix-blend-mode: screen;
+    opacity: 0.75;
+}
+
+.auth-card::after {
+    background: linear-gradient(120deg, transparent 15%, rgba(19, 246, 255, 0.45) 38%, rgba(57, 255, 156, 0.65) 50%, transparent 70%);
+    transform: translateX(-120%);
+    animation: authCardSweep 9s ease-in-out infinite;
+}
+
+@keyframes authCardSweep {
+    0%,
+    20% {
+        transform: translateX(-120%);
+        opacity: 0;
+    }
+    30% {
+        opacity: 0.75;
+    }
+    50% {
+        transform: translateX(120%);
+        opacity: 0.35;
+    }
+    65%,
+    100% {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+}
+
+#loginForm {
+    display: grid;
+    gap: 1.5rem;
+}
+
+#loginForm .form-grid {
+    gap: 1rem;
+}
+
+#loginForm .button--primary {
+    position: relative;
+    z-index: 1;
 }
 
 .auth-feedback {
@@ -1761,18 +1822,70 @@ header {
     letter-spacing: 0.2em;
     font-size: 0.75rem;
     color: var(--accent-tertiary);
-    animation: authBlink 1.1s steps(2) infinite;
+    text-shadow: 0 0 8px rgba(19, 246, 255, 0.45);
+    position: relative;
+    animation: authBlink 1.4s steps(2) infinite, authGlow 5s ease-in-out infinite;
     text-align: center;
+}
+
+.auth-blink::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        180deg,
+        rgba(19, 246, 255, 0.16) 0,
+        rgba(19, 246, 255, 0.16) 2px,
+        transparent 2px,
+        transparent 6px
+    );
+    mix-blend-mode: screen;
+    opacity: 0.4;
+    animation: authScan 6s linear infinite;
+    pointer-events: none;
 }
 
 @keyframes authBlink {
     0%,
-    49% {
+    42% {
         opacity: 1;
     }
-    50%,
+    50% {
+        opacity: 0.25;
+    }
+    58% {
+        opacity: 1;
+    }
     100% {
-        opacity: 0;
+        opacity: 0.85;
+    }
+}
+
+@keyframes authGlow {
+    0%,
+    100% {
+        text-shadow: 0 0 8px rgba(19, 246, 255, 0.35), 0 0 18px rgba(57, 255, 156, 0.15);
+        letter-spacing: 0.18em;
+    }
+    45% {
+        text-shadow: 0 0 12px rgba(19, 246, 255, 0.55), 0 0 22px rgba(57, 255, 156, 0.35);
+        letter-spacing: 0.22em;
+    }
+    70% {
+        text-shadow: 0 0 10px rgba(19, 246, 255, 0.45), 0 0 18px rgba(57, 255, 156, 0.25);
+        letter-spacing: 0.2em;
+    }
+}
+
+@keyframes authScan {
+    0% {
+        transform: translateY(-15%);
+    }
+    50% {
+        transform: translateY(15%);
+    }
+    100% {
+        transform: translateY(-15%);
     }
 }
 
@@ -1816,6 +1929,37 @@ header {
     outline: none;
     border-color: rgba(57, 255, 156, 0.6);
     box-shadow: 0 0 0 3px rgba(57, 255, 156, 0.25);
+}
+
+.form-field input[aria-invalid="true"],
+.form-field textarea[aria-invalid="true"] {
+    border-color: rgba(255, 122, 107, 0.75);
+    box-shadow: 0 0 0 1px rgba(255, 122, 107, 0.35), inset 0 0 0 1px rgba(255, 122, 107, 0.18);
+}
+
+.form-field input[aria-invalid="true"]:focus-visible,
+.form-field textarea[aria-invalid="true"]:focus-visible {
+    border-color: rgba(255, 145, 130, 0.95);
+    box-shadow: 0 0 0 3px rgba(255, 122, 107, 0.3);
+}
+
+@media (min-width: 640px) {
+    #loginForm {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: end;
+    }
+
+    #loginForm .form-grid {
+        grid-column: 1 / -1;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+
+    #loginForm .button--block {
+        width: auto;
+        justify-self: end;
+        padding-inline: 2.75rem;
+    }
 }
 
 .form-meta {
