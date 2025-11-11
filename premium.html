@@ -87,7 +87,7 @@
         </section>
 
         <div id="premium-page">
-            <section class="section section--alt">
+            <section class="section section--alt premium-plan-section">
                 <div class="container">
                     <div class="section__heading">
                         <p class="section__eyebrow">Planned tiers</p>
@@ -96,30 +96,48 @@
                     </div>
                     <div class="pricing-grid premium-plan-grid">
                         <article class="pricing-card premium-plan">
-                            <span class="status-pill">Monthly access</span>
-                            <h3 class="pricing-card__title">Arcade Transmission</h3>
-                            <p class="pricing-card__price">$5.99</p>
+                            <span class="premium-plan__shine" aria-hidden="true"></span>
+                            <div class="premium-plan__header">
+                                <span class="status-pill">Monthly access</span>
+                                <h3 class="pricing-card__title">Arcade Transmission</h3>
+                            </div>
+                            <div class="premium-plan__price-block">
+                                <span class="pricing-card__price">$5.99</span>
+                                <span class="premium-plan__billing">per month</span>
+                            </div>
                             <p class="pricing-card__description">Keep your retro reactor charged with a rolling monthly pass.</p>
-                            <ul class="pricing-card__list">
+                            <ul class="pricing-card__list premium-plan__list">
                                 <li>500+ premium games</li>
                                 <li>Monthly new releases &amp; ad-free play</li>
                                 <li>Priority support &amp; exclusive merch</li>
                                 <li>Retro poster shipped each quarter</li>
                             </ul>
-                            <button class="button button--primary button--block" type="button" id="monthly-btn">Start monthly</button>
+                            <div class="premium-plan__footer">
+                                <p class="premium-plan__note">Cancel anytime. Swap tiers instantly inside the hub.</p>
+                                <button class="button button--ghost button--block" type="button" id="monthly-btn">Start monthly</button>
+                            </div>
                         </article>
                         <article class="pricing-card premium-plan premium-plan--highlight">
-                            <span class="status-pill">Best value</span>
-                            <h3 class="pricing-card__title">Signal Annual</h3>
-                            <p class="pricing-card__price">$49.99</p>
+                            <span class="premium-plan__shine" aria-hidden="true"></span>
+                            <div class="premium-plan__header">
+                                <span class="status-pill">Best value</span>
+                                <h3 class="pricing-card__title">Signal Annual</h3>
+                            </div>
+                            <div class="premium-plan__price-block">
+                                <span class="pricing-card__price">$49.99</span>
+                                <span class="premium-plan__billing">per year</span>
+                            </div>
                             <p class="pricing-card__description">Lock in the signal for a full year and join the founders circle.</p>
-                            <ul class="pricing-card__list">
+                            <ul class="pricing-card__list premium-plan__list">
                                 <li>All monthly perks for 30% less</li>
                                 <li>Annual collector's box &amp; limited items</li>
                                 <li>Founders badge &amp; private roadmap polls</li>
                                 <li>Invite-only community tournaments</li>
                             </ul>
-                            <button class="button button--ghost button--block" type="button" id="annual-btn">Start annual</button>
+                            <div class="premium-plan__footer">
+                                <p class="premium-plan__note premium-plan__note--accent">Founders circle seats include quarterly merch drops and seasonal surprises.</p>
+                                <button class="button button--primary button--block" type="button" id="annual-btn">Start annual</button>
+                            </div>
                         </article>
                     </div>
                 </div>
