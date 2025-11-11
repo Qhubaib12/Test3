@@ -127,15 +127,45 @@
         var closeRecovery = document.getElementById('closeRecovery');
         var loginEmailInput = document.getElementById('login-email');
         var loginPasswordInput = document.getElementById('login-password');
+        var resetEmailInput = document.getElementById('resetEmail');
+        var loginDefaultError = errorMsg ? errorMsg.textContent : '';
+        var recoveryDefaultError = emailErrorMsg ? emailErrorMsg.innerHTML : '';
+
+        function sanitizeInputValue(value) {
+            return value ? value.replace(/\s+/g, ' ').trim() : '';
+        }
+
+        function isValidEmail(value) {
+            if (!value) {
+                return false;
+            }
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+        }
+
+        function markInvalidState(input, isInvalid) {
+            if (!input) {
+                return;
+            }
+            input.setAttribute('aria-invalid', isInvalid ? 'true' : 'false');
+        }
 
         function resetLoginState() {
             toggleDisplay(loadingMsg, false);
             toggleDisplay(errorMsg, false);
+            if (errorMsg && loginDefaultError) {
+                errorMsg.textContent = loginDefaultError;
+            }
+            markInvalidState(loginEmailInput, false);
+            markInvalidState(loginPasswordInput, false);
         }
 
         function resetRecoveryState() {
             toggleDisplay(emailLoadingMsg, false);
             toggleDisplay(emailErrorMsg, false);
+            if (emailErrorMsg && recoveryDefaultError) {
+                emailErrorMsg.innerHTML = recoveryDefaultError;
+            }
+            markInvalidState(resetEmailInput, false);
         }
 
         if (loginForm) {
@@ -143,7 +173,7 @@
                 event.preventDefault();
                 resetLoginState();
 
-                var emailValue = loginEmailInput ? loginEmailInput.value.replace(/\s+/g, ' ').trim() : '';
+                var emailValue = loginEmailInput ? sanitizeInputValue(loginEmailInput.value) : '';
                 var passwordValue = loginPasswordInput ? loginPasswordInput.value : '';
 
                 if (!emailValue || !passwordValue) {
@@ -151,10 +181,25 @@
                         errorMsg.textContent = 'Enter your email and password to continue.';
                         toggleDisplay(errorMsg, true, 'block');
                     }
+                    markInvalidState(loginEmailInput, !emailValue);
+                    markInvalidState(loginPasswordInput, !passwordValue);
                     if (!emailValue && loginEmailInput) {
                         loginEmailInput.focus();
                     } else if (loginPasswordInput) {
                         loginPasswordInput.focus();
+                    }
+                    return;
+                }
+
+                if (!isValidEmail(emailValue)) {
+                    if (errorMsg) {
+                        errorMsg.textContent = 'Enter a valid email address (example@domain.com).';
+                        toggleDisplay(errorMsg, true, 'block');
+                    }
+                    markInvalidState(loginEmailInput, true);
+                    if (loginEmailInput) {
+                        loginEmailInput.focus();
+                        loginEmailInput.select();
                     }
                     return;
                 }
@@ -168,6 +213,8 @@
                 setTimeout(function () {
                     toggleDisplay(loadingMsg, false);
                     toggleDisplay(errorMsg, true, 'block');
+                    markInvalidState(loginEmailInput, true);
+                    markInvalidState(loginPasswordInput, true);
                 }, 2000);
             });
         }
@@ -228,12 +275,44 @@
         if (resetForm) {
             resetForm.addEventListener('submit', function (event) {
                 event.preventDefault();
-                toggleDisplay(emailErrorMsg, false);
+                resetRecoveryState();
+
+                var resetEmailValue = resetEmailInput ? sanitizeInputValue(resetEmailInput.value) : '';
+
+                if (!resetEmailValue) {
+                    if (emailErrorMsg) {
+                        emailErrorMsg.textContent = 'Enter the registered email address to start recovery.';
+                        toggleDisplay(emailErrorMsg, true, 'block');
+                    }
+                    markInvalidState(resetEmailInput, true);
+                    if (resetEmailInput) {
+                        resetEmailInput.focus();
+                    }
+                    return;
+                }
+
+                if (!isValidEmail(resetEmailValue)) {
+                    if (emailErrorMsg) {
+                        emailErrorMsg.textContent = 'That email address looks incorrect—double-check the format and try again.';
+                        toggleDisplay(emailErrorMsg, true, 'block');
+                    }
+                    markInvalidState(resetEmailInput, true);
+                    if (resetEmailInput) {
+                        resetEmailInput.focus();
+                        resetEmailInput.select();
+                    }
+                    return;
+                }
+
                 toggleDisplay(emailLoadingMsg, true, 'block');
 
                 setTimeout(function () {
                     toggleDisplay(emailLoadingMsg, false);
+                    if (emailErrorMsg && recoveryDefaultError) {
+                        emailErrorMsg.innerHTML = recoveryDefaultError;
+                    }
                     toggleDisplay(emailErrorMsg, true, 'block');
+                    markInvalidState(resetEmailInput, true);
                 }, 2500);
             });
         }
