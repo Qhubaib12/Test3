@@ -127,15 +127,45 @@
         var closeRecovery = document.getElementById('closeRecovery');
         var loginEmailInput = document.getElementById('login-email');
         var loginPasswordInput = document.getElementById('login-password');
+        var resetEmailInput = document.getElementById('resetEmail');
+        var loginDefaultError = errorMsg ? errorMsg.textContent : '';
+        var recoveryDefaultError = emailErrorMsg ? emailErrorMsg.innerHTML : '';
+
+        function sanitizeInputValue(value) {
+            return value ? value.replace(/\s+/g, ' ').trim() : '';
+        }
+
+        function isValidEmail(value) {
+            if (!value) {
+                return false;
+            }
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+        }
+
+        function markInvalidState(input, isInvalid) {
+            if (!input) {
+                return;
+            }
+            input.setAttribute('aria-invalid', isInvalid ? 'true' : 'false');
+        }
 
         function resetLoginState() {
             toggleDisplay(loadingMsg, false);
             toggleDisplay(errorMsg, false);
+            if (errorMsg && loginDefaultError) {
+                errorMsg.textContent = loginDefaultError;
+            }
+            markInvalidState(loginEmailInput, false);
+            markInvalidState(loginPasswordInput, false);
         }
 
         function resetRecoveryState() {
             toggleDisplay(emailLoadingMsg, false);
             toggleDisplay(emailErrorMsg, false);
+            if (emailErrorMsg && recoveryDefaultError) {
+                emailErrorMsg.innerHTML = recoveryDefaultError;
+            }
+            markInvalidState(resetEmailInput, false);
         }
 
         if (loginForm) {
@@ -143,7 +173,7 @@
                 event.preventDefault();
                 resetLoginState();
 
-                var emailValue = loginEmailInput ? loginEmailInput.value.replace(/\s+/g, ' ').trim() : '';
+                var emailValue = loginEmailInput ? sanitizeInputValue(loginEmailInput.value) : '';
                 var passwordValue = loginPasswordInput ? loginPasswordInput.value : '';
 
                 if (!emailValue || !passwordValue) {
@@ -151,10 +181,25 @@
                         errorMsg.textContent = 'Enter your email and password to continue.';
                         toggleDisplay(errorMsg, true, 'block');
                     }
+                    markInvalidState(loginEmailInput, !emailValue);
+                    markInvalidState(loginPasswordInput, !passwordValue);
                     if (!emailValue && loginEmailInput) {
                         loginEmailInput.focus();
                     } else if (loginPasswordInput) {
                         loginPasswordInput.focus();
+                    }
+                    return;
+                }
+
+                if (!isValidEmail(emailValue)) {
+                    if (errorMsg) {
+                        errorMsg.textContent = 'Enter a valid email address (example@domain.com).';
+                        toggleDisplay(errorMsg, true, 'block');
+                    }
+                    markInvalidState(loginEmailInput, true);
+                    if (loginEmailInput) {
+                        loginEmailInput.focus();
+                        loginEmailInput.select();
                     }
                     return;
                 }
@@ -168,6 +213,8 @@
                 setTimeout(function () {
                     toggleDisplay(loadingMsg, false);
                     toggleDisplay(errorMsg, true, 'block');
+                    markInvalidState(loginEmailInput, true);
+                    markInvalidState(loginPasswordInput, true);
                 }, 2000);
             });
         }
@@ -228,12 +275,44 @@
         if (resetForm) {
             resetForm.addEventListener('submit', function (event) {
                 event.preventDefault();
-                toggleDisplay(emailErrorMsg, false);
+                resetRecoveryState();
+
+                var resetEmailValue = resetEmailInput ? sanitizeInputValue(resetEmailInput.value) : '';
+
+                if (!resetEmailValue) {
+                    if (emailErrorMsg) {
+                        emailErrorMsg.textContent = 'Enter the registered email address to start recovery.';
+                        toggleDisplay(emailErrorMsg, true, 'block');
+                    }
+                    markInvalidState(resetEmailInput, true);
+                    if (resetEmailInput) {
+                        resetEmailInput.focus();
+                    }
+                    return;
+                }
+
+                if (!isValidEmail(resetEmailValue)) {
+                    if (emailErrorMsg) {
+                        emailErrorMsg.textContent = 'That email address looks incorrect—double-check the format and try again.';
+                        toggleDisplay(emailErrorMsg, true, 'block');
+                    }
+                    markInvalidState(resetEmailInput, true);
+                    if (resetEmailInput) {
+                        resetEmailInput.focus();
+                        resetEmailInput.select();
+                    }
+                    return;
+                }
+
                 toggleDisplay(emailLoadingMsg, true, 'block');
 
                 setTimeout(function () {
                     toggleDisplay(emailLoadingMsg, false);
+                    if (emailErrorMsg && recoveryDefaultError) {
+                        emailErrorMsg.innerHTML = recoveryDefaultError;
+                    }
                     toggleDisplay(emailErrorMsg, true, 'block');
+                    markInvalidState(resetEmailInput, true);
                 }, 2500);
             });
         }
@@ -246,6 +325,8 @@
         var applyCouponButton = document.getElementById('apply-coupon-btn');
         var couponInput = document.getElementById('couponCode');
         var paymentForm = document.getElementById('payment-form');
+        var paymentSubmitButton = paymentForm ? paymentForm.querySelector('button[type="submit"]') : null;
+        var paymentRequiredInputs = paymentForm ? Array.prototype.slice.call(paymentForm.querySelectorAll('input[required]')) : [];
         var planTypeEl = document.getElementById('plan-type');
         var planPriceEl = document.getElementById('plan-price');
         var totalAmountEl = document.getElementById('total-amount');
@@ -273,10 +354,98 @@
             if (errorMessage) {
                 toggleDisplay(errorMessage, false);
             }
+            for (var i = 0; i < paymentRequiredInputs.length; i += 1) {
+                paymentRequiredInputs[i].setAttribute('aria-invalid', 'false');
+            }
             updateOrderSummary();
             if (paymentPage && typeof paymentPage.scrollIntoView === 'function') {
                 paymentPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
+            updatePaymentButtonState();
+        }
+
+        function isValidCardNumber(value) {
+            var digits = value.replace(/\s+/g, '');
+            return digits.length >= 12;
+        }
+
+        function isValidExpiry(value) {
+            if (!/^\d{2}\/\d{2}$/.test(value)) {
+                return false;
+            }
+            var parts = value.split('/');
+            var month = parseInt(parts[0], 10);
+            return month >= 1 && month <= 12;
+        }
+
+        function isValidCvv(value) {
+            return /^\d{3,4}$/.test(value);
+        }
+
+        function isValidZip(value) {
+            return /^[A-Za-z0-9\s-]{3,10}$/.test(value);
+        }
+
+        function isPaymentFieldValid(input) {
+            if (!input) {
+                return false;
+            }
+            var value = sanitizeInputValue(input.value);
+            if (!value) {
+                return false;
+            }
+            switch (input.id) {
+                case 'email':
+                    return isValidEmail(value);
+                case 'cardNumber':
+                    return isValidCardNumber(value);
+                case 'expiryDate':
+                    return isValidExpiry(value);
+                case 'cvv':
+                    return isValidCvv(value);
+                case 'zipCode':
+                    return isValidZip(value);
+                default:
+                    return value.length > 0;
+            }
+        }
+
+        function updatePaymentFieldStates(showInvalid) {
+            if (!paymentRequiredInputs.length) {
+                return true;
+            }
+            var firstInvalid = null;
+            var isValid = true;
+            for (var i = 0; i < paymentRequiredInputs.length; i += 1) {
+                var input = paymentRequiredInputs[i];
+                var fieldIsValid = isPaymentFieldValid(input);
+                if (showInvalid) {
+                    input.setAttribute('aria-invalid', fieldIsValid ? 'false' : 'true');
+                }
+                if (!fieldIsValid) {
+                    isValid = false;
+                    if (!firstInvalid) {
+                        firstInvalid = input;
+                    }
+                }
+            }
+            if (showInvalid && firstInvalid && typeof firstInvalid.focus === 'function') {
+                firstInvalid.focus();
+            }
+            return isValid;
+        }
+
+        function updatePaymentButtonState() {
+            var isValid = updatePaymentFieldStates(false);
+            if (paymentSubmitButton) {
+                paymentSubmitButton.disabled = !isValid;
+                if (isValid) {
+                    paymentSubmitButton.removeAttribute('aria-disabled');
+                } else {
+                    paymentSubmitButton.setAttribute('aria-disabled', 'true');
+                }
+            }
+            return isValid;
         }
 
         function showPremiumPage() {
@@ -301,6 +470,7 @@
             if (premiumPage && typeof premiumPage.scrollIntoView === 'function') {
                 premiumPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
+            updatePaymentButtonState();
         }
 
         function selectPlan(type, price) {
@@ -413,9 +583,28 @@
             paymentForm.addEventListener('submit', function (event) {
                 event.preventDefault();
                 toggleDisplay(errorMessage, false);
+                var isFormValid = updatePaymentFieldStates(true);
+                updatePaymentButtonState();
+                if (!isFormValid) {
+                    return;
+                }
                 showProcessingAnimation();
             });
         }
+
+        for (var paymentIndex = 0; paymentIndex < paymentRequiredInputs.length; paymentIndex += 1) {
+            (function (input) {
+                input.addEventListener('input', function () {
+                    input.setAttribute('aria-invalid', isPaymentFieldValid(input) ? 'false' : 'true');
+                    updatePaymentButtonState();
+                });
+                input.addEventListener('blur', function () {
+                    input.setAttribute('aria-invalid', isPaymentFieldValid(input) ? 'false' : 'true');
+                });
+            })(paymentRequiredInputs[paymentIndex]);
+        }
+
+        updatePaymentButtonState();
 
         var cardNumberInput = document.getElementById('cardNumber');
         if (cardNumberInput) {
