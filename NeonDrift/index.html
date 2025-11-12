@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neon Drift</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;600;700&display=swap"
+        rel="stylesheet"
+    />
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: radial-gradient(circle at 12% 20%, rgba(92, 255, 241, 0.18), transparent 45%),
+                radial-gradient(circle at 88% 12%, rgba(255, 113, 248, 0.26), transparent 55%),
+                #040313;
+            --panel: linear-gradient(140deg, rgba(8, 12, 32, 0.92), rgba(12, 4, 36, 0.88));
+            --accent: #5cfff1;
+            --accent-strong: #ff71f8;
+            --text-soft: rgba(255, 255, 255, 0.72);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: #f4f8ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(20px, 4vw, 60px);
+            overflow: hidden;
+        }
+
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.25) 51%);
+            background-size: 100% 3px;
+            opacity: 0.35;
+            mix-blend-mode: soft-light;
+        }
+
+        main {
+            width: min(1080px, 100%);
+            display: grid;
+            gap: clamp(24px, 4vw, 48px);
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            display: grid;
+            gap: 18px;
+            text-align: left;
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: clamp(26px, 4.4vw, 44px);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin: 0;
+            text-shadow: 0 0 18px rgba(92, 255, 241, 0.7);
+        }
+
+        h1 span {
+            color: var(--accent-strong);
+        }
+
+        .tagline {
+            color: var(--text-soft);
+            font-size: clamp(16px, 2.4vw, 20px);
+            max-width: 720px;
+            line-height: 1.7;
+        }
+
+        .game-shell {
+            position: relative;
+            background: var(--panel);
+            border-radius: clamp(28px, 4vw, 36px);
+            padding: clamp(22px, 4vw, 36px);
+            border: 1px solid rgba(92, 255, 241, 0.22);
+            box-shadow: 0 24px 60px rgba(6, 0, 30, 0.5);
+            overflow: hidden;
+        }
+
+        .game-shell::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 70% -10%, rgba(255, 113, 248, 0.28), transparent 55%);
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        canvas {
+            width: 100%;
+            max-width: 960px;
+            display: block;
+            margin-inline: auto;
+            border-radius: clamp(20px, 3vw, 26px);
+            border: 1px solid rgba(92, 255, 241, 0.32);
+            background: radial-gradient(circle at 50% 0%, rgba(92, 255, 241, 0.22), rgba(4, 5, 20, 0.95));
+        }
+
+        .hud {
+            margin-top: clamp(18px, 3vw, 28px);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+        }
+
+        .hud__panel {
+            position: relative;
+            padding: 18px 20px;
+            border-radius: 16px;
+            background: linear-gradient(150deg, rgba(10, 20, 38, 0.85), rgba(8, 12, 32, 0.92));
+            border: 1px solid rgba(92, 255, 241, 0.2);
+            overflow: hidden;
+        }
+
+        .hud__panel::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent, rgba(92, 255, 241, 0.16));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .hud__panel:hover::after {
+            opacity: 1;
+        }
+
+        .hud__label {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .hud__value {
+            font-size: clamp(22px, 2.6vw, 30px);
+            font-weight: 600;
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .hud__sub {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        .control-row {
+            margin-top: clamp(18px, 3vw, 28px);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .control-row p {
+            margin: 0;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.65);
+            line-height: 1.6;
+        }
+
+        .control-row span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            border: 1px solid rgba(92, 255, 241, 0.35);
+            background: rgba(4, 12, 30, 0.7);
+            font-size: 12px;
+            letter-spacing: 1.2px;
+        }
+
+        button {
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(120deg, rgba(92, 255, 241, 0.9), rgba(255, 113, 248, 0.85));
+            color: #030616;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            padding: 14px 28px;
+            cursor: pointer;
+            box-shadow: 0 12px 32px rgba(92, 255, 241, 0.28);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 44px rgba(92, 255, 241, 0.38);
+        }
+
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        footer {
+            font-size: 12px;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.45);
+            text-align: center;
+        }
+
+        @media (max-width: 720px) {
+            header {
+                text-align: center;
+            }
+
+            .control-row {
+                justify-content: center;
+            }
+
+            .control-row p {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines" aria-hidden="true"></div>
+    <main>
+        <header>
+            <h1>Neon <span>Drift</span></h1>
+            <p class="tagline">
+                Ride the synth-lit expressway, chain perfect near-misses, and charge your quantum thrusters to outpace
+                the sunrise. Dodge rival drones, scoop energy shards, and trigger Hyperdrive to bend the track to your
+                will.
+            </p>
+        </header>
+
+        <section class="game-shell" aria-label="Neon Drift gameplay">
+            <canvas id="track" width="900" height="540" role="img" aria-label="Neon Drift game canvas"></canvas>
+
+            <div class="hud" role="status">
+                <article class="hud__panel">
+                    <p class="hud__label">Score</p>
+                    <p class="hud__value"><span id="score">000000</span><span class="hud__sub">pts</span></p>
+                </article>
+                <article class="hud__panel">
+                    <p class="hud__label">Combo</p>
+                    <p class="hud__value"><span id="combo">x1.0</span><span class="hud__sub" id="streak">0 chain</span></p>
+                </article>
+                <article class="hud__panel">
+                    <p class="hud__label">Shields</p>
+                    <p class="hud__value"><span id="shields">3</span><span class="hud__sub">hits left</span></p>
+                </article>
+                <article class="hud__panel">
+                    <p class="hud__label">Hyperdrive</p>
+                    <p class="hud__value"><span id="hyper">0%</span><span class="hud__sub" id="hyperStatus">charge</span></p>
+                </article>
+            </div>
+
+            <div class="control-row">
+                <p>
+                    <strong id="status">Press start</strong>
+                    &nbsp;– steer with <kbd>←</kbd>/<kbd>→</kbd> or <kbd>A</kbd>/<kbd>D</kbd>, tap <kbd>Shift</kbd> once the meter
+                    glows to unleash Hyperdrive.
+                </p>
+                <span>
+                    <button id="start">Press Start</button>
+                </span>
+            </div>
+        </section>
+
+        <footer>Built for the Arcade Hub — keep drifting, keep glowing.</footer>
+    </main>
+
+    <script>
+        const canvas = document.getElementById('track');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const comboEl = document.getElementById('combo');
+        const streakEl = document.getElementById('streak');
+        const shieldEl = document.getElementById('shields');
+        const hyperEl = document.getElementById('hyper');
+        const hyperStatusEl = document.getElementById('hyperStatus');
+        const startBtn = document.getElementById('start');
+        const statusEl = document.getElementById('status');
+
+        const state = {
+            running: false,
+            gameOver: false,
+            score: 0,
+            streak: 0,
+            shields: 3,
+            speed: 4,
+            hyper: 0,
+            hyperActive: 0,
+            spawnTimer: 0,
+            shardTimer: 0,
+            laneOffset: 0,
+        };
+
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height - 120,
+            width: 60,
+            height: 110,
+            vx: 0,
+            maxSpeed: 12,
+            acceleration: 1.1,
+        };
+
+        const drones = [];
+        const shards = [];
+        const keys = new Set();
+
+        const neonPalette = [
+            '#5cfff1',
+            '#ff71f8',
+            '#8efc5c',
+            '#ffb347',
+            '#81a9ff',
+        ];
+
+        function resetGame() {
+            state.running = true;
+            state.gameOver = false;
+            state.score = 0;
+            state.streak = 0;
+            state.shields = 3;
+            state.speed = 4;
+            state.hyper = 0;
+            state.hyperActive = 0;
+            state.spawnTimer = 0;
+            state.shardTimer = 2000;
+            state.laneOffset = 0;
+            drones.length = 0;
+            shards.length = 0;
+            player.x = canvas.width / 2;
+            player.vx = 0;
+            statusEl.textContent = 'Stay sharp';
+            startBtn.textContent = 'Restart';
+            updateHud();
+        }
+
+        function updateHud() {
+            scoreEl.textContent = Math.round(state.score).toString().padStart(6, '0');
+            comboEl.textContent = `x${(1 + state.streak * 0.1).toFixed(1)}`;
+            streakEl.textContent = `${state.streak} chain`;
+            shieldEl.textContent = state.shields;
+            hyperEl.textContent = `${Math.round(state.hyper * 100)}%`;
+            if (state.hyperActive > 0) {
+                hyperStatusEl.textContent = 'Hyperdrive!';
+            } else if (state.hyper >= 1) {
+                hyperStatusEl.textContent = 'ready';
+            } else {
+                hyperStatusEl.textContent = 'charge';
+            }
+        }
+
+        function spawnDrone() {
+            const laneWidth = canvas.width * 0.6;
+            const laneStart = canvas.width * 0.2;
+            const lanes = 4;
+            const lane = Math.floor(Math.random() * lanes);
+            const x = laneStart + lane * (laneWidth / (lanes - 1));
+            drones.push({
+                x,
+                y: -160,
+                width: 70,
+                height: 130,
+                hue: neonPalette[Math.floor(Math.random() * neonPalette.length)],
+                sway: (Math.random() * 0.6 + 0.2) * (Math.random() > 0.5 ? 1 : -1),
+            });
+        }
+
+        function spawnShard() {
+            const laneWidth = canvas.width * 0.6;
+            const laneStart = canvas.width * 0.2;
+            const x = laneStart + Math.random() * laneWidth;
+            shards.push({
+                x,
+                y: -60,
+                size: 40,
+                pulse: Math.random() * Math.PI * 2,
+            });
+        }
+
+        function activateHyperdrive() {
+            if (state.hyper < 1 || state.hyperActive > 0 || !state.running) return;
+            state.hyperActive = 3000;
+            state.hyper = 0;
+            statusEl.textContent = 'Hyperdrive engaged!';
+        }
+
+        function handleInput(delta) {
+            const left = keys.has('ArrowLeft') || keys.has('KeyA');
+            const right = keys.has('ArrowRight') || keys.has('KeyD');
+
+            if (left && !right) {
+                player.vx -= player.acceleration * delta;
+            } else if (right && !left) {
+                player.vx += player.acceleration * delta;
+            } else {
+                player.vx *= 0.9;
+            }
+
+            player.vx = Math.max(Math.min(player.vx, player.maxSpeed), -player.maxSpeed);
+            player.x += player.vx * delta * 4;
+
+            const minX = canvas.width * 0.2;
+            const maxX = canvas.width * 0.8;
+            if (player.x < minX) {
+                player.x = minX;
+                player.vx = 0;
+            }
+            if (player.x > maxX) {
+                player.x = maxX;
+                player.vx = 0;
+            }
+        }
+
+        function updateGame(delta, timestamp) {
+            if (!state.running) return;
+
+            handleInput(delta);
+
+            const baseSpeed = state.hyperActive > 0 ? state.speed * 2.2 : state.speed;
+            state.laneOffset = (state.laneOffset + baseSpeed * 15 * delta) % 120;
+            state.score += baseSpeed * 10 * delta * (1 + state.streak * 0.1);
+
+            state.spawnTimer -= delta * 1000;
+            if (state.spawnTimer <= 0) {
+                spawnDrone();
+                const clampSpeed = Math.min(baseSpeed, 18);
+                state.spawnTimer = 700 - clampSpeed * 18;
+                if (state.spawnTimer < 260) state.spawnTimer = 260;
+            }
+
+            state.shardTimer -= delta * 1000;
+            if (state.shardTimer <= 0) {
+                spawnShard();
+                state.shardTimer = 1200 + Math.random() * 800;
+            }
+
+            const speedBoost = baseSpeed * 4;
+            for (let i = drones.length - 1; i >= 0; i--) {
+                const drone = drones[i];
+                drone.y += speedBoost * delta;
+                drone.x += Math.sin((timestamp + drone.y) * 0.002) * drone.sway;
+                if (drone.y > canvas.height + 160) {
+                    drones.splice(i, 1);
+                }
+            }
+
+            for (let i = shards.length - 1; i >= 0; i--) {
+                const shard = shards[i];
+                shard.y += speedBoost * delta;
+                shard.pulse += delta * 8;
+                if (shard.y > canvas.height + 80) {
+                    shards.splice(i, 1);
+                }
+            }
+
+            if (state.hyperActive > 0) {
+                state.hyperActive -= delta * 1000;
+                if (state.hyperActive <= 0) {
+                    state.hyperActive = 0;
+                    statusEl.textContent = 'Combo fever';
+                }
+            }
+
+            detectCollisions();
+            updateHud();
+        }
+
+        function detectCollisions() {
+            const playerRect = {
+                left: player.x - player.width / 2,
+                right: player.x + player.width / 2,
+                top: player.y - player.height / 2,
+                bottom: player.y + player.height / 2,
+            };
+
+            for (let i = drones.length - 1; i >= 0; i--) {
+                const drone = drones[i];
+                const droneRect = {
+                    left: drone.x - drone.width / 2,
+                    right: drone.x + drone.width / 2,
+                    top: drone.y - drone.height / 2,
+                    bottom: drone.y + drone.height / 2,
+                };
+
+                if (
+                    playerRect.left < droneRect.right &&
+                    playerRect.right > droneRect.left &&
+                    playerRect.top < droneRect.bottom &&
+                    playerRect.bottom > droneRect.top
+                ) {
+                    if (state.hyperActive > 0) {
+                        drones.splice(i, 1);
+                        state.score += 500;
+                        state.streak += 2;
+                        continue;
+                    }
+
+                    drones.splice(i, 1);
+                    state.shields -= 1;
+                    state.streak = 0;
+                    statusEl.textContent = 'Impact! Shields down';
+                    if (state.shields <= 0) {
+                        endGame();
+                        return;
+                    }
+                }
+            }
+
+            for (let i = shards.length - 1; i >= 0; i--) {
+                const shard = shards[i];
+                const distX = Math.abs(player.x - shard.x);
+                const distY = Math.abs(player.y - shard.y);
+                if (distX < (player.width + shard.size) / 2 && distY < (player.height + shard.size) / 2) {
+                    shards.splice(i, 1);
+                    state.score += 150 * (1 + state.streak * 0.1);
+                    state.streak = Math.min(state.streak + 1, 99);
+                    state.hyper = Math.min(state.hyper + 0.18, 1);
+                    statusEl.textContent = 'Energy linked';
+                }
+            }
+        }
+
+        function endGame() {
+            state.running = false;
+            state.gameOver = true;
+            statusEl.textContent = 'Out of shields — press restart';
+            updateHud();
+        }
+
+        function draw(timestamp) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBackground();
+            drawTrack();
+            drawShards(timestamp);
+            drawDrones(timestamp);
+            drawPlayer(timestamp);
+
+            if (!state.running && state.gameOver) {
+                drawGameOver();
+            } else if (!state.running) {
+                drawIdle();
+            }
+        }
+
+        function drawBackground() {
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, 'rgba(12, 18, 42, 0.85)');
+            gradient.addColorStop(1, 'rgba(4, 6, 20, 0.95)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawTrack() {
+            const laneStart = canvas.width * 0.2;
+            const laneWidth = canvas.width * 0.6;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(laneStart - 90, canvas.height);
+            ctx.lineTo(canvas.width / 2 - 40, 0);
+            ctx.lineTo(canvas.width / 2 + 40, 0);
+            ctx.lineTo(laneStart + laneWidth + 90, canvas.height);
+            ctx.closePath();
+            const roadGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            roadGradient.addColorStop(0, 'rgba(10, 12, 36, 0.95)');
+            roadGradient.addColorStop(1, 'rgba(4, 6, 22, 0.96)');
+            ctx.fillStyle = roadGradient;
+            ctx.fill();
+            ctx.restore();
+
+            ctx.strokeStyle = 'rgba(92, 255, 241, 0.35)';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([24, 28]);
+            ctx.lineDashOffset = state.laneOffset;
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawPlayer(timestamp) {
+            const { x, y, width, height } = player;
+            ctx.save();
+            ctx.translate(x, y);
+            const glow = ctx.createLinearGradient(-width / 2, -height / 2, width / 2, height / 2);
+            glow.addColorStop(0, 'rgba(255, 113, 248, 0.95)');
+            glow.addColorStop(1, 'rgba(92, 255, 241, 0.95)');
+            ctx.fillStyle = glow;
+            ctx.shadowColor = state.hyperActive > 0 ? '#fff8a9' : '#5cfff1';
+            ctx.shadowBlur = state.hyperActive > 0 ? 50 : 26;
+            ctx.beginPath();
+            ctx.roundRect(-width / 2, -height / 2, width, height, 24);
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.fillRect(-width / 2 + 8, -height / 2 + 18, width - 16, 12);
+            ctx.fillRect(-width / 2 + 8, height / 2 - 30, width - 16, 12);
+
+            const pulse = Math.sin(timestamp * 0.008) * 0.5 + 0.5;
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.35 + pulse * 0.3})`;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-width / 2 + 6, -height / 2 + 10, width - 12, height - 20);
+            ctx.restore();
+        }
+
+        function drawDrones(timestamp) {
+            drones.forEach((drone) => {
+                ctx.save();
+                ctx.translate(drone.x, drone.y);
+                ctx.rotate(Math.sin((timestamp + drone.y) * 0.0015) * 0.12);
+                ctx.fillStyle = drone.hue;
+                ctx.shadowColor = drone.hue;
+                ctx.shadowBlur = 24;
+                ctx.beginPath();
+                ctx.roundRect(-drone.width / 2, -drone.height / 2, drone.width, drone.height, 22);
+                ctx.fill();
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                ctx.fillRect(-drone.width / 2 + 10, 0, drone.width - 20, drone.height / 2);
+                ctx.restore();
+            });
+        }
+
+        function drawShards(timestamp) {
+            shards.forEach((shard) => {
+                const size = shard.size * (0.85 + Math.sin(shard.pulse) * 0.15);
+                ctx.save();
+                ctx.translate(shard.x, shard.y);
+                ctx.rotate((timestamp * 0.002 + shard.pulse) % (Math.PI * 2));
+                const gradient = ctx.createRadialGradient(0, 0, size * 0.2, 0, 0, size);
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+                gradient.addColorStop(1, 'rgba(92, 255, 241, 0.2)');
+                ctx.fillStyle = gradient;
+                ctx.shadowColor = '#5cfff1';
+                ctx.shadowBlur = 20;
+                ctx.beginPath();
+                ctx.moveTo(0, -size / 2);
+                ctx.lineTo(size / 2, 0);
+                ctx.lineTo(0, size / 2);
+                ctx.lineTo(-size / 2, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        function drawGameOver() {
+            ctx.save();
+            ctx.fillStyle = 'rgba(4, 6, 20, 0.6)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ff71f8';
+            ctx.font = '32px "Space Grotesk"';
+            ctx.textAlign = 'center';
+            ctx.fillText('OUT OF SHIELDS', canvas.width / 2, canvas.height / 2 - 10);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+            ctx.font = '18px "Space Grotesk"';
+            ctx.fillText('Press restart to dive back in', canvas.width / 2, canvas.height / 2 + 28);
+            ctx.restore();
+        }
+
+        function drawIdle() {
+            ctx.save();
+            ctx.fillStyle = 'rgba(4, 6, 20, 0.4)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#5cfff1';
+            ctx.font = '26px "Space Grotesk"';
+            ctx.textAlign = 'center';
+            ctx.fillText('Press start to enter the drift', canvas.width / 2, canvas.height / 2 + 60);
+            ctx.restore();
+        }
+
+        let lastTime = 0;
+        function loop(timestamp) {
+            const delta = Math.min((timestamp - lastTime) / 1000, 0.1);
+            lastTime = timestamp;
+            updateGame(delta, timestamp);
+            draw(timestamp);
+            requestAnimationFrame(loop);
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD', 'ShiftLeft', 'ShiftRight'].includes(event.code)) {
+                event.preventDefault();
+            }
+            keys.add(event.code);
+            if ((event.code === 'Space' || event.code === 'Enter') && !state.running) {
+                resetGame();
+            }
+            if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+                activateHyperdrive();
+            }
+        });
+
+        document.addEventListener('keyup', (event) => {
+            keys.delete(event.code);
+        });
+
+        startBtn.addEventListener('click', () => {
+            if (!state.running) {
+                resetGame();
+            } else {
+                resetGame();
+            }
+        });
+
+        canvas.addEventListener('pointerdown', () => {
+            if (!state.running) {
+                resetGame();
+            } else {
+                activateHyperdrive();
+            }
+        });
+
+        requestAnimationFrame(loop);
+        draw(0);
+        updateHud();
+    </script>
+</body>
+</html>
