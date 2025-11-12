@@ -761,6 +761,33 @@ header {
     --card-halo-strong: rgba(84, 255, 163, 0.5);
 }
 
+.game-card--neon-drift {
+    --logo-primary: #ff71f8;
+    --logo-secondary: #5cfff1;
+    --logo-tertiary: #ffe98f;
+    --logo-glow: rgba(92, 255, 241, 0.6);
+    --card-halo: rgba(255, 113, 248, 0.18);
+    --card-halo-strong: rgba(92, 255, 241, 0.52);
+}
+
+.game-card--synthwave-siege {
+    --logo-primary: #6fb3ff;
+    --logo-secondary: #ff71f8;
+    --logo-tertiary: #ffd972;
+    --logo-glow: rgba(255, 113, 248, 0.58);
+    --card-halo: rgba(111, 179, 255, 0.2);
+    --card-halo-strong: rgba(255, 113, 248, 0.5);
+}
+
+.game-card--quantum-loop {
+    --logo-primary: #63fff5;
+    --logo-secondary: #a980ff;
+    --logo-tertiary: #fffba0;
+    --logo-glow: rgba(99, 255, 245, 0.58);
+    --card-halo: rgba(169, 128, 255, 0.18);
+    --card-halo-strong: rgba(99, 255, 245, 0.48);
+}
+
 .game-logo {
     width: 64px;
     height: 64px;
@@ -937,6 +964,212 @@ header {
 
 .game-logo--circuit-puzzle .circuit-pulse circle {
     animation: circuit-pulse 3.4s ease-out infinite;
+}
+
+.game-logo--neon-drift .drift-track {
+    stroke-dasharray: 14 10;
+    animation: drift-track 9s linear infinite;
+}
+
+.game-logo--neon-drift .drift-line {
+    stroke-dasharray: 6 10;
+    animation: drift-line 3.2s ease-in-out infinite;
+}
+
+.game-logo--neon-drift .drift-car rect {
+    animation: drift-car 3.2s ease-in-out infinite;
+}
+
+.game-logo--neon-drift .drift-car path {
+    opacity: 0.75;
+    animation: drift-glow 3.2s ease-in-out infinite;
+}
+
+.game-logo--neon-drift .drift-trails path {
+    opacity: 0;
+    animation: drift-trail 3.2s ease-in-out infinite;
+}
+
+.game-logo--neon-drift .drift-trails path:first-child {
+    animation-delay: 0.1s;
+}
+
+.game-logo--neon-drift .drift-trails path:last-child {
+    animation-delay: 0.4s;
+}
+
+.game-logo--synthwave-siege .siege-shield {
+    filter: drop-shadow(0 0 6px rgba(255, 113, 248, 0.35));
+}
+
+.game-logo--synthwave-siege .siege-core {
+    animation: siege-core 4s ease-in-out infinite;
+}
+
+.game-logo--synthwave-siege .siege-rings circle:first-child {
+    animation: siege-spin 12s linear infinite;
+}
+
+.game-logo--synthwave-siege .siege-rings circle:last-child {
+    opacity: 0.6;
+    animation: siege-spin 8s linear infinite reverse;
+}
+
+.game-logo--synthwave-siege .siege-beams line {
+    stroke-dasharray: 4 6;
+    animation: siege-beam 2.8s ease-in-out infinite;
+}
+
+.game-logo--synthwave-siege .siege-beams line:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.game-logo--synthwave-siege .siege-beams line:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.game-logo--quantum-loop .loop-core {
+    animation: loop-pulse 4s ease-in-out infinite;
+}
+
+.game-logo--quantum-loop .loop-ring {
+    animation: loop-rotate 10s linear infinite;
+}
+
+.game-logo--quantum-loop .loop-ring--inner {
+    animation-duration: 7s;
+    animation-direction: reverse;
+}
+
+.game-logo--quantum-loop .loop-arcs path {
+    opacity: 0.65;
+    animation: loop-wave 3.4s ease-in-out infinite;
+}
+
+.game-logo--quantum-loop .loop-arcs path:last-child {
+    animation-delay: 0.3s;
+}
+
+@keyframes drift-track {
+    0% {
+        stroke-dashoffset: 0;
+    }
+    100% {
+        stroke-dashoffset: -64;
+    }
+}
+
+@keyframes drift-line {
+    0%,
+    100% {
+        stroke-dashoffset: 40;
+        opacity: 0.45;
+    }
+    50% {
+        stroke-dashoffset: -40;
+        opacity: 0.9;
+    }
+}
+
+@keyframes drift-car {
+    0%,
+    100% {
+        transform: translateX(-2px) skewX(-4deg);
+    }
+    50% {
+        transform: translateX(2px) skewX(6deg);
+    }
+}
+
+@keyframes drift-glow {
+    0%,
+    100% {
+        opacity: 0.4;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes drift-trail {
+    0% {
+        opacity: 0;
+        transform: translate(-2px, -2px);
+    }
+    50% {
+        opacity: 0.65;
+        transform: translate(-5px, -5px);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-8px, -8px);
+    }
+}
+
+@keyframes siege-core {
+    0%,
+    100% {
+        transform: scale(0.92);
+        filter: drop-shadow(0 0 4px rgba(255, 113, 248, 0.4));
+    }
+    50% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 8px rgba(255, 113, 248, 0.6));
+    }
+}
+
+@keyframes siege-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes siege-beam {
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+    50% {
+        opacity: 0.85;
+        transform: translateY(-4px);
+    }
+}
+
+@keyframes loop-pulse {
+    0%,
+    100% {
+        transform: scale(0.92);
+        filter: drop-shadow(0 0 3px rgba(99, 255, 245, 0.5));
+    }
+    50% {
+        transform: scale(1.08);
+        filter: drop-shadow(0 0 10px rgba(169, 128, 255, 0.6));
+    }
+}
+
+@keyframes loop-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes loop-wave {
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+    50% {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
 }
 
 @keyframes media-glimmer {
