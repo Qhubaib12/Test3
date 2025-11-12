@@ -1902,6 +1902,14 @@ header {
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
+.button[disabled],
+.button[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+}
+
 .button:hover,
 .button:focus-visible {
     transform: translateY(-1px);
@@ -2576,6 +2584,7 @@ header {
 .premium-payment {
     display: grid;
     gap: 1.8rem;
+    justify-items: center;
 }
 
 .premium-payment__back {
@@ -2584,8 +2593,17 @@ header {
 
 .premium-payment__grid {
     display: grid;
-    gap: 1.5rem;
-    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+    gap: 1.75rem;
+    align-items: start;
+    justify-content: center;
+    grid-template-columns: repeat(2, minmax(320px, 1fr));
+}
+
+.premium-payment__summary,
+.premium-payment__form {
+    width: min(100%, 480px);
+    margin-inline: auto;
+    justify-self: center;
 }
 
 .premium-payment__summary {

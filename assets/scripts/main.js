@@ -325,6 +325,8 @@
         var applyCouponButton = document.getElementById('apply-coupon-btn');
         var couponInput = document.getElementById('couponCode');
         var paymentForm = document.getElementById('payment-form');
+        var paymentSubmitButton = paymentForm ? paymentForm.querySelector('button[type="submit"]') : null;
+        var paymentRequiredInputs = paymentForm ? Array.prototype.slice.call(paymentForm.querySelectorAll('input[required]')) : [];
         var planTypeEl = document.getElementById('plan-type');
         var planPriceEl = document.getElementById('plan-price');
         var totalAmountEl = document.getElementById('total-amount');
@@ -352,10 +354,98 @@
             if (errorMessage) {
                 toggleDisplay(errorMessage, false);
             }
+            for (var i = 0; i < paymentRequiredInputs.length; i += 1) {
+                paymentRequiredInputs[i].setAttribute('aria-invalid', 'false');
+            }
             updateOrderSummary();
             if (paymentPage && typeof paymentPage.scrollIntoView === 'function') {
                 paymentPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
+            updatePaymentButtonState();
+        }
+
+        function isValidCardNumber(value) {
+            var digits = value.replace(/\s+/g, '');
+            return digits.length >= 12;
+        }
+
+        function isValidExpiry(value) {
+            if (!/^\d{2}\/\d{2}$/.test(value)) {
+                return false;
+            }
+            var parts = value.split('/');
+            var month = parseInt(parts[0], 10);
+            return month >= 1 && month <= 12;
+        }
+
+        function isValidCvv(value) {
+            return /^\d{3,4}$/.test(value);
+        }
+
+        function isValidZip(value) {
+            return /^[A-Za-z0-9\s-]{3,10}$/.test(value);
+        }
+
+        function isPaymentFieldValid(input) {
+            if (!input) {
+                return false;
+            }
+            var value = sanitizeInputValue(input.value);
+            if (!value) {
+                return false;
+            }
+            switch (input.id) {
+                case 'email':
+                    return isValidEmail(value);
+                case 'cardNumber':
+                    return isValidCardNumber(value);
+                case 'expiryDate':
+                    return isValidExpiry(value);
+                case 'cvv':
+                    return isValidCvv(value);
+                case 'zipCode':
+                    return isValidZip(value);
+                default:
+                    return value.length > 0;
+            }
+        }
+
+        function updatePaymentFieldStates(showInvalid) {
+            if (!paymentRequiredInputs.length) {
+                return true;
+            }
+            var firstInvalid = null;
+            var isValid = true;
+            for (var i = 0; i < paymentRequiredInputs.length; i += 1) {
+                var input = paymentRequiredInputs[i];
+                var fieldIsValid = isPaymentFieldValid(input);
+                if (showInvalid) {
+                    input.setAttribute('aria-invalid', fieldIsValid ? 'false' : 'true');
+                }
+                if (!fieldIsValid) {
+                    isValid = false;
+                    if (!firstInvalid) {
+                        firstInvalid = input;
+                    }
+                }
+            }
+            if (showInvalid && firstInvalid && typeof firstInvalid.focus === 'function') {
+                firstInvalid.focus();
+            }
+            return isValid;
+        }
+
+        function updatePaymentButtonState() {
+            var isValid = updatePaymentFieldStates(false);
+            if (paymentSubmitButton) {
+                paymentSubmitButton.disabled = !isValid;
+                if (isValid) {
+                    paymentSubmitButton.removeAttribute('aria-disabled');
+                } else {
+                    paymentSubmitButton.setAttribute('aria-disabled', 'true');
+                }
+            }
+            return isValid;
         }
 
         function showPremiumPage() {
@@ -380,6 +470,7 @@
             if (premiumPage && typeof premiumPage.scrollIntoView === 'function') {
                 premiumPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
+            updatePaymentButtonState();
         }
 
         function selectPlan(type, price) {
@@ -492,9 +583,28 @@
             paymentForm.addEventListener('submit', function (event) {
                 event.preventDefault();
                 toggleDisplay(errorMessage, false);
+                var isFormValid = updatePaymentFieldStates(true);
+                updatePaymentButtonState();
+                if (!isFormValid) {
+                    return;
+                }
                 showProcessingAnimation();
             });
         }
+
+        for (var paymentIndex = 0; paymentIndex < paymentRequiredInputs.length; paymentIndex += 1) {
+            (function (input) {
+                input.addEventListener('input', function () {
+                    input.setAttribute('aria-invalid', isPaymentFieldValid(input) ? 'false' : 'true');
+                    updatePaymentButtonState();
+                });
+                input.addEventListener('blur', function () {
+                    input.setAttribute('aria-invalid', isPaymentFieldValid(input) ? 'false' : 'true');
+                });
+            })(paymentRequiredInputs[paymentIndex]);
+        }
+
+        updatePaymentButtonState();
 
         var cardNumberInput = document.getElementById('cardNumber');
         if (cardNumberInput) {
