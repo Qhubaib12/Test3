@@ -1,746 +1,768 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neon Drift</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;600;700&display=swap"
-        rel="stylesheet"
-    />
     <style>
-        :root {
-            color-scheme: dark;
-            --bg: radial-gradient(circle at 12% 20%, rgba(92, 255, 241, 0.18), transparent 45%),
-                radial-gradient(circle at 88% 12%, rgba(255, 113, 248, 0.26), transparent 55%),
-                #040313;
-            --panel: linear-gradient(140deg, rgba(8, 12, 32, 0.92), rgba(12, 4, 36, 0.88));
-            --accent: #5cfff1;
-            --accent-strong: #ff71f8;
-            --text-soft: rgba(255, 255, 255, 0.72);
-        }
-
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: 'Space Grotesk', sans-serif;
-            background: var(--bg);
-            color: #f4f8ff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: clamp(20px, 4vw, 60px);
+            background: #050510;
+            font-family: 'Orbitron', monospace;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            color: #ff00ff;
+        }
+        
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(ellipse at center, #0a0a1f 0%, #000 100%);
+            position: relative;
             overflow: hidden;
         }
-
-        .scanlines {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.25) 51%);
-            background-size: 100% 3px;
-            opacity: 0.35;
-            mix-blend-mode: soft-light;
-        }
-
-        main {
-            width: min(1080px, 100%);
-            display: grid;
-            gap: clamp(24px, 4vw, 48px);
-            position: relative;
-            z-index: 1;
-        }
-
-        header {
-            display: grid;
-            gap: 18px;
-            text-align: left;
-        }
-
-        h1 {
-            font-family: 'Press Start 2P', cursive;
-            font-size: clamp(26px, 4.4vw, 44px);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin: 0;
-            text-shadow: 0 0 18px rgba(92, 255, 241, 0.7);
-        }
-
-        h1 span {
-            color: var(--accent-strong);
-        }
-
-        .tagline {
-            color: var(--text-soft);
-            font-size: clamp(16px, 2.4vw, 20px);
-            max-width: 720px;
-            line-height: 1.7;
-        }
-
-        .game-shell {
-            position: relative;
-            background: var(--panel);
-            border-radius: clamp(28px, 4vw, 36px);
-            padding: clamp(22px, 4vw, 36px);
-            border: 1px solid rgba(92, 255, 241, 0.22);
-            box-shadow: 0 24px 60px rgba(6, 0, 30, 0.5);
-            overflow: hidden;
-        }
-
-        .game-shell::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 70% -10%, rgba(255, 113, 248, 0.28), transparent 55%);
-            opacity: 0.8;
-            pointer-events: none;
-        }
-
-        canvas {
+        
+        #gameCanvas {
             width: 100%;
-            max-width: 960px;
+            height: 100%;
             display: block;
-            margin-inline: auto;
-            border-radius: clamp(20px, 3vw, 26px);
-            border: 1px solid rgba(92, 255, 241, 0.32);
-            background: radial-gradient(circle at 50% 0%, rgba(92, 255, 241, 0.22), rgba(4, 5, 20, 0.95));
         }
-
-        .hud {
-            margin-top: clamp(18px, 3vw, 28px);
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 16px;
+        
+        #gameHeader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10vh;
+            background: linear-gradient(to bottom, rgba(255, 0, 255, 0.15), transparent);
+            border-bottom: 2px solid #ff00ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 3vw;
+            z-index: 10;
         }
-
-        .hud__panel {
-            position: relative;
-            padding: 18px 20px;
-            border-radius: 16px;
-            background: linear-gradient(150deg, rgba(10, 20, 38, 0.85), rgba(8, 12, 32, 0.92));
-            border: 1px solid rgba(92, 255, 241, 0.2);
+        
+        #gameTitle {
+            font-size: clamp(20px, 4.5vw, 36px);
+            font-weight: 900;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease infinite;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(255, 0, 255, 0.8);
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        #gameStats {
+            display: flex;
+            gap: clamp(15px, 3vw, 35px);
+            font-size: clamp(10px, 2vw, 14px);
+            font-weight: 700;
+        }
+        
+        .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-label {
+            font-size: clamp(8px, 1.5vw, 10px);
+            color: #00ffff;
+            opacity: 0.8;
+            margin-bottom: 2px;
+        }
+        
+        .stat-value {
+            font-size: clamp(14px, 2.8vw, 18px);
+            color: #fff;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+        
+        #driftMeter {
+            position: absolute;
+            right: 3vw;
+            top: 50%;
+            transform: translateY(-50%);
+            width: clamp(30px, 5vw, 60px);
+            height: 40vh;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
             overflow: hidden;
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
         }
-
-        .hud__panel::after {
+        
+        #driftFill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 0%;
+            background: linear-gradient(to top, #ff00ff, #00ffff);
+            transition: height 0.1s ease;
+            box-shadow: 0 0 15px currentColor;
+        }
+        
+        #driftLabel {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(8px, 1.5vw, 10px);
+            color: #00ffff;
+            white-space: nowrap;
+        }
+        
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: rgba(0, 0, 0, 0.95);
+            padding: clamp(25px, 5vw, 50px);
+            border: 3px solid #ff00ff;
+            box-shadow: 
+                0 0 40px #ff00ff,
+                inset 0 0 30px rgba(255, 0, 255, 0.2);
+            display: none;
+            z-index: 20;
+            border-radius: 12px;
+            min-width: 320px;
+        }
+        
+        #gameOver h2 {
+            font-size: clamp(26px, 6vw, 36px);
+            font-weight: 900;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 25px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        .score-display {
+            margin: 15px 0;
+            font-size: clamp(14px, 3vw, 18px);
+            color: #fff;
+        }
+        
+        .high-score {
+            color: #ffff00;
+            text-shadow: 0 0 15px #ffff00;
+        }
+        
+        .restart-hint {
+            margin-top: 25px;
+            font-size: clamp(11px, 2.2vw, 13px);
+            color: #00ffff;
+            opacity: 0.9;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 2vh;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #00ffff;
+            text-align: center;
+            font-size: clamp(9px, 1.6vw, 12px);
+            background: rgba(0, 255, 255, 0.1);
+            padding: clamp(8px, 1.5vh, 12px) clamp(15px, 3vw, 25px);
+            border: 1px solid rgba(0, 255, 255, 0.4);
+            border-radius: 5px;
+        }
+        
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 15px #ff00ff); }
+            to { filter: drop-shadow(0 0 30px #ff00ff) drop-shadow(0 0 40px #00ffff); }
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 0.9; }
+            51%, 100% { opacity: 0.4; }
+        }
+        
+        .new-high-score {
+            animation: celebrate 0.6s ease-out;
+        }
+        
+        @keyframes celebrate {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        #gameContainer::before {
             content: '';
             position: absolute;
-            inset: 0;
-            background: linear-gradient(120deg, transparent, rgba(92, 255, 241, 0.16));
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255, 0, 255, 0.03) 2px,
+                    rgba(255, 0, 255, 0.03) 4px
+                );
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        .combo-text {
+            position: absolute;
+            top: 15vh;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(18px, 4vw, 28px);
+            font-weight: 900;
+            color: #ffff00;
+            text-shadow: 0 0 20px #ffff00;
             opacity: 0;
-            transition: opacity 0.4s ease;
+            animation: comboPopup 1s ease-out;
+            z-index: 12;
+            pointer-events: none;
         }
 
-        .hud__panel:hover::after {
-            opacity: 1;
+        @keyframes comboPopup {
+            0% { opacity: 0; transform: translateX(-50%) scale(0.5); }
+            20% { opacity: 1; transform: translateX(-50%) scale(1.2); }
+            80% { opacity: 1; transform: translateX(-50%) scale(1); }
+            100% { opacity: 0; transform: translateX(-50%) scale(0.8); }
         }
 
-        .hud__label {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 11px;
-            letter-spacing: 2px;
-            color: var(--accent);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-        }
-
-        .hud__value {
-            font-size: clamp(22px, 2.6vw, 30px);
-            font-weight: 600;
-            display: flex;
-            align-items: baseline;
-            gap: 10px;
-        }
-
-        .hud__sub {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            color: rgba(255, 255, 255, 0.55);
-        }
-
-        .control-row {
-            margin-top: clamp(18px, 3vw, 28px);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .control-row p {
-            margin: 0;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.65);
-            line-height: 1.6;
-        }
-
-        .control-row span {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 16px;
-            border-radius: 999px;
-            border: 1px solid rgba(92, 255, 241, 0.35);
-            background: rgba(4, 12, 30, 0.7);
-            font-size: 12px;
-            letter-spacing: 1.2px;
-        }
-
-        button {
-            border: none;
-            border-radius: 999px;
-            background: linear-gradient(120deg, rgba(92, 255, 241, 0.9), rgba(255, 113, 248, 0.85));
-            color: #030616;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            letter-spacing: 1.8px;
-            text-transform: uppercase;
-            padding: 14px 28px;
-            cursor: pointer;
-            box-shadow: 0 12px 32px rgba(92, 255, 241, 0.28);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 18px 44px rgba(92, 255, 241, 0.38);
-        }
-
-        button:disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        footer {
-            font-size: 12px;
-            letter-spacing: 1.6px;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.45);
-            text-align: center;
-        }
-
-        @media (max-width: 720px) {
-            header {
-                text-align: center;
+        @media (max-width: 768px) {
+            #driftMeter {
+                width: clamp(25px, 6vw, 40px);
+                height: 30vh;
             }
-
-            .control-row {
-                justify-content: center;
+            
+            #gameOver {
+                margin: 0 5vw;
+                max-width: 90vw;
             }
+        }
 
-            .control-row p {
-                text-align: center;
+        @media (max-height: 500px) and (orientation: landscape) {
+            #gameHeader {
+                height: 12vh;
+            }
+            
+            #driftMeter {
+                height: 35vh;
             }
         }
     </style>
 </head>
 <body>
-    <div class="scanlines" aria-hidden="true"></div>
-    <main>
-        <header>
-            <h1>Neon <span>Drift</span></h1>
-            <p class="tagline">
-                Ride the synth-lit expressway, chain perfect near-misses, and charge your quantum thrusters to outpace
-                the sunrise. Dodge rival drones, scoop energy shards, and trigger Hyperdrive to bend the track to your
-                will.
-            </p>
-        </header>
-
-        <section class="game-shell" aria-label="Neon Drift gameplay">
-            <canvas id="track" width="900" height="540" role="img" aria-label="Neon Drift game canvas"></canvas>
-
-            <div class="hud" role="status">
-                <article class="hud__panel">
-                    <p class="hud__label">Score</p>
-                    <p class="hud__value"><span id="score">000000</span><span class="hud__sub">pts</span></p>
-                </article>
-                <article class="hud__panel">
-                    <p class="hud__label">Combo</p>
-                    <p class="hud__value"><span id="combo">x1.0</span><span class="hud__sub" id="streak">0 chain</span></p>
-                </article>
-                <article class="hud__panel">
-                    <p class="hud__label">Shields</p>
-                    <p class="hud__value"><span id="shields">3</span><span class="hud__sub">hits left</span></p>
-                </article>
-                <article class="hud__panel">
-                    <p class="hud__label">Hyperdrive</p>
-                    <p class="hud__value"><span id="hyper">0%</span><span class="hud__sub" id="hyperStatus">charge</span></p>
-                </article>
+    <div id="gameContainer">
+        <div id="gameHeader">
+            <div id="gameTitle">NEON DRIFT</div>
+            <div id="gameStats">
+                <div class="stat">
+                    <div class="stat-label">DISTANCE</div>
+                    <div class="stat-value" id="distance">0000m</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">BEST</div>
+                    <div class="stat-value high-score" id="highScore">0000m</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">SPEED</div>
+                    <div class="stat-value" id="speed">120</div>
+                </div>
             </div>
-
-            <div class="control-row">
-                <p>
-                    <strong id="status">Press start</strong>
-                    &nbsp;– steer with <kbd>←</kbd>/<kbd>→</kbd> or <kbd>A</kbd>/<kbd>D</kbd>, tap <kbd>Shift</kbd> once the meter
-                    glows to unleash Hyperdrive.
-                </p>
-                <span>
-                    <button id="start">Press Start</button>
-                </span>
+        </div>
+        
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="driftMeter">
+            <div id="driftLabel">DRIFT</div>
+            <div id="driftFill"></div>
+        </div>
+        
+        <div id="gameOver">
+            <h2>DRIFT ENDED</h2>
+            <div class="score-display">DISTANCE: <span id="finalScore">0000m</span></div>
+            <div class="score-display" id="highScoreDisplay" style="display: none;">
+                ⚡ NEW RECORD! ⚡
             </div>
-        </section>
-
-        <footer>Built for the Arcade Hub — keep drifting, keep glowing.</footer>
-    </main>
+            <div class="score-display">BEST: <span id="bestScore" class="high-score">0000m</span></div>
+            <div class="restart-hint">PRESS [SPACE] OR TAP TO RESTART</div>
+        </div>
+        
+        <div id="instructions">
+            HOLD [SPACE] OR [TOUCH] TO DRIFT LEFT/RIGHT • AVOID WALLS
+        </div>
+    </div>
 
     <script>
-        const canvas = document.getElementById('track');
+        const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const scoreEl = document.getElementById('score');
-        const comboEl = document.getElementById('combo');
-        const streakEl = document.getElementById('streak');
-        const shieldEl = document.getElementById('shields');
-        const hyperEl = document.getElementById('hyper');
-        const hyperStatusEl = document.getElementById('hyperStatus');
-        const startBtn = document.getElementById('start');
-        const statusEl = document.getElementById('status');
-
-        const state = {
-            running: false,
-            gameOver: false,
-            score: 0,
-            streak: 0,
-            shields: 3,
-            speed: 4,
-            hyper: 0,
-            hyperActive: 0,
-            spawnTimer: 0,
-            shardTimer: 0,
-            laneOffset: 0,
-        };
-
-        const player = {
-            x: canvas.width / 2,
-            y: canvas.height - 120,
-            width: 60,
-            height: 110,
-            vx: 0,
-            maxSpeed: 12,
-            acceleration: 1.1,
-        };
-
-        const drones = [];
-        const shards = [];
-        const keys = new Set();
-
-        const neonPalette = [
-            '#5cfff1',
-            '#ff71f8',
-            '#8efc5c',
-            '#ffb347',
-            '#81a9ff',
-        ];
-
-        function resetGame() {
-            state.running = true;
-            state.gameOver = false;
-            state.score = 0;
-            state.streak = 0;
-            state.shields = 3;
-            state.speed = 4;
-            state.hyper = 0;
-            state.hyperActive = 0;
-            state.spawnTimer = 0;
-            state.shardTimer = 2000;
-            state.laneOffset = 0;
-            drones.length = 0;
-            shards.length = 0;
-            player.x = canvas.width / 2;
-            player.vx = 0;
-            statusEl.textContent = 'Stay sharp';
-            startBtn.textContent = 'Restart';
-            updateHud();
+        
+        let gameRunning = true;
+        let distance = 0;
+        let highScore = 0;
+        let speed = 120;
+        let isDrifting = false;
+        let driftDirection = 1; // 1 for right, -1 for left
+        let carX = 0; // Car position relative to center
+        let driftPower = 0;
+        let roadOffset = 0;
+        let combo = 0;
+        
+        const roadWidth = 0.5; // Road width as percentage of screen
+        const driftSpeed = 2.5; // How fast car moves when drifting
+        const returnSpeed = 1.5; // How fast car returns to center
+        
+        let walls = [];
+        let wallTimer = 0;
+        const wallInterval = 100;
+        
+        let particles = [];
+        let trailParticles = [];
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
-
-        function updateHud() {
-            scoreEl.textContent = Math.round(state.score).toString().padStart(6, '0');
-            comboEl.textContent = `x${(1 + state.streak * 0.1).toFixed(1)}`;
-            streakEl.textContent = `${state.streak} chain`;
-            shieldEl.textContent = state.shields;
-            hyperEl.textContent = `${Math.round(state.hyper * 100)}%`;
-            if (state.hyperActive > 0) {
-                hyperStatusEl.textContent = 'Hyperdrive!';
-            } else if (state.hyper >= 1) {
-                hyperStatusEl.textContent = 'ready';
-            } else {
-                hyperStatusEl.textContent = 'charge';
-            }
+        
+        window.addEventListener('resize', resizeCanvas);
+        
+        function loadHighScore() {
+            const saved = localStorage.getItem('neonDriftHighScore');
+            highScore = saved ? parseInt(saved) : 0;
+            updateHighScoreDisplay();
         }
-
-        function spawnDrone() {
-            const laneWidth = canvas.width * 0.6;
-            const laneStart = canvas.width * 0.2;
-            const lanes = 4;
-            const lane = Math.floor(Math.random() * lanes);
-            const x = laneStart + lane * (laneWidth / (lanes - 1));
-            drones.push({
-                x,
-                y: -160,
-                width: 70,
-                height: 130,
-                hue: neonPalette[Math.floor(Math.random() * neonPalette.length)],
-                sway: (Math.random() * 0.6 + 0.2) * (Math.random() > 0.5 ? 1 : -1),
+        
+        function saveHighScore() {
+            localStorage.setItem('neonDriftHighScore', highScore.toString());
+        }
+        
+        function updateHighScoreDisplay() {
+            document.getElementById('highScore').textContent = highScore + 'm';
+        }
+        
+        function createWall(side) {
+            const wallWidth = canvas.width * 0.08;
+            const wallHeight = canvas.height * 0.18;
+            const roadWidthPx = canvas.width * roadWidth;
+            
+            walls.push({
+                side: side,
+                x: side === 'left' ? -roadWidthPx / 2 : roadWidthPx / 2 - wallWidth,
+                y: -wallHeight,
+                width: wallWidth,
+                height: wallHeight,
+                passed: false
             });
         }
-
-        function spawnShard() {
-            const laneWidth = canvas.width * 0.6;
-            const laneStart = canvas.width * 0.2;
-            const x = laneStart + Math.random() * laneWidth;
-            shards.push({
-                x,
-                y: -60,
-                size: 40,
-                pulse: Math.random() * Math.PI * 2,
+        
+        function createParticle(x, y, color, vx, vy) {
+            particles.push({
+                x: x,
+                y: y,
+                vx: vx || (Math.random() - 0.5) * 8,
+                vy: vy || (Math.random() - 0.5) * 8,
+                color: color,
+                life: 30,
+                maxLife: 30,
+                size: Math.random() * 4 + 2
             });
         }
-
-        function activateHyperdrive() {
-            if (state.hyper < 1 || state.hyperActive > 0 || !state.running) return;
-            state.hyperActive = 3000;
-            state.hyper = 0;
-            statusEl.textContent = 'Hyperdrive engaged!';
+        
+        function createTrailParticle(x, y) {
+            trailParticles.push({
+                x: x,
+                y: y,
+                life: 20,
+                maxLife: 20,
+                size: Math.random() * 6 + 3,
+                color: isDrifting ? '#ff00ff' : '#00ffff'
+            });
         }
-
-        function handleInput(delta) {
-            const left = keys.has('ArrowLeft') || keys.has('KeyA');
-            const right = keys.has('ArrowRight') || keys.has('KeyD');
-
-            if (left && !right) {
-                player.vx -= player.acceleration * delta;
-            } else if (right && !left) {
-                player.vx += player.acceleration * delta;
-            } else {
-                player.vx *= 0.9;
+        
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vx *= 0.96;
+                p.vy *= 0.96;
+                p.life--;
+                if (p.life <= 0) particles.splice(i, 1);
             }
-
-            player.vx = Math.max(Math.min(player.vx, player.maxSpeed), -player.maxSpeed);
-            player.x += player.vx * delta * 4;
-
-            const minX = canvas.width * 0.2;
-            const maxX = canvas.width * 0.8;
-            if (player.x < minX) {
-                player.x = minX;
-                player.vx = 0;
-            }
-            if (player.x > maxX) {
-                player.x = maxX;
-                player.vx = 0;
+            
+            for (let i = trailParticles.length - 1; i >= 0; i--) {
+                const p = trailParticles[i];
+                p.y += speed * 0.15;
+                p.life--;
+                if (p.life <= 0) trailParticles.splice(i, 1);
             }
         }
-
-        function updateGame(delta, timestamp) {
-            if (!state.running) return;
-
-            handleInput(delta);
-
-            const baseSpeed = state.hyperActive > 0 ? state.speed * 2.2 : state.speed;
-            state.laneOffset = (state.laneOffset + baseSpeed * 15 * delta) % 120;
-            state.score += baseSpeed * 10 * delta * (1 + state.streak * 0.1);
-
-            state.spawnTimer -= delta * 1000;
-            if (state.spawnTimer <= 0) {
-                spawnDrone();
-                const clampSpeed = Math.min(baseSpeed, 18);
-                state.spawnTimer = 700 - clampSpeed * 18;
-                if (state.spawnTimer < 260) state.spawnTimer = 260;
-            }
-
-            state.shardTimer -= delta * 1000;
-            if (state.shardTimer <= 0) {
-                spawnShard();
-                state.shardTimer = 1200 + Math.random() * 800;
-            }
-
-            const speedBoost = baseSpeed * 4;
-            for (let i = drones.length - 1; i >= 0; i--) {
-                const drone = drones[i];
-                drone.y += speedBoost * delta;
-                drone.x += Math.sin((timestamp + drone.y) * 0.002) * drone.sway;
-                if (drone.y > canvas.height + 160) {
-                    drones.splice(i, 1);
-                }
-            }
-
-            for (let i = shards.length - 1; i >= 0; i--) {
-                const shard = shards[i];
-                shard.y += speedBoost * delta;
-                shard.pulse += delta * 8;
-                if (shard.y > canvas.height + 80) {
-                    shards.splice(i, 1);
-                }
-            }
-
-            if (state.hyperActive > 0) {
-                state.hyperActive -= delta * 1000;
-                if (state.hyperActive <= 0) {
-                    state.hyperActive = 0;
-                    statusEl.textContent = 'Combo fever';
-                }
-            }
-
-            detectCollisions();
-            updateHud();
+        
+        function drawParticles() {
+            trailParticles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = (p.life / p.maxLife) * 0.6;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 10;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+            
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.life / p.maxLife;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 8;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+                ctx.restore();
+            });
         }
-
-        function detectCollisions() {
-            const playerRect = {
-                left: player.x - player.width / 2,
-                right: player.x + player.width / 2,
-                top: player.y - player.height / 2,
-                bottom: player.y + player.height / 2,
-            };
-
-            for (let i = drones.length - 1; i >= 0; i--) {
-                const drone = drones[i];
-                const droneRect = {
-                    left: drone.x - drone.width / 2,
-                    right: drone.x + drone.width / 2,
-                    top: drone.y - drone.height / 2,
-                    bottom: drone.y + drone.height / 2,
-                };
-
-                if (
-                    playerRect.left < droneRect.right &&
-                    playerRect.right > droneRect.left &&
-                    playerRect.top < droneRect.bottom &&
-                    playerRect.bottom > droneRect.top
-                ) {
-                    if (state.hyperActive > 0) {
-                        drones.splice(i, 1);
-                        state.score += 500;
-                        state.streak += 2;
-                        continue;
-                    }
-
-                    drones.splice(i, 1);
-                    state.shields -= 1;
-                    state.streak = 0;
-                    statusEl.textContent = 'Impact! Shields down';
-                    if (state.shields <= 0) {
-                        endGame();
-                        return;
-                    }
-                }
-            }
-
-            for (let i = shards.length - 1; i >= 0; i--) {
-                const shard = shards[i];
-                const distX = Math.abs(player.x - shard.x);
-                const distY = Math.abs(player.y - shard.y);
-                if (distX < (player.width + shard.size) / 2 && distY < (player.height + shard.size) / 2) {
-                    shards.splice(i, 1);
-                    state.score += 150 * (1 + state.streak * 0.1);
-                    state.streak = Math.min(state.streak + 1, 99);
-                    state.hyper = Math.min(state.hyper + 0.18, 1);
-                    statusEl.textContent = 'Energy linked';
-                }
-            }
-        }
-
-        function endGame() {
-            state.running = false;
-            state.gameOver = true;
-            statusEl.textContent = 'Out of shields — press restart';
-            updateHud();
-        }
-
-        function draw(timestamp) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawBackground();
-            drawTrack();
-            drawShards(timestamp);
-            drawDrones(timestamp);
-            drawPlayer(timestamp);
-
-            if (!state.running && state.gameOver) {
-                drawGameOver();
-            } else if (!state.running) {
-                drawIdle();
-            }
-        }
-
-        function drawBackground() {
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, 'rgba(12, 18, 42, 0.85)');
-            gradient.addColorStop(1, 'rgba(4, 6, 20, 0.95)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function drawTrack() {
-            const laneStart = canvas.width * 0.2;
-            const laneWidth = canvas.width * 0.6;
-
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(laneStart - 90, canvas.height);
-            ctx.lineTo(canvas.width / 2 - 40, 0);
-            ctx.lineTo(canvas.width / 2 + 40, 0);
-            ctx.lineTo(laneStart + laneWidth + 90, canvas.height);
-            ctx.closePath();
-            const roadGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            roadGradient.addColorStop(0, 'rgba(10, 12, 36, 0.95)');
-            roadGradient.addColorStop(1, 'rgba(4, 6, 22, 0.96)');
-            ctx.fillStyle = roadGradient;
-            ctx.fill();
-            ctx.restore();
-
-            ctx.strokeStyle = 'rgba(92, 255, 241, 0.35)';
+        
+        function drawRoad() {
+            const centerX = canvas.width / 2;
+            const roadWidthPx = canvas.width * roadWidth;
+            const headerHeight = canvas.height * 0.1;
+            
+            // Road background
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(centerX - roadWidthPx / 2, 0, roadWidthPx, canvas.height);
+            
+            // Road edges with glow
+            ctx.strokeStyle = '#00ffff';
             ctx.lineWidth = 4;
-            ctx.setLineDash([24, 28]);
-            ctx.lineDashOffset = state.laneOffset;
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 15;
             ctx.beginPath();
-            ctx.moveTo(canvas.width / 2, 0);
-            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.moveTo(centerX - roadWidthPx / 2, 0);
+            ctx.lineTo(centerX - roadWidthPx / 2, canvas.height);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(centerX + roadWidthPx / 2, 0);
+            ctx.lineTo(centerX + roadWidthPx / 2, canvas.height);
+            ctx.stroke();
+            
+            // Center line dashes
+            ctx.strokeStyle = '#ff00ff';
+            ctx.lineWidth = 3;
+            ctx.shadowColor = '#ff00ff';
+            ctx.shadowBlur = 10;
+            ctx.setLineDash([20, 30]);
+            const dashOffset = (roadOffset * 2) % 50;
+            ctx.lineDashOffset = -dashOffset;
+            ctx.beginPath();
+            ctx.moveTo(centerX, headerHeight);
+            ctx.lineTo(centerX, canvas.height);
             ctx.stroke();
             ctx.setLineDash([]);
         }
-
-        function drawPlayer(timestamp) {
-            const { x, y, width, height } = player;
+        
+        function drawCar() {
+            const centerX = canvas.width / 2;
+            const carY = canvas.height * 0.75;
+            const carWidth = canvas.width * 0.05;
+            const carHeight = canvas.width * 0.08;
+            const carDrawX = centerX + carX;
+            
+            // Calculate tilt based on movement
+            const tilt = (carX / (canvas.width * roadWidth / 2)) * 0.15;
+            
             ctx.save();
-            ctx.translate(x, y);
-            const glow = ctx.createLinearGradient(-width / 2, -height / 2, width / 2, height / 2);
-            glow.addColorStop(0, 'rgba(255, 113, 248, 0.95)');
-            glow.addColorStop(1, 'rgba(92, 255, 241, 0.95)');
-            ctx.fillStyle = glow;
-            ctx.shadowColor = state.hyperActive > 0 ? '#fff8a9' : '#5cfff1';
-            ctx.shadowBlur = state.hyperActive > 0 ? 50 : 26;
-            ctx.beginPath();
-            ctx.roundRect(-width / 2, -height / 2, width, height, 24);
-            ctx.fill();
-
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
-            ctx.fillRect(-width / 2 + 8, -height / 2 + 18, width - 16, 12);
-            ctx.fillRect(-width / 2 + 8, height / 2 - 30, width - 16, 12);
-
-            const pulse = Math.sin(timestamp * 0.008) * 0.5 + 0.5;
-            ctx.strokeStyle = `rgba(255, 255, 255, ${0.35 + pulse * 0.3})`;
-            ctx.lineWidth = 3;
-            ctx.strokeRect(-width / 2 + 6, -height / 2 + 10, width - 12, height - 20);
+            ctx.translate(carDrawX, carY);
+            ctx.rotate(tilt);
+            
+            // Car body glow
+            ctx.shadowColor = isDrifting ? '#ff00ff' : '#00ffff';
+            ctx.shadowBlur = 20;
+            
+            // Main body
+            const gradient = ctx.createLinearGradient(-carWidth/2, 0, carWidth/2, 0);
+            gradient.addColorStop(0, '#ff00ff');
+            gradient.addColorStop(0.5, '#ffffff');
+            gradient.addColorStop(1, '#00ffff');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(-carWidth/2, -carHeight/2, carWidth, carHeight);
+            
+            // Windows
+            ctx.fillStyle = 'rgba(0, 255, 255, 0.6)';
+            ctx.fillRect(-carWidth/3, -carHeight/3, carWidth * 0.66, carHeight * 0.4);
+            
+            // Lights
+            ctx.fillStyle = '#ffff00';
+            ctx.shadowColor = '#ffff00';
+            ctx.shadowBlur = 15;
+            ctx.fillRect(-carWidth/2 + 2, carHeight/2 - 8, 8, 6);
+            ctx.fillRect(carWidth/2 - 10, carHeight/2 - 8, 8, 6);
+            
             ctx.restore();
+            
+            // Drift trail
+            if (isDrifting && Math.random() > 0.3) {
+                createTrailParticle(carDrawX + (Math.random() - 0.5) * carWidth, carY + carHeight/2);
+            }
         }
-
-        function drawDrones(timestamp) {
-            drones.forEach((drone) => {
-                ctx.save();
-                ctx.translate(drone.x, drone.y);
-                ctx.rotate(Math.sin((timestamp + drone.y) * 0.0015) * 0.12);
-                ctx.fillStyle = drone.hue;
-                ctx.shadowColor = drone.hue;
-                ctx.shadowBlur = 24;
-                ctx.beginPath();
-                ctx.roundRect(-drone.width / 2, -drone.height / 2, drone.width, drone.height, 22);
-                ctx.fill();
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-                ctx.fillRect(-drone.width / 2 + 10, 0, drone.width - 20, drone.height / 2);
-                ctx.restore();
-            });
-        }
-
-        function drawShards(timestamp) {
-            shards.forEach((shard) => {
-                const size = shard.size * (0.85 + Math.sin(shard.pulse) * 0.15);
-                ctx.save();
-                ctx.translate(shard.x, shard.y);
-                ctx.rotate((timestamp * 0.002 + shard.pulse) % (Math.PI * 2));
-                const gradient = ctx.createRadialGradient(0, 0, size * 0.2, 0, 0, size);
-                gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-                gradient.addColorStop(1, 'rgba(92, 255, 241, 0.2)');
-                ctx.fillStyle = gradient;
-                ctx.shadowColor = '#5cfff1';
+        
+        function drawWalls() {
+            const centerX = canvas.width / 2;
+            
+            walls.forEach(wall => {
+                const drawX = centerX + wall.x;
+                
+                // Wall glow
+                ctx.shadowColor = '#ff0066';
                 ctx.shadowBlur = 20;
-                ctx.beginPath();
-                ctx.moveTo(0, -size / 2);
-                ctx.lineTo(size / 2, 0);
-                ctx.lineTo(0, size / 2);
-                ctx.lineTo(-size / 2, 0);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
+                
+                // Wall gradient
+                const gradient = ctx.createLinearGradient(drawX, wall.y, drawX, wall.y + wall.height);
+                gradient.addColorStop(0, '#ff0066');
+                gradient.addColorStop(1, '#cc0052');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(drawX, wall.y, wall.width, wall.height);
+                
+                // Wall highlight
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.fillRect(drawX, wall.y, 5, wall.height);
             });
         }
-
-        function drawGameOver() {
-            ctx.save();
-            ctx.fillStyle = 'rgba(4, 6, 20, 0.6)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#ff71f8';
-            ctx.font = '32px "Space Grotesk"';
-            ctx.textAlign = 'center';
-            ctx.fillText('OUT OF SHIELDS', canvas.width / 2, canvas.height / 2 - 10);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-            ctx.font = '18px "Space Grotesk"';
-            ctx.fillText('Press restart to dive back in', canvas.width / 2, canvas.height / 2 + 28);
-            ctx.restore();
+        
+        function showCombo() {
+            const comboEl = document.createElement('div');
+            comboEl.className = 'combo-text';
+            comboEl.textContent = `${combo}x COMBO!`;
+            document.getElementById('gameContainer').appendChild(comboEl);
+            setTimeout(() => comboEl.remove(), 1000);
         }
-
-        function drawIdle() {
-            ctx.save();
-            ctx.fillStyle = 'rgba(4, 6, 20, 0.4)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#5cfff1';
-            ctx.font = '26px "Space Grotesk"';
-            ctx.textAlign = 'center';
-            ctx.fillText('Press start to enter the drift', canvas.width / 2, canvas.height / 2 + 60);
-            ctx.restore();
-        }
-
-        let lastTime = 0;
-        function loop(timestamp) {
-            const delta = Math.min((timestamp - lastTime) / 1000, 0.1);
-            lastTime = timestamp;
-            updateGame(delta, timestamp);
-            draw(timestamp);
-            requestAnimationFrame(loop);
-        }
-
-        document.addEventListener('keydown', (event) => {
-            if (['ArrowLeft', 'ArrowRight', 'KeyA', 'KeyD', 'ShiftLeft', 'ShiftRight'].includes(event.code)) {
-                event.preventDefault();
-            }
-            keys.add(event.code);
-            if ((event.code === 'Space' || event.code === 'Enter') && !state.running) {
-                resetGame();
-            }
-            if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
-                activateHyperdrive();
-            }
-        });
-
-        document.addEventListener('keyup', (event) => {
-            keys.delete(event.code);
-        });
-
-        startBtn.addEventListener('click', () => {
-            if (!state.running) {
-                resetGame();
+        
+        function update() {
+            if (!gameRunning) return;
+            
+            // Update car position based on drifting
+            if (isDrifting) {
+                carX += driftSpeed * driftDirection;
+                driftPower = Math.min(100, driftPower + 2);
+                
+                // Change direction when hitting road edges
+                const roadWidthPx = canvas.width * roadWidth;
+                const maxCarX = roadWidthPx / 2 - canvas.width * 0.025;
+                
+                if (carX >= maxCarX) {
+                    carX = maxCarX;
+                    driftDirection = -1; // Switch to left
+                } else if (carX <= -maxCarX) {
+                    carX = -maxCarX;
+                    driftDirection = 1; // Switch to right
+                }
             } else {
-                resetGame();
+                // Return to center when not drifting
+                if (Math.abs(carX) > 0.5) {
+                    carX -= Math.sign(carX) * returnSpeed;
+                } else {
+                    carX = 0;
+                }
+                driftPower = Math.max(0, driftPower - 3);
             }
-        });
-
-        canvas.addEventListener('pointerdown', () => {
-            if (!state.running) {
-                resetGame();
+            
+            // Update speed and distance
+            speed = 120 + distance * 0.02;
+            distance += 1;
+            roadOffset += speed * 0.02;
+            
+            // Update drift meter
+            document.getElementById('driftFill').style.height = driftPower + '%';
+            
+            // Create walls
+            wallTimer++;
+            const adjustedInterval = Math.max(70, wallInterval - distance * 0.01);
+            if (wallTimer >= adjustedInterval) {
+                const side = Math.random() > 0.5 ? 'left' : 'right';
+                createWall(side);
+                wallTimer = 0;
+            }
+            
+            // Update walls and collision
+            const centerX = canvas.width / 2;
+            const carY = canvas.height * 0.75;
+            const carWidth = canvas.width * 0.05;
+            const carHeight = canvas.width * 0.08;
+            
+            for (let i = walls.length - 1; i >= 0; i--) {
+                const wall = walls[i];
+                wall.y += speed * 0.15;
+                
+                // Collision detection
+                const carLeft = centerX + carX - carWidth/2;
+                const carRight = centerX + carX + carWidth/2;
+                const carTop = carY - carHeight/2;
+                const carBottom = carY + carHeight/2;
+                
+                const wallLeft = centerX + wall.x;
+                const wallRight = wallLeft + wall.width;
+                const wallTop = wall.y;
+                const wallBottom = wall.y + wall.height;
+                
+                if (carRight > wallLeft && carLeft < wallRight &&
+                    carBottom > wallTop && carTop < wallBottom) {
+                    gameOver();
+                    return;
+                }
+                
+                // Pass scoring
+                if (!wall.passed && wall.y > carY) {
+                    wall.passed = true;
+                    combo++;
+                    if (combo % 5 === 0 && combo > 0) {
+                        showCombo();
+                    }
+                    createParticle(centerX + wall.x + wall.width/2, wall.y, '#ffff00', 0, -5);
+                }
+                
+                // Remove off-screen walls
+                if (wall.y > canvas.height) {
+                    walls.splice(i, 1);
+                }
+            }
+            
+            updateParticles();
+        }
+        
+        function draw() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawRoad();
+            drawWalls();
+            drawParticles();
+            drawCar();
+            
+            document.getElementById('distance').textContent = distance + 'm';
+            document.getElementById('speed').textContent = Math.floor(speed);
+        }
+        
+        function gameOver() {
+            gameRunning = false;
+            
+            let isNewHighScore = false;
+            if (distance > highScore) {
+                highScore = distance;
+                isNewHighScore = true;
+                saveHighScore();
+                updateHighScoreDisplay();
+                document.getElementById('highScoreDisplay').style.display = 'block';
+                document.getElementById('gameOver').classList.add('new-high-score');
             } else {
-                activateHyperdrive();
+                document.getElementById('highScoreDisplay').style.display = 'none';
+                document.getElementById('gameOver').classList.remove('new-high-score');
+            }
+            
+            document.getElementById('finalScore').textContent = distance + 'm';
+            document.getElementById('bestScore').textContent = highScore + 'm';
+            document.getElementById('gameOver').style.display = 'block';
+            
+            // Explosion effect
+            const centerX = canvas.width / 2 + carX;
+            const carY = canvas.height * 0.75;
+            for (let i = 0; i < 30; i++) {
+                createParticle(centerX, carY, i % 2 === 0 ? '#ff00ff' : '#00ffff');
+            }
+        }
+        
+        function restart() {
+            gameRunning = true;
+            distance = 0;
+            speed = 120;
+            carX = 0;
+            driftDirection = 1;
+            driftPower = 0;
+            isDrifting = false;
+            walls = [];
+            particles = [];
+            trailParticles = [];
+            wallTimer = 0;
+            combo = 0;
+            roadOffset = 0;
+            
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('gameOver').classList.remove('new-high-score');
+        }
+        
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Controls
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (gameRunning) {
+                    isDrifting = true;
+                } else {
+                    restart();
+                }
             }
         });
-
-        requestAnimationFrame(loop);
-        draw(0);
-        updateHud();
+        
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                isDrifting = false;
+            }
+        });
+        
+        // Touch controls
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameRunning) {
+                isDrifting = true;
+            } else {
+                restart();
+            }
+        });
+        
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            isDrifting = false;
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+        
+        // Initialize
+        resizeCanvas();
+        loadHighScore();
+        gameLoop();
     </script>
 </body>
 </html>
