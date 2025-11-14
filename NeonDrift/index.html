@@ -335,13 +335,13 @@
         let roadOffset = 0;
         let combo = 0;
         
-        const roadWidth = 0.5; // Road width as percentage of screen
-        const driftSpeed = 2.5; // How fast car moves when drifting
-        const returnSpeed = 1.5; // How fast car returns to center
+        const roadWidth = 0.6; // Road width as percentage of screen
+        const driftSpeed = 4.5; // How fast car moves when drifting
+        const returnSpeed = 3.0; // How fast car returns to center
         
         let walls = [];
         let wallTimer = 0;
-        const wallInterval = 100;
+        const wallInterval = 80;
         
         let particles = [];
         let trailParticles = [];
@@ -368,13 +368,24 @@
         }
         
         function createWall(side) {
-            const wallWidth = canvas.width * 0.08;
-            const wallHeight = canvas.height * 0.18;
+            const wallWidth = canvas.width * 0.12;
+            const wallHeight = canvas.height * 0.15;
             const roadWidthPx = canvas.width * roadWidth;
+            const laneWidth = roadWidthPx / 3;
+            
+            // Position walls in lanes: left, center, or right
+            let xPos;
+            if (side === 'left') {
+                xPos = -roadWidthPx / 2 + laneWidth * 0.5 - wallWidth / 2;
+            } else if (side === 'center') {
+                xPos = -wallWidth / 2;
+            } else { // right
+                xPos = roadWidthPx / 2 - laneWidth * 0.5 - wallWidth / 2;
+            }
             
             walls.push({
                 side: side,
-                x: side === 'left' ? -roadWidthPx / 2 : roadWidthPx / 2 - wallWidth,
+                x: xPos,
                 y: -wallHeight,
                 width: wallWidth,
                 height: wallHeight,
@@ -419,7 +430,7 @@
             
             for (let i = trailParticles.length - 1; i >= 0; i--) {
                 const p = trailParticles[i];
-                p.y += speed * 0.15;
+                p.y += speed * 0.08;
                 p.life--;
                 if (p.life <= 0) trailParticles.splice(i, 1);
             }
@@ -573,7 +584,8 @@
                 
                 // Change direction when hitting road edges
                 const roadWidthPx = canvas.width * roadWidth;
-                const maxCarX = roadWidthPx / 2 - canvas.width * 0.025;
+                const carWidth = canvas.width * 0.05;
+                const maxCarX = (roadWidthPx / 2) - (carWidth * 1.5);
                 
                 if (carX >= maxCarX) {
                     carX = maxCarX;
@@ -602,10 +614,12 @@
             
             // Create walls
             wallTimer++;
-            const adjustedInterval = Math.max(70, wallInterval - distance * 0.01);
+            const adjustedInterval = Math.max(60, wallInterval - distance * 0.005);
             if (wallTimer >= adjustedInterval) {
-                const side = Math.random() > 0.5 ? 'left' : 'right';
-                createWall(side);
+                // Randomly choose lane: left, center, or right
+                const lanes = ['left', 'center', 'right'];
+                const randomLane = lanes[Math.floor(Math.random() * lanes.length)];
+                createWall(randomLane);
                 wallTimer = 0;
             }
             
@@ -617,7 +631,7 @@
             
             for (let i = walls.length - 1; i >= 0; i--) {
                 const wall = walls[i];
-                wall.y += speed * 0.15;
+                wall.y += speed * 0.08;
                 
                 // Collision detection
                 const carLeft = centerX + carX - carWidth/2;
