@@ -2,594 +2,673 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dragon Flight — Endless Adventure</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Dragon Flight: Neon Horizon</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     :root {
-      --ui: #9cf8ff;
+      --ui: #aeeeff;
       --accent: #ffd166;
-      --bg: #0b0f1a;
-      --good: #73fa88;
-      --bad: #ff6b6b;
+      --bg: #050810;
+      --glass: rgba(12, 20, 40, 0.85);
+      --border: rgba(174, 238, 255, 0.3);
     }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; touch-action: none; }
     body {
-      margin: 0;
-      background: radial-gradient(1200px 500px at 50% -20%, #15203a, var(--bg));
-      color: var(--ui);
-      font-family: 'Press Start 2P', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
-      overflow: hidden;
+      margin: 0; overflow: hidden; background: var(--bg);
+      font-family: 'Press Start 2P', monospace; color: var(--ui);
+      height: 100vh; width: 100vw;
     }
-
-    #game { position: relative; width: 100vw; height: 100vh; }
+    #game-container { position: relative; width: 100%; height: 100%; }
     canvas { display: block; width: 100%; height: 100%; }
 
+    /* UI Layer */
+    .ui-layer {
+      position: absolute; inset: 0; pointer-events: none;
+      display: flex; flex-direction: column; justify-content: space-between;
+      padding: max(15px, 2vw);
+    }
+
     /* HUD */
-    .hud {
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 16px;
-      padding: clamp(10px, 2vw, 20px);
-      pointer-events: none;
+    .hud-top { display: flex; justify-content: space-between; width: 100%; max-width: 1200px; margin: 0 auto; }
+    .stat-box {
+      background: var(--glass); border: 1px solid var(--border);
+      padding: 10px 15px; border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      text-align: center; min-width: 80px;
+      backdrop-filter: blur(4px);
     }
-    .hud .stats { display: flex; gap: clamp(10px, 4vw, 32px); }
-    .panel {
-      background: rgba(10, 15, 28, 0.45);
-      border: 1px solid rgba(156, 248, 255, 0.35);
-      box-shadow: 0 0 24px rgba(156, 248, 255, 0.12) inset, 0 0 20px rgba(0,0,0,0.3);
-      border-radius: 10px;
-      padding: 10px 14px;
-      text-shadow: 0 0 8px rgba(156, 248, 255, 0.6);
-      pointer-events: none;
-    }
-    .title { font-size: clamp(12px, 2.4vw, 18px); letter-spacing: 1px; }
-    .value { font-size: clamp(16px, 4.2vw, 28px); color: white; display: block; margin-top: 6px; }
+    .label { font-size: 10px; opacity: 0.7; margin-bottom: 5px; display: block; letter-spacing: 1px; }
+    .value { font-size: 16px; color: #fff; text-shadow: 0 0 10px var(--ui); }
+    #shield-bar { color: #ff6b6b; transition: color 0.3s; }
+    #shield-bar.active { color: #73fa88; text-shadow: 0 0 10px #73fa88; }
 
-    /* Start and Game Over overlays */
-    .overlay {
-      position: absolute; inset: 0; display: grid; place-items: center; text-align: center;
-      background: radial-gradient(1000px 400px at 50% 0%, rgba(30,40,70,0.5), rgba(10,10,18,0.85));
-      color: var(--ui);
+    /* Menus */
+    .modal {
+      position: absolute; inset: 0; 
+      display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(circle, rgba(5,8,16,0.6) 0%, rgba(5,8,16,0.95) 100%);
+      opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 10;
     }
+    .modal.visible { opacity: 1; pointer-events: auto; }
+    
     .card {
-      max-width: 680px; width: min(92vw, 680px);
-      padding: 28px clamp(16px, 4vw, 40px);
-      border: 1px solid rgba(156, 248, 255, 0.35);
-      border-radius: 14px;
-      background: rgba(10, 15, 28, 0.7);
-      box-shadow: 0 0 28px rgba(156, 248, 255, 0.18), inset 0 0 24px rgba(156, 248, 255, 0.12);
+      background: var(--glass); border: 1px solid var(--border);
+      padding: 40px; border-radius: 16px; text-align: center;
+      max-width: 500px; width: 90%;
+      box-shadow: 0 0 40px rgba(174, 238, 255, 0.1);
+      transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .card h1 { margin: 0 0 14px; font-size: clamp(22px, 5vw, 36px); color: white; }
-    .card p { margin: 6px 0; line-height: 1.6; font-size: clamp(10px, 2.3vw, 14px); opacity: 0.9; }
-    .controls { margin-top: 14px; font-size: clamp(10px, 2.3vw, 14px); color: var(--accent); }
-    .button {
-      margin-top: 18px;
-      display: inline-block; pointer-events: auto;
-      padding: 12px 18px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 209, 102, 0.5);
-      background: linear-gradient(180deg, rgba(255, 209, 102, 0.95), rgba(255, 156, 54, 0.95));
-      color: #111; text-decoration: none;
-      text-shadow: none;
-      transition: transform .08s;
+    .modal.visible .card { transform: translateY(0); }
+
+    h1 { margin: 0 0 15px; font-size: clamp(20px, 4vw, 32px); color: #fff; text-shadow: 0 0 20px var(--ui); line-height: 1.4; }
+    p { font-size: 12px; line-height: 1.8; color: #ccc; margin-bottom: 25px; }
+    
+    .btn {
+      background: linear-gradient(135deg, #ffd166, #ff9e00);
+      border: none; border-radius: 8px; padding: 15px 30px;
+      font-family: inherit; font-size: 14px; color: #1a0f00; cursor: pointer;
+      box-shadow: 0 4px 0 #c27a00; transition: all 0.1s;
+      text-transform: uppercase; letter-spacing: 1px;
     }
-    .button:active { transform: translateY(1px); }
+    .btn:active { transform: translateY(4px); box-shadow: 0 0 0 #c27a00; }
+    
+    .tip { margin-top: 20px; font-size: 10px; opacity: 0.6; font-style: italic; }
 
-    .hidden { display: none; }
-
-    /* Touch hint */
-    .hint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 10px; opacity: .7; }
-
-    /* Scanlines for retro feel */
-    #game::after {
-      content: ""; position: absolute; inset: 0; pointer-events: none;
-      background: linear-gradient(transparent 50%, rgba(255,255,255,0.05) 50%);
-      background-size: 100% 4px; mix-blend-mode: overlay; opacity: .2;
+    /* CRT Scanline Effect */
+    .scanlines {
+      position: absolute; inset: 0; pointer-events: none; z-index: 5;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 3px, 6px 100%;
     }
   </style>
 </head>
 <body>
-  <div id="game">
+  <div id="game-container">
     <canvas id="c"></canvas>
+    <div class="scanlines"></div>
 
-    <div class="hud">
-      <div class="panel">
-        <span class="title">SCORE</span>
-        <span id="score" class="value">0000</span>
-      </div>
-      <div class="stats">
-        <div class="panel">
-          <span class="title">BEST</span>
-          <span id="best" class="value">0000</span>
+    <div class="ui-layer">
+      <div class="hud-top">
+        <div class="stat-box">
+          <span class="label">SCORE</span>
+          <span id="ui-score" class="value">0</span>
         </div>
-        <div class="panel">
-          <span class="title">SHIELD</span>
-          <span id="shield" class="value">OFF</span>
+        <div class="stat-box">
+          <span class="label">SHIELD</span>
+          <span id="shield-bar" class="value">0%</span>
+        </div>
+        <div class="stat-box">
+          <span class="label">BEST</span>
+          <span id="ui-best" class="value">0</span>
         </div>
       </div>
     </div>
 
-    <div id="start" class="overlay">
+    <!-- Start Screen -->
+    <div id="modal-start" class="modal visible">
       <div class="card">
-        <h1>DRAGON FLIGHT</h1>
-        <p>Fly through the ancient caves. Collect gems. Avoid spikes. Grab shields to survive a hit. Simple, fast, and retro.</p>
-        <p class="controls">Press Space or click/tap to flap. Press P to pause. Survive as long as you can.</p>
-        <a class="button" id="playBtn" href="#">Start Flight</a>
+        <h1>DRAGON FLIGHT<br><span style="font-size:0.6em; color:var(--ui)">NEON HORIZON</span></h1>
+        <p>Navigate the crystal caverns.<br>Collect gems to charge your shield.<br>Avoid the jagged spikes.</p>
+        <button class="btn" id="btn-start">IGNITE ENGINES</button>
+        <div class="tip">Tap, Click, or Spacebar to Fly</div>
       </div>
-      <div class="hint">Tip: stay low when you see tall ceiling spikes</div>
     </div>
 
-    <div id="over" class="overlay hidden">
+    <!-- Game Over Screen -->
+    <div id="modal-over" class="modal">
       <div class="card">
-        <h1>Flight Over</h1>
-        <p>Your score: <span id="final">0</span></p>
-        <p>Best: <span id="finalBest">0</span></p>
-        <a class="button" id="againBtn" href="#">Fly Again</a>
+        <h1 style="color:#ff6b6b; text-shadow:0 0 20px #ff6b6b">CRITICAL DAMAGE</h1>
+        <p>Your journey ends here.</p>
+        <div style="display:flex; justify-content:center; gap:20px; margin-bottom:25px;">
+          <div class="stat-box"><span class="label">SCORE</span><span id="end-score" class="value">0</span></div>
+          <div class="stat-box"><span class="label">BEST</span><span id="end-best" class="value">0</span></div>
+        </div>
+        <button class="btn" id="btn-restart">RELAUNCH</button>
       </div>
     </div>
   </div>
 
   <script>
-  (() => {
-    const canvas = document.getElementById('c');
-    const ctx = canvas.getContext('2d');
+    /**
+     * AUDIO SYSTEM (Web Audio API)
+     * Procedurally generated sounds - no assets to load.
+     */
+    const AudioSys = {
+      ctx: null,
+      enabled: false,
+      
+      init() {
+        if (this.ctx) return;
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AudioContext();
+        this.enabled = true;
+        // Master compressor to prevent clipping
+        this.master = this.ctx.createDynamicsCompressor();
+        this.master.connect(this.ctx.destination);
+      },
 
-    // HUD elements
-    const scoreEl = document.getElementById('score');
-    const bestEl = document.getElementById('best');
-    const shieldEl = document.getElementById('shield');
-    const startEl = document.getElementById('start');
-    const overEl = document.getElementById('over');
-    const finalEl = document.getElementById('final');
-    const finalBestEl = document.getElementById('finalBest');
-    const playBtn = document.getElementById('playBtn');
-    const againBtn = document.getElementById('againBtn');
+      playTone(freq, type, duration, vol = 0.1, slide = 0) {
+        if (!this.enabled) return;
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+        if (slide) osc.frequency.exponentialRampToValueAtTime(freq + slide, t + duration);
+        
+        gain.gain.setValueAtTime(vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+        
+        osc.connect(gain);
+        gain.connect(this.master);
+        osc.start();
+        osc.stop(t + duration);
+      },
 
-    // Game state
-    let W = 0, H = 0, dpr = 1;
-    let running = false; let paused = false; let t = 0;
-    let score = 0; let best = 0;
-    let objects = []; // spikes, gems, powerups
-    let particles = [];
-    let lastSpawnX = 0; // Track last spawn position to ensure proper spacing
-
-    // Player dragon
-    const dragon = {
-      x: 160, y: 0, vx: 0, vy: 0,
-      r: 20, // base radius
-      flapStrength: -8.5,
-      gravity: 0.45,
-      shield: 0, // time remaining frames
-      alive: true,
+      flap() { this.playTone(150, 'triangle', 0.1, 0.1, -50); },
+      coin() { 
+        this.playTone(1200, 'sine', 0.1, 0.05); 
+        setTimeout(() => this.playTone(1800, 'sine', 0.2, 0.05), 50);
+      },
+      shieldUp() { this.playTone(400, 'square', 0.4, 0.05, 400); },
+      crash() {
+        if (!this.enabled) return;
+        // Noise burst
+        const bufferSize = this.ctx.sampleRate * 0.5;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
+        noise.connect(gain);
+        gain.connect(this.master);
+        noise.start();
+        
+        this.playTone(100, 'sawtooth', 0.6, 0.2, -80);
+      }
     };
 
-    // Utility
-    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-    const rand = (a, b) => a + Math.random() * (b - a);
-    const pad = (n) => String(n|0).padStart(4, '0');
+    /**
+     * GAME ENGINE & LOGIC
+     * Uses virtual resolution for consistent physics across devices.
+     */
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d', { alpha: false }); // Optimize
+    
+    // Constants
+    const GAME_WIDTH = 800; // Virtual resolution width
+    const GAME_HEIGHT = 450; // Virtual resolution height
+    const GRAVITY = 0.25;
+    const FLAP_FORCE = -5.5;
+    const TERMINAL_VELOCITY = 6;
+    
+    // State
+    let running = false;
+    let score = 0;
+    let bestScore = parseInt(localStorage.getItem('dragon_best') || '0');
+    let gameTime = 0;
+    let speed = 3;
+    let shake = 0;
+    
+    // Scaling
+    let scale = 1;
+    
+    // Object Pools to reduce GC
+    const pools = {
+      particles: [],
+      objects: [] // spikes, gems
+    };
+    
+    // Active Entities
+    let particles = [];
+    let objects = [];
+    
+    const dragon = {
+      x: 100, y: GAME_HEIGHT / 2,
+      r: 14,
+      vy: 0,
+      shield: 0,
+      maxShield: 100,
+      angle: 0
+    };
 
+    // Initialization
     function resize() {
-      dpr = window.devicePixelRatio || 1;
-      W = canvas.width = Math.floor(window.innerWidth * dpr);
-      H = canvas.height = Math.floor(window.innerHeight * dpr);
-      canvas.style.width = '100%';
-      canvas.style.height = '100%';
+      const winW = window.innerWidth;
+      const winH = window.innerHeight;
+      canvas.width = winW;
+      canvas.height = winH;
+      
+      // Calculate scale to fit game logic into screen while maintaining aspect ratio is not strictly needed
+      // Instead, we scale the drawing context to fit the height or width
+      scale = Math.min(winW / GAME_WIDTH, winH / GAME_HEIGHT);
+      
+      // If screen is very wide, we might want to show more width, but for fairness,
+      // let's stick to a fixed height logical projection
+      scale = winH / GAME_HEIGHT;
     }
     window.addEventListener('resize', resize);
+    resize();
 
-    function loadBest() {
-      try { best = parseInt(localStorage.getItem('dragonFlightBest') || '0', 10) || 0; } catch(e){ best = 0; }
-      bestEl.textContent = pad(best);
+    // Inputs
+    function handleInput(e) {
+      if (e.type === 'keydown' && e.code !== 'Space') return;
+      if (e.type === 'keydown') e.preventDefault(); // Stop scrolling
+      
+      if (!running) return;
+      
+      dragon.vy = FLAP_FORCE;
+      AudioSys.flap();
+      
+      // Flap particles
+      spawnParticles(dragon.x - 10, dragon.y + 5, 5, '#fff', 1);
     }
-    function saveBest() { try { localStorage.setItem('dragonFlightBest', String(best)); } catch(e){} }
-
-    // Input
-    function flap() {
-      if (!running) { start(); return; }
-      if (!dragon.alive) return;
-      dragon.vy = dragon.flapStrength;
-      // small horizontal bob for feel
-      dragon.vx = 0.6;
-      spawnFlapBurst();
-    }
-
-    window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space') { e.preventDefault(); flap(); }
-      if (e.code === 'KeyP') { e.preventDefault(); if (running) paused = !paused; }
-    }, { passive: false });
-
-    canvas.addEventListener('pointerdown', flap);
-    playBtn.addEventListener('click', (e) => { e.preventDefault(); start(); });
-    againBtn.addEventListener('click', (e) => { e.preventDefault(); reset(); start(); });
-
-    // Generators - FIXED SPACING (SIMPLIFIED)
-    let spawnTimer = 0;
+    window.addEventListener('keydown', handleInput);
+    window.addEventListener('pointerdown', handleInput);
     
-    function spawnStuff(dt) {
-      spawnTimer += dt;
+    document.getElementById('btn-start').onclick = startGame;
+    document.getElementById('btn-restart').onclick = resetGame;
+
+    function startGame() {
+      AudioSys.init();
+      document.getElementById('modal-start').classList.remove('visible');
+      resetGame();
+    }
+
+    function resetGame() {
+      running = true;
+      score = 0;
+      gameTime = 0;
+      speed = 3.5;
+      shake = 0;
       
-      // Determine spawn interval based on difficulty
-      const baseInterval = 1200; // Base spawn time in ms
-      const minInterval = 700; // Minimum spawn time
-      const difficultyReduction = Math.min(400, score * 0.6);
-      const spawnInterval = Math.max(minInterval, baseInterval - difficultyReduction);
+      dragon.y = GAME_HEIGHT / 2;
+      dragon.vy = 0;
+      dragon.shield = 0;
       
-      if (spawnTimer < spawnInterval) return;
-      spawnTimer = 0;
-
-      // Simple but effective spacing
-      const speed = getSpeed();
-      const minSpacing = 300 * dpr; // Fixed minimum spacing in pixels
+      objects = [];
+      particles = [];
       
-      // Find rightmost obstacle
-      let rightmostX = W + 50 * dpr; // Default spawn position
-      for (const obj of objects) {
-        const objRight = obj.x + (obj.type === 'spike' ? obj.w : obj.r * 2);
-        if (objRight > rightmostX - minSpacing) {
-          rightmostX = objRight + minSpacing;
-        }
-      }
+      document.getElementById('modal-over').classList.remove('visible');
+      document.getElementById('ui-score').textContent = '0';
+      document.getElementById('ui-best').textContent = bestScore;
+      updateShieldUI();
       
-      const spawnX = rightmostX;
-
-      // Decide what to spawn: spikes pair, gem, or shield
-      const roll = Math.random();
-
-      if (roll < 0.65) {
-        // Spike pair
-        const gap = clamp(150 - score * 0.05, 120, 150) * dpr;
-        const topHeight = rand(60, H*0.42 - gap*0.5);
-        const bottomStart = topHeight + gap;
-        const thickness = rand(22, 32) * dpr;
-        const color = `hsl(${220 + rand(-10, 10)}, 70%, 65%)`;
-        
-        objects.push({ 
-          type: 'spike', 
-          x: spawnX, 
-          y: 0, 
-          w: thickness, 
-          h: topHeight, 
-          vx: -speed, 
-          color
-        });
-        objects.push({ 
-          type: 'spike', 
-          x: spawnX, 
-          y: bottomStart, 
-          w: thickness, 
-          h: H - bottomStart, 
-          vx: -speed, 
-          color
-        });
-        
-      } else if (roll < 0.88) {
-        // Gem - spawn with small offset
-        const gemX = spawnX + rand(60, 120) * dpr;
-        const safeY = rand(H*0.25, H*0.75);
-        objects.push({ 
-          type: 'gem', 
-          x: gemX,
-          y: safeY, 
-          r: 10 * dpr, 
-          vx: -speed*0.95, 
-          bob: rand(0, 6.28)
-        });
-        
-      } else {
-        // Shield power-up
-        const shieldX = spawnX + rand(80, 150) * dpr;
-        const safeY = rand(H*0.3, H*0.7);
-        objects.push({ 
-          type: 'shield', 
-          x: shieldX,
-          y: safeY, 
-          r: 13 * dpr, 
-          vx: -speed*0.9, 
-          bob: rand(0, 6.28)
-        });
-      }
-    }
-
-    function getSpeed() {
-      return (3.0 + Math.min(6, score * 0.004)) * dpr; // Back to reasonable speed
-    }
-
-    // Particles
-    function addParticle(px, py, vx, vy, life, color, size) {
-      particles.push({ x: px, y: py, vx, vy, life, max: life, color, size });
-    }
-
-    function spawnFlapBurst() {
-      const n = 12;
-      for (let i=0;i<n;i++) {
-        const a = rand(Math.PI*0.8, Math.PI*1.2);
-        const s = rand(1.2, 2.8) * dpr;
-        addParticle(dragon.x - dragon.r*0.8, dragon.y + rand(-6,6)*dpr, Math.cos(a)*s, Math.sin(a)*s, rand(300, 520), 'rgba(255,240,180,0.8)', rand(2,4)*dpr);
-      }
-    }
-
-    function spawnHitBurst() {
-      const n = 22;
-      for (let i=0;i<n;i++) {
-        const a = rand(0, Math.PI*2);
-        const s = rand(1.5, 3.6) * dpr;
-        addParticle(dragon.x, dragon.y, Math.cos(a)*s, Math.sin(a)*s, rand(400, 700), 'rgba(255,90,90,0.9)', rand(2,5)*dpr);
-      }
-    }
-
-    // Collision helpers
-    function circleRectCollide(cx, cy, cr, rx, ry, rw, rh) {
-      const nx = clamp(cx, rx, rx + rw);
-      const ny = clamp(cy, ry, ry + rh);
-      const dx = cx - nx; const dy = cy - ny;
-      return dx*dx + dy*dy <= cr*cr;
-    }
-
-    function circleCircleCollide(ax, ay, ar, bx, by, br) {
-      const dx = ax - bx, dy = ay - by, r = ar + br; return dx*dx + dy*dy <= r*r;
-    }
-
-    // Drawing
-    function drawBackground(time) {
-      // parallax caves and stars
-      const speed = getSpeed();
-      const tpx = (time * 0.04 * speed) % (W);
-
-      // Stars
-      ctx.save();
-      ctx.globalAlpha = 0.5;
-      for (let i=0;i<80;i++) {
-        const x = (i*W/80 - tpx*0.4 + W) % W;
-        const y = (i*i*97 % H);
-        ctx.fillStyle = i % 7 ? 'rgba(180,220,255,0.5)' : 'rgba(255,255,255,0.9)';
-        ctx.fillRect(x, y, 2*dpr, 2*dpr);
-      }
-      ctx.restore();
-
-      // Layered cave silhouettes
-      const layers = [
-        { h: H*0.72, amp: 28*dpr, k: 0.0016, a: 0.7 },
-        { h: H*0.80, amp: 34*dpr, k: 0.0012, a: 0.6 },
-        { h: H*0.88, amp: 40*dpr, k: 0.0010, a: 0.5 },
-      ];
-      layers.forEach((L, idx) => {
-        const yBase = L.h;
-        ctx.fillStyle = `rgba(35,50,85,${L.a})`;
-        ctx.beginPath();
-        ctx.moveTo(0, H);
-        for (let x=0; x<=W; x+=8*dpr) {
-          const y = yBase + Math.sin((x + tpx*(0.4+idx*0.25)) * L.k) * L.amp;
-          ctx.lineTo(x, y);
-        }
-        ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
-      });
-
-      // Ceiling silhouette
-      ctx.fillStyle = 'rgba(25,40,70,0.6)';
-      ctx.beginPath(); ctx.moveTo(0,0);
-      for (let x=0; x<=W; x+=8*dpr) {
-        const y = 40*dpr + Math.sin((x + tpx*0.55) * 0.002) * 20*dpr;
-        ctx.lineTo(x, y);
-      }
-      ctx.lineTo(W,0); ctx.closePath(); ctx.fill();
-    }
-
-    function drawDragon() {
-      const x = dragon.x, y = dragon.y, r = dragon.r;
-      // body
-      const tilt = clamp(dragon.vy * 0.04, -0.6, 0.6);
-      ctx.save();
-      ctx.translate(x, y); ctx.rotate(tilt);
-
-      // tail
-      ctx.fillStyle = '#e2a23a';
-      ctx.beginPath();
-      ctx.moveTo(-r*1.2, 0);
-      ctx.quadraticCurveTo(-r*1.6, -r*0.3, -r*2.0, 0);
-      ctx.quadraticCurveTo(-r*1.6, r*0.3, -r*1.2, 0);
-      ctx.fill();
-
-      // wings (flap)
-      const wing = Math.sin(t * 0.02) * r*0.5 + r*0.7;
-      ctx.fillStyle = '#f8d27a';
-      ctx.beginPath();
-      ctx.ellipse(-r*0.2, -r*0.6, wing*0.7, r*0.5, -0.3, 0, Math.PI*2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(-r*0.2, r*0.6, wing*0.7, r*0.5, 0.3, 0, Math.PI*2);
-      ctx.fill();
-
-      // body core
-      const grad = ctx.createRadialGradient(0,0,r*0.2, 0,0,r*1.05);
-      grad.addColorStop(0,'#fff5cc'); grad.addColorStop(1,'#e5b757');
-      ctx.fillStyle = grad;
-      ctx.beginPath(); ctx.ellipse(0,0,r*1.15,r*0.9,0,0,Math.PI*2); ctx.fill();
-
-      // eye
-      ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(r*0.5,-r*0.15,r*0.12,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(r*0.55,-r*0.18,r*0.05,0,Math.PI*2); ctx.fill();
-
-      // shield glow
-      if (dragon.shield > 0) {
-        ctx.shadowColor = 'rgba(115,250,136,0.9)';
-        ctx.shadowBlur = 18*dpr;
-        ctx.strokeStyle = 'rgba(115,250,136,0.9)';
-        ctx.lineWidth = 3*dpr;
-        ctx.beginPath(); ctx.arc(0,0,r*1.4,0,Math.PI*2); ctx.stroke();
-      }
-
-      ctx.restore();
-    }
-
-    function drawObjects() {
-      for (const o of objects) {
-        if (o.type === 'spike') {
-          ctx.fillStyle = o.color;
-          // draw as jagged crystal column
-          ctx.beginPath();
-          const x = o.x, y = o.y, w = o.w, h = o.h;
-          const teeth = Math.max(4, Math.floor(h / (24*dpr)));
-          const step = h / teeth;
-          for (let i=0;i<teeth;i++) {
-            const yy = y + i*step;
-            const skew = (i % 2 ? -1 : 1) * w*0.35;
-            ctx.moveTo(x, yy);
-            ctx.lineTo(x + w, yy);
-            ctx.lineTo(x + w + skew, yy + step);
-            ctx.lineTo(x + skew, yy + step);
-          }
-          ctx.closePath(); ctx.fill();
-        } else if (o.type === 'gem') {
-          const r = o.r; const pulse = 1 + Math.sin(t*0.02 + o.bob) * 0.08;
-          ctx.save(); ctx.translate(o.x, o.y); ctx.scale(pulse, pulse);
-          const g = ctx.createLinearGradient(-r, -r, r, r);
-          g.addColorStop(0, '#6cf'); g.addColorStop(1, '#c8f7ff');
-          ctx.fillStyle = g; ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 1*dpr;
-          ctx.beginPath();
-          ctx.moveTo(0,-r); ctx.lineTo(r*0.8, -r*0.2); ctx.lineTo(r*0.6, r*0.9);
-          ctx.lineTo(-r*0.6, r*0.9); ctx.lineTo(-r*0.8, -r*0.2); ctx.closePath();
-          ctx.fill(); ctx.stroke();
-          ctx.restore();
-        } else if (o.type === 'shield') {
-          const r = o.r; const pulse = 1 + Math.sin(t*0.03 + o.bob) * 0.12;
-          ctx.save(); ctx.translate(o.x, o.y); ctx.scale(pulse, pulse);
-          ctx.strokeStyle = 'rgba(115,250,136,0.95)'; ctx.lineWidth = 2*dpr;
-          ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.stroke();
-          ctx.beginPath(); ctx.moveTo(0,-r*0.6); ctx.lineTo(0,r*0.6); ctx.stroke();
-          ctx.restore();
-        }
-      }
-    }
-
-    function drawParticles(dt) {
-      for (const p of particles) {
-        const a = p.life / p.max;
-        ctx.globalAlpha = a;
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, p.size, p.size);
-        ctx.globalAlpha = 1;
-      }
-    }
-
-    // Update
-    let last = performance.now();
-    function update() {
-      const now = performance.now();
-      let dt = now - last; if (dt > 80) dt = 80; // clamp
-      last = now; if (!running || paused) { requestAnimationFrame(update); return drawFrame(0); }
-      t += dt;
-
-      // Physics
-      dragon.vy += dragon.gravity * dpr;
-      dragon.y += dragon.vy * dpr;
-      dragon.x += dragon.vx * dpr; dragon.vx *= 0.92;
-
-      // World bounds
-      dragon.y = clamp(dragon.y, dragon.r + 4*dpr, H - dragon.r - 4*dpr);
-
-      // Spawn and move objects
-      spawnStuff(dt);
-      const speed = getSpeed();
-      for (let i=objects.length-1; i>=0; i--) {
-        const o = objects[i];
-        o.x += o.vx;
-        if (o.type === 'gem' || o.type === 'shield') {
-          o.y += Math.sin((t*0.006) + o.bob) * 0.6 * dpr;
-        }
-        // off screen - increased cleanup distance
-        if (o.x < -150*dpr) objects.splice(i,1);
-      }
-
-      // Particles
-      for (let i=particles.length-1; i>=0; i--) {
-        const p = particles[i];
-        p.x += p.vx; p.y += p.vy; p.vx *= 0.99; p.vy *= 0.99; p.life -= dt;
-        if (p.life <= 0) particles.splice(i,1);
-      }
-
-      // Collisions
-      for (let i=objects.length-1; i>=0; i--) {
-        const o = objects[i];
-        if (o.type === 'spike') {
-          if (circleRectCollide(dragon.x, dragon.y, dragon.r*0.85, o.x, o.y, o.w, o.h)) {
-            if (dragon.shield > 0) {
-              dragon.shield = 0; shieldEl.textContent = 'OFF';
-              spawnHitBurst();
-              // break the spike chunk for effect
-              for (let k=0;k<12;k++) addParticle(dragon.x, dragon.y, rand(-2,2)*dpr, rand(-2,2)*dpr, rand(200,500), 'rgba(255,220,120,0.9)', rand(2,4)*dpr);
-              // nudge player out
-              dragon.vy = -6*dpr; dragon.vx = -1.2*dpr;
-              // remove this spike segment to avoid double hits
-              objects.splice(i,1);
-              continue;
-            } else {
-              dragon.alive = false; gameOver(); return;
-            }
-          }
-        } else if (o.type === 'gem') {
-          if (circleCircleCollide(dragon.x, dragon.y, dragon.r*0.9, o.x, o.y, o.r)) {
-            score += 10; scoreEl.textContent = pad(score);
-            for (let k=0;k<10;k++) addParticle(o.x, o.y, rand(-1.2,1.2)*dpr, rand(-1.2,1.2)*dpr, rand(250,450), 'rgba(200,245,255,0.95)', rand(2,4)*dpr);
-            objects.splice(i,1);
-          }
-        } else if (o.type === 'shield') {
-          if (circleCircleCollide(dragon.x, dragon.y, dragon.r*0.9, o.x, o.y, o.r)) {
-            dragon.shield = 1; shieldEl.textContent = 'ON';
-            for (let k=0;k<12;k++) addParticle(o.x, o.y, rand(-1.2,1.2)*dpr, rand(-1.2,1.2)*dpr, rand(300,500), 'rgba(115,250,136,0.95)', rand(2,4)*dpr);
-            objects.splice(i,1);
-          }
-        }
-      }
-
-      // Passive score for survival
-      score += Math.max(1, Math.floor(dt * 0.02));
-      scoreEl.textContent = pad(score);
-
-      drawFrame(dt);
-      requestAnimationFrame(update);
-    }
-
-    function drawFrame(dt) {
-      // clear
-      ctx.clearRect(0,0,W,H);
-      drawBackground(t);
-      drawObjects();
-      drawDragon();
-      drawParticles(dt);
-    }
-
-    function start() {
-      if (running) { paused = false; return; }
-      running = true; startEl.classList.add('hidden'); overEl.classList.add('hidden');
-      last = performance.now(); requestAnimationFrame(update);
-    }
-
-    function reset() {
-      score = 0; scoreEl.textContent = pad(score);
-      dragon.x = 160 * dpr; dragon.y = H*0.5; dragon.vx = 0; dragon.vy = 0; dragon.alive = true; dragon.shield = 0; shieldEl.textContent = 'OFF';
-      objects = []; particles = []; spawnTimer = 0; t = 0; paused = false;
+      requestAnimationFrame(loop);
     }
 
     function gameOver() {
       running = false;
-      finalEl.textContent = score;
-      if (score > best) { best = score; saveBest(); }
-      bestEl.textContent = pad(best);
-      finalBestEl.textContent = best;
-      overEl.classList.remove('hidden');
+      shake = 20;
+      AudioSys.crash();
+      
+      if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('dragon_best', bestScore);
+      }
+      
+      document.getElementById('end-score').textContent = Math.floor(score);
+      document.getElementById('end-best').textContent = bestScore;
+      
+      // Delay showing modal for dramatic effect
+      setTimeout(() => {
+        document.getElementById('modal-over').classList.add('visible');
+      }, 500);
     }
 
-    // Boot
-    function boot() {
-      resize(); loadBest(); reset(); drawFrame(0);
+    // --- Logic Helpers ---
+
+    function spawnParticles(x, y, count, color, speedVar) {
+      for (let i = 0; i < count; i++) {
+        let p = pools.particles.pop() || { x:0, y:0, vx:0, vy:0, life:0, color:'' };
+        p.x = x;
+        p.y = y;
+        const angle = Math.random() * Math.PI * 2;
+        const s = Math.random() * speedVar;
+        p.vx = Math.cos(angle) * s - speed/2; // Drift left with world
+        p.vy = Math.sin(angle) * s;
+        p.life = 1.0;
+        p.color = color;
+        p.size = Math.random() * 3 + 1;
+        particles.push(p);
+      }
     }
-    boot();
-  })();
+
+    // Pattern Generator for Spikes
+    let spawnTimer = 0;
+    let patternState = 0; // 0: random, 1: wave, 2: tunnel
+    
+    function spawnObstacles() {
+      spawnTimer -= speed;
+      if (spawnTimer > 0) return;
+      
+      // Difficulty scaling
+      const difficulty = Math.min(1, score / 2000);
+      const gapSize = 140 - (difficulty * 50); // Gaps get smaller
+      const spacing = 220; // Horizontal spacing
+      
+      spawnTimer = spacing;
+
+      // Pattern Logic
+      const spawnX = GAME_WIDTH + 100; // Spawn off-screen
+      
+      // Determine Y position based on noise/pattern
+      const time = gameTime * 0.05;
+      const noise = Math.sin(time) + Math.sin(time * 0.3) * 0.5; // -1.5 to 1.5
+      
+      let centerY = GAME_HEIGHT/2 + (noise * (GAME_HEIGHT/3));
+      centerY = Math.max(gapSize/2 + 20, Math.min(GAME_HEIGHT - gapSize/2 - 20, centerY));
+
+      // Spawn Top Spike
+      let tSpike = pools.objects.pop() || {};
+      tSpike.type = 'spike';
+      tSpike.x = spawnX;
+      tSpike.y = 0;
+      tSpike.w = 40;
+      tSpike.h = centerY - gapSize/2;
+      tSpike.active = true;
+      objects.push(tSpike);
+
+      // Spawn Bottom Spike
+      let bSpike = pools.objects.pop() || {};
+      bSpike.type = 'spike';
+      bSpike.x = spawnX;
+      bSpike.y = centerY + gapSize/2;
+      bSpike.w = 40;
+      bSpike.h = GAME_HEIGHT - bSpike.y;
+      bSpike.active = true;
+      objects.push(bSpike);
+
+      // Chance to spawn gem
+      if (Math.random() > 0.6) {
+        let gem = pools.objects.pop() || {};
+        gem.type = 'gem';
+        gem.x = spawnX + 20;
+        gem.y = centerY;
+        gem.r = 8;
+        gem.active = true;
+        objects.push(gem);
+      }
+    }
+
+    function updateShieldUI() {
+      const ui = document.getElementById('shield-bar');
+      ui.textContent = Math.floor(dragon.shield) + '%';
+      if (dragon.shield >= 100) ui.classList.add('active');
+      else ui.classList.remove('active');
+    }
+
+    // --- Main Loop ---
+
+    function loop() {
+      if (!running) return;
+      
+      // Delta time approximation (assume 60fps for simplicity in this specific simplified physics model)
+      // For a production engine, true DT is better, but for a retro flyer, fixed step is fine.
+      
+      // 1. Logic Update
+      gameTime++;
+      speed = 3.5 + (score / 1000); // Accelerate slowly
+      
+      // Dragon Physics
+      dragon.vy += GRAVITY;
+      dragon.vy = Math.min(dragon.vy, TERMINAL_VELOCITY);
+      dragon.y += dragon.vy;
+      
+      // Rotation based on velocity
+      dragon.angle = Math.min(Math.PI / 4, Math.max(-Math.PI / 4, (dragon.vy * 0.1)));
+
+      // Bounds Check
+      if (dragon.y < 0 || dragon.y > GAME_HEIGHT) {
+        gameOver();
+      }
+
+      // Shield Drain (if active)
+      if (dragon.shield >= 100) {
+        dragon.shield -= 0.2; // Lasts about 8 seconds
+        if (dragon.shield < 0) dragon.shield = 0;
+        updateShieldUI();
+      }
+
+      // Object Manager
+      spawnObstacles();
+      
+      // Process Objects
+      for (let i = objects.length - 1; i >= 0; i--) {
+        let o = objects[i];
+        o.x -= speed;
+        
+        // Magnet Effect for Gems
+        if (o.type === 'gem' && o.active) {
+          const dx = dragon.x - o.x;
+          const dy = dragon.y - o.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < 150) { // Magnet range
+            o.x += dx * 0.05;
+            o.y += dy * 0.05;
+          }
+          
+          // Gem Collision
+          if (dist < dragon.r + o.r) {
+            o.active = false;
+            score += 10;
+            dragon.shield = Math.min(100, dragon.shield + 20);
+            updateShieldUI();
+            AudioSys.coin();
+            spawnParticles(o.x, o.y, 8, '#73fa88', 3);
+            if (dragon.shield >= 100 && dragon.shield - 20 < 100) AudioSys.shieldUp();
+          }
+        }
+        
+        // Spike Collision
+        if (o.type === 'spike' && o.active) {
+          // AABB Collision
+          if (dragon.x + dragon.r > o.x && dragon.x - dragon.r < o.x + o.w &&
+              dragon.y + dragon.r > o.y && dragon.y - dragon.r < o.y + o.h) {
+            
+            if (dragon.shield >= 100) {
+              // Shield Hit
+              o.active = false; // Smash spike
+              dragon.shield = 0;
+              updateShieldUI();
+              shake = 10;
+              AudioSys.crash();
+              spawnParticles(o.x + o.w/2, dragon.y, 15, '#fff', 5);
+            } else {
+              gameOver();
+            }
+          }
+        }
+
+        // Despawn
+        if (o.x < -100 || !o.active) {
+          objects.splice(i, 1);
+          pools.objects.push(o);
+        }
+      }
+
+      // Process Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 0.02;
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          pools.particles.push(p);
+        }
+      }
+
+      // Score
+      score += 0.1;
+      document.getElementById('ui-score').textContent = Math.floor(score);
+
+      // Screenshake decay
+      if (shake > 0) shake *= 0.9;
+      if (shake < 0.5) shake = 0;
+
+      // 2. Render
+      draw();
+      
+      if (running) requestAnimationFrame(loop);
+    }
+
+    // --- Rendering ---
+
+    function draw() {
+      // Reset transform
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      
+      // Clear Background (Gradient)
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, '#0b1021');
+      grad.addColorStop(1, '#1b2735');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Apply Virtual Scale & Shake
+      let shakeX = (Math.random() - 0.5) * shake;
+      let shakeY = (Math.random() - 0.5) * shake;
+      
+      // Center the view vertically if screen aspect ratio differs significantly, 
+      // but sticking to top-left scaling is simpler for this game type.
+      ctx.translate(shakeX, shakeY);
+      ctx.scale(scale, scale);
+
+      // Draw Parallax Background Stars
+      ctx.fillStyle = '#fff';
+      for(let i=0; i<50; i++) {
+        let bx = (i * 137 + gameTime * -0.2) % GAME_WIDTH;
+        if (bx < 0) bx += GAME_WIDTH;
+        let by = (i * 233) % GAME_HEIGHT;
+        ctx.globalAlpha = (Math.sin(gameTime*0.05 + i) + 1) / 2 * 0.5;
+        ctx.fillRect(bx, by, i%3+1, i%3+1);
+      }
+      ctx.globalAlpha = 1;
+
+      // Draw Cave Silhouettes (Parallax Layers)
+      drawCaveLayer(0.5, '#151d2f', 100);
+      drawCaveLayer(1.0, '#0a0e17', 50); // Foreground spikes move with speed
+
+      // Draw Objects
+      for (let o of objects) {
+        if (!o.active) continue;
+        if (o.type === 'spike') {
+          // Draw jagged spike
+          ctx.fillStyle = '#2a3b55';
+          ctx.strokeStyle = '#5da6ff';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.rect(o.x, o.y, o.w, o.h);
+          ctx.fill();
+          // Add neon edge
+          ctx.beginPath();
+          if (o.y === 0) { // Top spike
+            ctx.moveTo(o.x, 0); ctx.lineTo(o.x, o.h); ctx.lineTo(o.x+o.w, o.h); ctx.lineTo(o.x+o.w, 0);
+          } else { // Bottom spike
+            ctx.moveTo(o.x, GAME_HEIGHT); ctx.lineTo(o.x, o.y); ctx.lineTo(o.x+o.w, o.y); ctx.lineTo(o.x+o.w, GAME_HEIGHT);
+          }
+          ctx.stroke();
+          
+          // Inner detail
+          ctx.fillStyle = 'rgba(93, 166, 255, 0.1)';
+          ctx.fillRect(o.x + 5, o.y, o.w - 10, o.h);
+        } 
+        else if (o.type === 'gem') {
+          ctx.fillStyle = '#73fa88';
+          ctx.shadowColor = '#73fa88';
+          ctx.shadowBlur = 15;
+          ctx.beginPath();
+          ctx.arc(o.x, o.y, o.r, 0, Math.PI*2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#fff';
+          ctx.beginPath();
+          ctx.arc(o.x - 2, o.y - 2, 3, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+
+      // Draw Particles
+      for (let p of particles) {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      // Draw Dragon
+      ctx.save();
+      ctx.translate(dragon.x, dragon.y);
+      ctx.rotate(dragon.angle);
+      
+      // Shield Effect
+      if (dragon.shield >= 100) {
+        ctx.beginPath();
+        ctx.arc(0, 0, dragon.r + 8, 0, Math.PI*2);
+        ctx.strokeStyle = `rgba(115, 250, 136, ${0.5 + Math.sin(gameTime*0.2)*0.2})`;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+
+      // Trail
+      ctx.fillStyle = 'rgba(255, 209, 102, 0.3)';
+      ctx.beginPath();
+      ctx.moveTo(-10, 0); ctx.lineTo(-30, -5); ctx.lineTo(-30, 5);
+      ctx.fill();
+
+      // Body
+      ctx.fillStyle = '#ffd166';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, dragon.r, dragon.r*0.8, 0, 0, Math.PI*2);
+      ctx.fill();
+      
+      // Eye
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(6, -4, 3, 0, Math.PI*2);
+      ctx.fill();
+      
+      // Wing
+      ctx.fillStyle = '#ff9e00';
+      ctx.beginPath();
+      const flapState = Math.sin(gameTime * 0.5) * 8;
+      ctx.ellipse(-4, 2, 8, 5, (dragon.vy < 0 ? -0.5 : 0.2), 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // Procedural Cave background layer
+    function drawCaveLayer(parallax, color, yOff) {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(0, GAME_HEIGHT);
+      
+      const step = 20;
+      const offset = (gameTime * speed * parallax);
+      
+      for (let x = 0; x <= GAME_WIDTH + step; x += step) {
+        // Simple noise function for terrain
+        let nx = x + offset;
+        let ny = Math.sin(nx * 0.005) * 50 + Math.sin(nx * 0.02) * 20;
+        ctx.lineTo(x, GAME_HEIGHT - 50 + ny + (yOff * Math.sin(nx*0.001)));
+      }
+      
+      ctx.lineTo(GAME_WIDTH, GAME_HEIGHT);
+      ctx.lineTo(0, GAME_HEIGHT);
+      ctx.fill();
+    }
   </script>
 </body>
 </html>
