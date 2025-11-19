@@ -2,829 +2,540 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gravity Flip</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gravity Flip: Phase Shift</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;900&display=swap');
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; user-select: none; }
         
         body {
-            background: #0a0a0a;
-            font-family: 'Orbitron', monospace;
+            background: #050505;
+            font-family: 'Exo 2', sans-serif;
             overflow: hidden;
             height: 100vh;
             width: 100vw;
-            color: #00ff88;
+            color: #fff;
         }
         
         #gameContainer {
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(180deg, #000428 0%, #004e92 50%, #000428 100%);
             position: relative;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-        
-        #gameCanvas {
             width: 100%;
             height: 100%;
-            display: block;
-        }
-        
-        #gameHeader {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 10vh;
-            background: linear-gradient(to bottom, rgba(0, 255, 136, 0.3), transparent);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 3vw;
-            z-index: 10;
-            border-bottom: 1px solid rgba(0, 255, 136, 0.3);
-        }
-        
-        #gameTitle {
-            font-size: clamp(18px, 4vw, 28px);
-            font-weight: 900;
-            color: #00ff88;
-            text-shadow: 0 0 15px #00ff88;
-            letter-spacing: 2px;
-        }
-        
-        #gameStats {
-            display: flex;
-            gap: clamp(15px, 3vw, 25px);
-            font-size: clamp(10px, 2vw, 14px);
-            font-weight: 700;
-        }
-        
-        .stat {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-        
-        .stat-label {
-            font-size: clamp(8px, 1.5vw, 10px);
-            opacity: 0.7;
-            margin-bottom: 2px;
-        }
-        
-        .stat-value {
-            font-size: clamp(12px, 2.5vw, 16px);
-            color: #fff;
-            text-shadow: 0 0 8px #00ff88;
-        }
-        
-        #gameOver {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: #00ff88;
-            background: rgba(0, 20, 40, 0.95);
-            padding: clamp(20px, 5vw, 40px);
-            border: 2px solid #00ff88;
-            box-shadow: 
-                0 0 30px #00ff88,
-                inset 0 0 20px rgba(0, 255, 136, 0.1);
-            display: none;
-            z-index: 20;
-            border-radius: 12px;
-            min-width: 320px;
-            backdrop-filter: blur(10px);
-        }
-        
-        #gameOver h2 {
-            font-size: clamp(24px, 6vw, 32px);
-            font-weight: 900;
-            margin-bottom: 20px;
-            text-shadow: 0 0 20px #00ff88;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-        
-        .score-display {
-            margin: 15px 0;
-            font-size: clamp(14px, 3vw, 18px);
-        }
-        
-        .high-score {
-            color: #ffd700;
-            text-shadow: 0 0 12px #ffd700;
-        }
-        
-        .restart-hint {
-            margin-top: 20px;
-            font-size: clamp(10px, 2vw, 12px);
-            opacity: 0.8;
-            animation: blink 1.5s ease-in-out infinite;
-        }
-        
-        #instructions {
-            position: absolute;
-            bottom: 3vh;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #00ff88;
-            text-align: center;
-            font-size: clamp(9px, 2vw, 12px);
-            opacity: 0.8;
-            background: rgba(0, 255, 136, 0.1);
-            padding: clamp(8px, 1.5vh, 12px) clamp(15px, 3vw, 25px);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            border-radius: 20px;
-            backdrop-filter: blur(5px);
-        }
-        
-        .gravity-indicator {
-            position: absolute;
-            left: 3vw;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 10;
-            transition: all 0.3s ease;
-        }
-        
-        .gravity-arrow {
-            width: clamp(20px, 4vw, 30px);
-            height: clamp(40px, 8vw, 60px);
-            background: linear-gradient(180deg, transparent, #00ff88, transparent);
-            border-radius: 4px;
-            position: relative;
-            animation: gravityPulse 1.5s ease-in-out infinite;
-        }
-        
-        .gravity-arrow::before {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 12px solid #00ff88;
-        }
-        
-        .gravity-indicator.flipped {
-            transform: translateY(-50%) rotate(180deg);
-        }
-        
-        .color-indicator {
-            position: absolute;
-            bottom: 15vh;
-            left: 3vw;
-            display: flex;
-            gap: clamp(8px, 1.5vw, 12px);
-            z-index: 10;
-        }
-        
-        .color-dot {
-            width: clamp(18px, 3.5vw, 26px);
-            height: clamp(18px, 3.5vw, 26px);
-            border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
-        }
-        
-        .color-dot.active {
-            border-color: #fff;
-            box-shadow: 
-                0 0 20px currentColor,
-                inset 0 0 10px rgba(255, 255, 255, 0.2);
-            transform: scale(1.3);
-        }
-        
-        @keyframes glow {
-            from { text-shadow: 0 0 20px #00ff88; }
-            to { text-shadow: 0 0 30px #00ff88, 0 0 40px #00ff88; }
-        }
-        
-        @keyframes blink {
-            0%, 50% { opacity: 0.8; }
-            51%, 100% { opacity: 0.3; }
-        }
-        
-        @keyframes gravityPulse {
-            0%, 100% { opacity: 0.7; transform: scaleY(1); }
-            50% { opacity: 1; transform: scaleY(1.1); }
-        }
-        
-        .new-high-score {
-            animation: celebrate 0.8s ease-out;
-        }
-        
-        @keyframes celebrate {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.1); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
-        
-        /* Space effect */
-        #gameContainer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
-                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.5), transparent),
-                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
-                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.8), transparent),
-                radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.6), transparent);
-            background-repeat: repeat;
-            background-size: 200px 100px;
-            animation: stars 20s linear infinite;
-            pointer-events: none;
-            z-index: 1;
-        }
-        
-        @keyframes stars {
-            from { transform: translateX(0); }
-            to { transform: translateX(-200px); }
+            background: #000;
         }
 
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-            #gameStats {
-                gap: clamp(10px, 2vw, 20px);
-            }
-            
-            #gameOver {
-                margin: 0 5vw;
-                max-width: 90vw;
-            }
-            
-            .color-indicator {
-                bottom: 12vh;
-            }
-            
-            .gravity-indicator {
-                left: 2vw;
-            }
-            
-            #instructions {
-                font-size: clamp(8px, 2.5vw, 10px);
-                padding: 8px 15px;
-                bottom: 2vh;
-            }
+        canvas { display: block; width: 100%; height: 100%; }
+
+        /* UI Layer */
+        #uiLayer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 20px;
+        }
+
+        .hud-top {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .stat-box { text-align: center; }
+        .label { font-size: 10px; color: #888; letter-spacing: 2px; margin-bottom: 4px; }
+        .value { font-size: 24px; font-weight: 900; }
+        .accent { color: #00ff88; text-shadow: 0 0 15px rgba(0, 255, 136, 0.6); }
+
+        /* Screens */
+        #startScreen, #gameOverScreen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 5, 10, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 20; pointer-events: auto;
+            transition: opacity 0.3s;
+        }
+
+        h1 {
+            font-size: clamp(40px, 8vw, 80px); margin-bottom: 10px;
+            background: linear-gradient(to right, #00ff88, #00d4ff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.3));
+            font-style: italic;
+        }
+
+        p { font-size: 14px; color: #aaa; margin-bottom: 30px; letter-spacing: 1px; }
+
+        button {
+            background: transparent; color: #00ff88;
+            border: 2px solid #00ff88;
+            padding: 15px 50px;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 18px; font-weight: 900;
+            cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.1);
+            transition: all 0.2s;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+        }
+
+        button:hover {
+            background: #00ff88; color: #000;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
+            transform: scale(1.05);
+        }
+
+        .hidden { opacity: 0; pointer-events: none; }
+
+        /* Scanlines */
+        .scanlines {
+            position: absolute; inset: 0; pointer-events: none; z-index: 10;
+            background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.3) 50%);
+            background-size: 100% 4px;
+            opacity: 0.5;
         }
     </style>
 </head>
 <body>
     <div id="gameContainer">
-        <div id="gameHeader">
-            <div id="gameTitle">GRAVITY FLIP</div>
-            <div id="gameStats">
-                <div class="stat">
-                    <div class="stat-label">SCORE</div>
-                    <div class="stat-value" id="score">00000</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">HI-SCORE</div>
-                    <div class="stat-value high-score" id="highScore">00000</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">SPEED</div>
-                    <div class="stat-value" id="speed">1.0x</div>
-                </div>
-            </div>
-        </div>
-        
         <canvas id="gameCanvas"></canvas>
+        <div class="scanlines"></div>
         
-        <div class="gravity-indicator" id="gravityIndicator">
-            <div class="gravity-arrow"></div>
-        </div>
-        
-        <div class="color-indicator">
-            <div class="color-dot active" id="dot0" style="background-color: #ff4757;"></div>
-            <div class="color-dot" id="dot1" style="background-color: #2ed573;"></div>
-            <div class="color-dot" id="dot2" style="background-color: #3742fa;"></div>
-            <div class="color-dot" id="dot3" style="background-color: #ffa502;"></div>
-        </div>
-        
-        <div id="gameOver">
-            <h2>GRAVITY COLLAPSED</h2>
-            <div class="score-display">FINAL SCORE: <span id="finalScore">00000</span></div>
-            <div class="score-display" id="highScoreDisplay" style="display: none;">
-                🚀 NEW HIGH SCORE! 🚀
+        <div id="uiLayer">
+            <div class="hud-top">
+                <div class="stat-box" style="text-align: left;">
+                    <div style="font-weight: 900; font-style: italic; font-size: 20px;">GRAVITY<br>FLIP</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">SCORE</div>
+                    <div class="value accent" id="scoreVal">0000</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">BEST</div>
+                    <div class="value" id="bestVal">0000</div>
+                </div>
             </div>
-            <div class="score-display">BEST: <span id="bestScore" class="high-score">00000</span></div>
-            <div class="restart-hint">TAP OR PRESS [SPACE] TO RESTART</div>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div class="label">CURRENT PHASE</div>
+                <div id="phaseIndicator" style="width: 40px; height: 40px; border-radius: 50%; border: 3px solid #fff; margin: 5px auto; transition: background 0.2s;"></div>
+            </div>
         </div>
-        
-        <div id="instructions">
-            TAP OR [SPACE] TO FLIP GRAVITY + CHANGE COLOR • MATCH BARRIER COLOR
+
+        <div id="startScreen">
+            <h1>GRAVITY FLIP</h1>
+            <p>TAP TO FLIP GRAVITY • MATCH COLORS TO PHASE THROUGH</p>
+            <button id="startBtn">ENGAGE</button>
+        </div>
+
+        <div id="gameOverScreen" class="hidden">
+            <h1 style="color: #ff4757; -webkit-text-fill-color: #ff4757; filter: drop-shadow(0 0 20px rgba(255, 71, 87, 0.4));">CRITICAL FAILURE</h1>
+            <p>FINAL SCORE: <span id="finalScore" style="color:#fff">0</span></p>
+            <button id="restartBtn">REBOOT</button>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Game state
-        let gameRunning = true;
-        let score = 0;
-        let highScore = 0;
-        let gameSpeed = 4;
-        let speedMultiplier = 1.0;
-        
-        // Colors
-        const colors = ['#ff4757', '#2ed573', '#3742fa', '#ffa502'];
-        
-        // Physics
-        let gravity = 0.6;
-        let gravityDirection = 1; // 1 = down, -1 = up
-        let gravityFlipTimer = 0;
-        let nextGravityFlip = 180; // frames until next flip
-        
-        // Player
-        const player = {
-            x: 100,
-            y: 0,
-            width: 24,
-            height: 24,
-            colorIndex: 0,
-            velocityY: 0,
-            get color() { return colors[this.colorIndex]; }
+        /**
+         * AUDIO SYSTEM (Web Audio API)
+         * No external files required.
+         */
+        const AudioSys = {
+            ctx: null,
+            init() {
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                this.ctx = new AudioContext();
+            },
+            playTone(freq, type, duration, vol = 0.1) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(freq/2, this.ctx.currentTime + duration);
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            },
+            flip() { this.playTone(300, 'square', 0.15, 0.1); },
+            phase() { this.playTone(600, 'sine', 0.3, 0.05); },
+            crash() { 
+                this.playTone(100, 'sawtooth', 0.5, 0.3);
+                this.playTone(50, 'square', 0.5, 0.3);
+            }
         };
-        
-        // Barriers
-        let barriers = [];
-        let barrierTimer = 0;
-        const barrierInterval = 140;
-        
-        // Particles
-        let particles = [];
-        
-        // Set canvas size
-        function resizeCanvas() {
+
+        /**
+         * GAME ENGINE
+         */
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+
+        // Virtual Resolution (Logic runs here, scales to screen)
+        const V_WIDTH = 1920;
+        const V_HEIGHT = 1080;
+        let scale = 1;
+
+        // Colors
+        const COLORS = [
+            { hex: '#00ff88', name: 'Green' }, // Neon Green
+            { hex: '#00d4ff', name: 'Blue' },  // Cyan
+            { hex: '#ff0055', name: 'Red' },   // Pink/Red
+            { hex: '#ffcc00', name: 'Yellow' } // Gold
+        ];
+
+        // Game State
+        let state = {
+            running: false,
+            score: 0,
+            highScore: parseInt(localStorage.getItem('gf_best') || 0),
+            speed: 900, // Pixels per second
+            gravity: 3500,
+            gDir: 1, // 1 = down, -1 = up
+            lastTime: 0,
+            shake: 0,
+            colorTimer: 0
+        };
+
+        // Entities
+        const player = {
+            x: 300, y: V_HEIGHT/2,
+            w: 60, h: 60,
+            vy: 0,
+            colorIdx: 0,
+            trail: []
+        };
+
+        let obstacles = [];
+        let particles = []; // Object pool
+
+        // Particle Pool Setup
+        const POOL_SIZE = 100;
+        for(let i=0; i<POOL_SIZE; i++) particles.push({ active: false, x:0, y:0, vx:0, vy:0, life:0, color:'#fff' });
+
+        function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            
-            player.x = canvas.width * 0.12;
-            player.y = canvas.height / 2;
-            player.width = Math.max(20, canvas.width * 0.022);
-            player.height = Math.max(20, canvas.width * 0.022);
+            scale = Math.min(canvas.width / V_WIDTH, canvas.height / V_HEIGHT);
+            // Force fill width for runner style
+            scale = canvas.height / V_HEIGHT; 
         }
-        
-        window.addEventListener('resize', resizeCanvas);
-        
-        // High score management
-        function loadHighScore() {
-            const saved = Math.floor(Math.random() * 5000); // Simulated for demo
-            highScore = saved;
-            updateHighScoreDisplay();
-        }
-        
-        function saveHighScore() {
-            // Would save to localStorage in real implementation
-        }
-        
-        function updateHighScoreDisplay() {
-            document.getElementById('highScore').textContent = highScore.toString().padStart(5, '0');
-        }
-        
-        function formatScore(num) {
-            return num.toString().padStart(5, '0');
-        }
-        
-        function updateColorIndicator() {
-            document.querySelectorAll('.color-dot').forEach((dot, index) => {
-                dot.classList.toggle('active', index === player.colorIndex);
-            });
-        }
-        
-        function updateGravityIndicator() {
-            const indicator = document.getElementById('gravityIndicator');
-            indicator.classList.toggle('flipped', gravityDirection === -1);
-        }
-        
-        function createBarrier() {
-            const colorIndex = Math.floor(Math.random() * colors.length);
-            const gapHeight = canvas.height * 0.35;
-            const headerHeight = canvas.height * 0.1;
-            const availableHeight = canvas.height - headerHeight - gapHeight;
-            const gapY = headerHeight + Math.random() * availableHeight;
-            
-            barriers.push({
-                x: canvas.width,
-                topY: headerHeight,
-                topHeight: gapY - headerHeight,
-                bottomY: gapY + gapHeight,
-                bottomHeight: canvas.height - (gapY + gapHeight),
-                width: Math.max(25, canvas.width * 0.03),
-                colorIndex: colorIndex,
-                passed: false,
-                get color() { return colors[this.colorIndex]; }
-            });
-        }
-        
-        function createParticle(x, y, color, count = 8) {
-            for (let i = 0; i < count; i++) {
-                particles.push({
-                    x: x,
-                    y: y,
-                    vx: (Math.random() - 0.5) * 15,
-                    vy: (Math.random() - 0.5) * 15,
-                    color: color,
-                    life: 50,
-                    maxLife: 50,
-                    size: Math.random() * 4 + 2
-                });
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Input
+        function handleInput(e) {
+            if (e.type !== 'keydown' && e.type !== 'touchstart' && e.type !== 'mousedown') return;
+            if (e.type === 'keydown' && e.code !== 'Space' && e.code !== 'ArrowUp') return;
+            e.preventDefault();
+
+            if (state.running) {
+                state.gDir *= -1;
+                AudioSys.flip();
+                spawnParticles(player.x + player.w/2, player.y + player.h/2, 15, COLORS[player.colorIdx].hex);
+            } else if (document.getElementById('gameOverScreen').style.opacity !== '0') {
+                // Debounce restart slightly
             }
         }
-        
-        function createGravityFlipEffect() {
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            for (let i = 0; i < 20; i++) {
-                particles.push({
-                    x: centerX + (Math.random() - 0.5) * canvas.width * 0.8,
-                    y: centerY + (Math.random() - 0.5) * canvas.height * 0.8,
-                    vx: (Math.random() - 0.5) * 8,
-                    vy: (Math.random() - 0.5) * 8,
-                    color: '#00ff88',
-                    life: 40,
-                    maxLife: 40,
-                    size: Math.random() * 6 + 3
-                });
-            }
-        }
-        
-        function updateParticles() {
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vx *= 0.96;
-                p.vy *= 0.96;
-                p.life--;
-                
-                if (p.life <= 0) {
-                    particles.splice(i, 1);
+        window.addEventListener('keydown', handleInput);
+        window.addEventListener('touchstart', handleInput, { passive: false });
+        window.addEventListener('mousedown', handleInput);
+
+        function spawnParticles(x, y, count, color) {
+            let spawned = 0;
+            for(let p of particles) {
+                if(!p.active) {
+                    p.active = true;
+                    p.x = x; p.y = y;
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 300 + 100;
+                    p.vx = Math.cos(angle) * speed;
+                    p.vy = Math.sin(angle) * speed;
+                    p.life = 0.5 + Math.random() * 0.5;
+                    p.color = color;
+                    spawned++;
+                    if(spawned >= count) break;
                 }
             }
         }
-        
-        function drawParticles() {
-            particles.forEach(p => {
-                ctx.save();
-                ctx.globalAlpha = p.life / p.maxLife;
-                ctx.shadowColor = p.color;
-                ctx.shadowBlur = 8;
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            });
-        }
-        
-        function changePlayerColor() {
-            player.colorIndex = (player.colorIndex + 1) % colors.length;
-            updateColorIndicator();
-            createParticle(player.x + player.width/2, player.y + player.height/2, player.color, 6);
-        }
-        
-        function flipGravity() {
-            gravityDirection *= -1;
-            updateGravityIndicator();
-            createGravityFlipEffect();
+
+        function resetGame() {
+            player.y = V_HEIGHT / 2;
+            player.vy = 0;
+            player.trail = [];
+            player.colorIdx = 0;
             
-            // Add screen shake effect
-            document.getElementById('gameContainer').style.transform = 'translateY(3px)';
+            state.score = 0;
+            state.speed = 900;
+            state.gDir = 1;
+            state.shake = 0;
+            state.colorTimer = 0;
+            obstacles = [];
+            
+            // Initial Obstacle
+            spawnObstacle(V_WIDTH + 500);
+
+            document.getElementById('scoreVal').innerText = '0000';
+            document.getElementById('bestVal').innerText = state.highScore.toString().padStart(4, '0');
+            document.getElementById('phaseIndicator').style.backgroundColor = COLORS[0].hex;
+            
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameOverScreen').classList.add('hidden');
+            
+            state.running = true;
+            state.lastTime = performance.now();
+            requestAnimationFrame(loop);
+        }
+
+        function gameOver() {
+            state.running = false;
+            state.shake = 30;
+            AudioSys.crash();
+            spawnParticles(player.x, player.y, 50, COLORS[player.colorIdx].hex);
+            
+            if(state.score > state.highScore) {
+                state.highScore = Math.floor(state.score);
+                localStorage.setItem('gf_best', state.highScore);
+            }
+
+            document.getElementById('finalScore').innerText = Math.floor(state.score);
             setTimeout(() => {
-                document.getElementById('gameContainer').style.transform = '';
-            }, 100);
+                document.getElementById('gameOverScreen').classList.remove('hidden');
+            }, 500);
         }
-        
-        function checkCollision(rect1, rect2) {
-            return rect1.x < rect2.x + rect2.width &&
-                   rect1.x + rect1.width > rect2.x &&
-                   rect1.y < rect2.y + rect2.height &&
-                   rect1.y + rect1.height > rect2.y;
+
+        function spawnObstacle(xOffset) {
+            const type = Math.random();
+            let obs = {
+                x: xOffset,
+                y: 0, w: 80, h: 0,
+                colorIdx: Math.floor(Math.random() * COLORS.length),
+                passed: false
+            };
+
+            // Difficulty scaling
+            const gapSize = Math.max(250, 450 - (state.score * 0.05)); 
+
+            if (type < 0.33) {
+                // Top Pillar
+                obs.y = 0;
+                obs.h = Math.random() * (V_HEIGHT * 0.6) + 100;
+            } else if (type < 0.66) {
+                // Bottom Pillar
+                obs.h = Math.random() * (V_HEIGHT * 0.6) + 100;
+                obs.y = V_HEIGHT - obs.h;
+            } else {
+                // Floating Bar (Phase check)
+                obs.h = 300;
+                obs.y = (V_HEIGHT / 2) - 150;
+                obs.w = 60;
+            }
+            
+            obstacles.push(obs);
         }
-        
-        function drawPlayer() {
+
+        function update(dt) {
+            // Speed Scaling
+            state.speed = 900 + (state.score * 0.2);
+            state.score += dt * 10;
+            document.getElementById('scoreVal').innerText = Math.floor(state.score).toString().padStart(4, '0');
+
+            // Player Physics
+            player.vy += state.gravity * state.gDir * dt;
+            player.y += player.vy * dt;
+
+            // Floor/Ceiling Collision
+            if (player.y < 0) {
+                player.y = 0;
+                player.vy = 0;
+            } else if (player.y + player.h > V_HEIGHT) {
+                player.y = V_HEIGHT - player.h;
+                player.vy = 0;
+            }
+
+            // Color Cycling
+            state.colorTimer += dt;
+            if (state.colorTimer > 3.0) { // Change color every 3 seconds
+                state.colorTimer = 0;
+                player.colorIdx = (player.colorIdx + 1) % COLORS.length;
+                document.getElementById('phaseIndicator').style.backgroundColor = COLORS[player.colorIdx].hex;
+                // Flash effect on player
+                spawnParticles(player.x + player.w/2, player.y + player.h/2, 5, '#fff');
+            }
+
+            // Trail Logic
+            if (state.running) {
+                player.trail.push({x: player.x, y: player.y});
+                if (player.trail.length > 10) player.trail.shift();
+            }
+
+            // Obstacle Logic
+            if (obstacles.length === 0 || (V_WIDTH + 200) - obstacles[obstacles.length-1].x > 600) {
+                spawnObstacle(V_WIDTH + 100);
+            }
+
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                let o = obstacles[i];
+                o.x -= state.speed * dt;
+
+                // AABB Collision
+                if (player.x < o.x + o.w && player.x + player.w > o.x &&
+                    player.y < o.y + o.h && player.y + player.h > o.y) {
+                    
+                    // Phase Mechanic: If colors match, you pass through
+                    if (o.colorIdx === player.colorIdx) {
+                        if (!o.passed) {
+                            o.passed = true;
+                            AudioSys.phase();
+                            state.score += 50; // Bonus for phasing
+                        }
+                    } else {
+                        gameOver();
+                    }
+                }
+
+                if (o.x < -200) obstacles.splice(i, 1);
+            }
+
+            // Particles
+            for (let p of particles) {
+                if (p.active) {
+                    p.x += p.vx * dt;
+                    p.y += p.vy * dt;
+                    p.life -= dt;
+                    if (p.life <= 0) p.active = false;
+                }
+            }
+
+            // Shake Decay
+            if (state.shake > 0) state.shake = Math.max(0, state.shake - 100 * dt);
+        }
+
+        function draw() {
+            // Clear
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
             ctx.save();
             
-            // Draw trail effect
-            ctx.globalAlpha = 0.3;
-            ctx.shadowColor = player.color;
-            ctx.shadowBlur = 20;
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x - 3, player.y, player.width + 6, player.height);
-            
-            // Draw main player
-            ctx.globalAlpha = 1;
-            ctx.shadowBlur = 15;
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            
-            // Inner glow
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-            const coreSize = Math.max(4, player.width - 8);
-            const offset = (player.width - coreSize) / 2;
-            ctx.fillRect(player.x + offset, player.y + offset, coreSize, coreSize);
-            
-            // Gravity direction indicator on player
-            ctx.fillStyle = '#fff';
-            const dotSize = 3;
-            if (gravityDirection === 1) {
-                ctx.fillRect(player.x + player.width/2 - 1, player.y + player.height - 6, dotSize, dotSize);
-            } else {
-                ctx.fillRect(player.x + player.width/2 - 1, player.y + 2, dotSize, dotSize);
+            // Virtual Resolution scaling
+            // Center the view vertically if screen aspect ratio is taller than 16:9
+            const yOffset = (canvas.height - V_HEIGHT * scale) / 2;
+            ctx.translate(0, yOffset);
+            ctx.scale(scale, scale);
+
+            // Camera Shake
+            if (state.shake > 0) {
+                ctx.translate((Math.random()-0.5)*state.shake, (Math.random()-0.5)*state.shake);
             }
+
+            // Background Grid (Parallax)
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 2;
+            const gridX = -(state.score * 5) % 100;
             
+            ctx.beginPath();
+            for (let i=0; i<25; i++) {
+                let x = gridX + i * 100;
+                ctx.moveTo(x, 0); ctx.lineTo(x - 300, V_HEIGHT);
+            }
+            // Horizon lines
+            ctx.moveTo(0, 0); ctx.lineTo(V_WIDTH, 0);
+            ctx.moveTo(0, V_HEIGHT); ctx.lineTo(V_WIDTH, V_HEIGHT);
+            ctx.stroke();
+
+            // Draw Trail
+            ctx.fillStyle = COLORS[player.colorIdx].hex;
+            ctx.globalAlpha = 0.3;
+            for(let t of player.trail) {
+                ctx.fillRect(t.x, t.y, player.w, player.h);
+            }
+            ctx.globalAlpha = 1.0;
+
+            // Draw Player (Glow via Additive Blending - Fast)
+            if (state.running || state.shake > 0) {
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.fillStyle = COLORS[player.colorIdx].hex;
+                // Core
+                ctx.fillRect(player.x, player.y, player.w, player.h);
+                // Glow
+                ctx.globalAlpha = 0.3;
+                ctx.fillRect(player.x - 5, player.y - 5, player.w + 10, player.h + 10);
+                ctx.fillRect(player.x - 10, player.y - 10, player.w + 20, player.h + 20);
+                
+                // Gravity Indicator Arrow
+                ctx.globalAlpha = 1.0;
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                const cx = player.x + player.w/2;
+                const cy = player.y + player.h/2;
+                const dir = state.gDir; // 1 down, -1 up
+                ctx.moveTo(cx, cy + (10 * dir));
+                ctx.lineTo(cx - 10, cy - (5 * dir));
+                ctx.lineTo(cx + 10, cy - (5 * dir));
+                ctx.fill();
+            }
+
+            // Draw Obstacles
+            for (let o of obstacles) {
+                const color = COLORS[o.colorIdx].hex;
+                
+                // Phased out look if matching color
+                if (o.colorIdx === player.colorIdx) {
+                    ctx.globalAlpha = 0.2;
+                    ctx.fillStyle = color;
+                    ctx.fillRect(o.x, o.y, o.w, o.h);
+                    ctx.globalAlpha = 1.0;
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(o.x, o.y, o.w, o.h);
+                } else {
+                    // Solid Danger
+                    ctx.fillStyle = color;
+                    ctx.fillRect(o.x, o.y, o.w, o.h);
+                    // Neon Edge
+                    ctx.globalCompositeOperation = 'lighter';
+                    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                    ctx.fillRect(o.x, o.y, 5, o.h); // Left edge highlight
+                    ctx.globalCompositeOperation = 'source-over';
+                }
+            }
+
+            // Draw Particles
+            for (let p of particles) {
+                if (p.active) {
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.life;
+                    ctx.fillRect(p.x, p.y, 4, 4);
+                }
+            }
+            ctx.globalAlpha = 1.0;
+
             ctx.restore();
         }
-        
-        function drawBarriers() {
-            barriers.forEach(barrier => {
-                ctx.save();
-                ctx.shadowColor = barrier.color;
-                ctx.shadowBlur = 15;
-                ctx.fillStyle = barrier.color;
-                
-                // Top barrier
-                if (barrier.topHeight > 0) {
-                    ctx.fillRect(barrier.x, barrier.topY, barrier.width, barrier.topHeight);
-                    
-                    // Edge highlight
-                    ctx.shadowBlur = 0;
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                    ctx.fillRect(barrier.x, barrier.topY, 2, barrier.topHeight);
-                }
-                
-                // Bottom barrier
-                ctx.shadowColor = barrier.color;
-                ctx.shadowBlur = 15;
-                ctx.fillStyle = barrier.color;
-                if (barrier.bottomHeight > 0) {
-                    ctx.fillRect(barrier.x, barrier.bottomY, barrier.width, barrier.bottomHeight);
-                    
-                    // Edge highlight
-                    ctx.shadowBlur = 0;
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-                    ctx.fillRect(barrier.x, barrier.bottomY, 2, barrier.bottomHeight);
-                }
-                
-                ctx.restore();
-            });
-        }
-        
-        function drawBackground() {
-            // Animated background effect
-            const time = Date.now() * 0.002;
-            const headerHeight = canvas.height * 0.1;
-            
-            // Moving grid
-            ctx.strokeStyle = 'rgba(0, 255, 136, 0.15)';
-            ctx.lineWidth = 1;
-            
-            const gridSize = 40;
-            const offsetX = (score * gameSpeed * 0.5) % gridSize;
-            
-            for (let x = -offsetX; x < canvas.width + gridSize; x += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(x, headerHeight);
-                ctx.lineTo(x, canvas.height);
-                ctx.stroke();
-            }
-            
-            // Gravity field visualization
-            if (gravityDirection === -1) {
-                ctx.fillStyle = 'rgba(0, 255, 136, 0.05)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height / 2);
-            } else {
-                ctx.fillStyle = 'rgba(0, 100, 255, 0.05)';
-                ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
-            }
-        }
-        
-        function update() {
-            if (!gameRunning) return;
-            
-            // Update speed
-            speedMultiplier = 1 + (score * 0.001);
-            gameSpeed = (canvas.width * 0.004) * speedMultiplier;
-            
-            // Update score
-            score += 1;
-            
-            // Handle gravity flips
-            gravityFlipTimer++;
-            const dynamicFlipInterval = Math.max(nextGravityFlip - (score * 0.05), 90);
-            if (gravityFlipTimer >= dynamicFlipInterval) {
-                flipGravity();
-                gravityFlipTimer = 0;
-                nextGravityFlip = 120 + Math.random() * 120; // Random interval
-            }
-            
-            // Apply gravity to player
-            player.velocityY += gravity * gravityDirection;
-            player.velocityY = Math.max(-15, Math.min(15, player.velocityY)); // Terminal velocity
-            player.y += player.velocityY;
-            
-            // Keep player in bounds
-            if (player.y < canvas.height * 0.1) {
-                player.y = canvas.height * 0.1;
-                player.velocityY = Math.max(0, player.velocityY);
-            }
-            if (player.y + player.height > canvas.height) {
-                player.y = canvas.height - player.height;
-                player.velocityY = Math.min(0, player.velocityY);
-            }
-            
-            // Create barriers
-            barrierTimer++;
-            if (barrierTimer >= Math.max(barrierInterval - (score * 0.04), 80)) {
-                createBarrier();
-                barrierTimer = 0;
-            }
-            
-            // Update barriers
-            for (let i = barriers.length - 1; i >= 0; i--) {
-                const barrier = barriers[i];
-                barrier.x -= gameSpeed;
-                
-                // Collision detection
-                if (barrier.topHeight > 0) {
-                    const topBarrier = {
-                        x: barrier.x,
-                        y: barrier.topY,
-                        width: barrier.width,
-                        height: barrier.topHeight
-                    };
-                    if (checkCollision(player, topBarrier)) {
-                        if (player.colorIndex !== barrier.colorIndex) {
-                            gameOver();
-                            return;
-                        }
-                    }
-                }
-                
-                if (barrier.bottomHeight > 0) {
-                    const bottomBarrier = {
-                        x: barrier.x,
-                        y: barrier.bottomY,
-                        width: barrier.width,
-                        height: barrier.bottomHeight
-                    };
-                    if (checkCollision(player, bottomBarrier)) {
-                        if (player.colorIndex !== barrier.colorIndex) {
-                            gameOver();
-                            return;
-                        }
-                    }
-                }
-                
-                // Score points
-                if (!barrier.passed && barrier.x + barrier.width < player.x) {
-                    barrier.passed = true;
-                    score += 100;
-                    createParticle(player.x, player.y + player.height/2, player.color, 4);
-                }
-                
-                // Remove off-screen barriers
-                if (barrier.x + barrier.width < 0) {
-                    barriers.splice(i, 1);
-                }
-            }
-            
-            updateParticles();
-        }
-        
-        function draw() {
-            // Clear with gradient
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, '#000428');
-            gradient.addColorStop(0.5, '#004e92');
-            gradient.addColorStop(1, '#000428');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            drawBackground();
-            drawPlayer();
-            drawBarriers();
-            drawParticles();
-            
-            // Update UI
-            document.getElementById('score').textContent = formatScore(score);
-            document.getElementById('speed').textContent = speedMultiplier.toFixed(1) + 'x';
-        }
-        
-        function gameOver() {
-            gameRunning = false;
-            
-            let isNewHighScore = false;
-            if (score > highScore) {
-                highScore = score;
-                isNewHighScore = true;
-                saveHighScore();
-                updateHighScoreDisplay();
-                document.getElementById('highScoreDisplay').style.display = 'block';
-                document.getElementById('gameOver').classList.add('new-high-score');
-            } else {
-                document.getElementById('highScoreDisplay').style.display = 'none';
-                document.getElementById('gameOver').classList.remove('new-high-score');
-            }
-            
-            document.getElementById('finalScore').textContent = formatScore(score);
-            document.getElementById('bestScore').textContent = formatScore(highScore);
-            document.getElementById('gameOver').style.display = 'block';
-        }
-        
-        function restart() {
-            gameRunning = true;
-            score = 0;
-            gameSpeed = canvas.width * 0.004;
-            speedMultiplier = 1.0;
-            barriers = [];
-            particles = [];
-            barrierTimer = 0;
-            gravityFlipTimer = 0;
-            nextGravityFlip = 180;
-            gravityDirection = 1;
-            
-            player.colorIndex = 0;
-            player.x = canvas.width * 0.12;
-            player.y = canvas.height / 2;
-            player.velocityY = 0;
-            
-            updateColorIndicator();
-            updateGravityIndicator();
-            document.getElementById('gameOver').style.display = 'none';
-            document.getElementById('gameOver').classList.remove('new-high-score');
-        }
-        
-        function gameLoop() {
-            update();
+
+        function loop(timestamp) {
+            // Calculate Delta Time (Cap at 0.1 to prevent explosions on lag)
+            const dt = Math.min((timestamp - state.lastTime) / 1000, 0.1);
+            state.lastTime = timestamp;
+
+            if (state.running) update(dt);
             draw();
-            requestAnimationFrame(gameLoop);
+            requestAnimationFrame(loop);
         }
-        
-        function handleInput() {
-            if (gameRunning) {
-                changePlayerColor();
-                // Small upward boost when changing color
-                player.velocityY += -2 * gravityDirection;
-            } else {
-                restart();
-            }
-        }
-        
-        // Input handling
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                handleInput();
-            }
+
+        // Init Listeners
+        document.getElementById('startBtn').addEventListener('click', () => {
+            AudioSys.init();
+            resetGame();
         });
+        document.getElementById('restartBtn').addEventListener('click', resetGame);
 
-        // Touch controls
-        let touchStartTime = 0;
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            touchStartTime = Date.now();
-        });
+        // Initial render
+        resize();
+        requestAnimationFrame(loop);
 
-        canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            const touchDuration = Date.now() - touchStartTime;
-            if (touchDuration < 500) {
-                handleInput();
-            }
-        });
-
-        // Prevent scrolling
-        document.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-        }, { passive: false });
-
-        // Initialize
-        resizeCanvas();
-        loadHighScore();
-        updateColorIndicator();
-        updateGravityIndicator();
-        gameLoop();
     </script>
 </body>
 </html>
