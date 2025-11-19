@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Color Dash</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Color Dash: Neon Overdrive</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         
@@ -11,86 +11,91 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
         }
         
         body {
-            background: #0a0a0a;
+            background: #050505;
             font-family: 'Orbitron', monospace;
             overflow: hidden;
             height: 100vh;
             width: 100vw;
-            margin: 0;
-            padding: 0;
             color: #00ff88;
         }
         
         #gameContainer {
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-            position: relative;
-            border: none;
-            border-radius: 0;
-            overflow: hidden;
-            box-shadow: 
-                inset 0 0 30px rgba(0, 255, 136, 0.1);
-        }
-        
-        #gameCanvas {
             width: 100%;
             height: 100%;
             background: #000;
-            display: block;
+            position: relative;
+            overflow: hidden;
         }
         
-        #gameHeader {
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #ui-layer {
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            height: 12vh;
-            background: linear-gradient(to bottom, rgba(0, 255, 136, 0.2), transparent);
-            border-bottom: 1px solid #00ff88;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        #gameHeader {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 3vw;
+            padding: 0 20px;
             z-index: 10;
         }
         
         #gameTitle {
-            font-size: clamp(18px, 4vw, 32px);
+            font-size: clamp(20px, 4vw, 32px);
             font-weight: 900;
-            color: #00ff88;
-            text-shadow: 0 0 10px #00ff88;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
             letter-spacing: 2px;
+            font-style: italic;
         }
         
         #gameStats {
             display: flex;
-            gap: clamp(15px, 3vw, 30px);
-            font-size: clamp(10px, 2vw, 14px);
-            font-weight: 700;
+            gap: 20px;
+            text-align: right;
         }
         
-        .stat {
+        .stat-box {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            text-align: center;
+            align-items: flex-end;
         }
         
         .stat-label {
-            font-size: clamp(8px, 1.5vw, 10px);
-            opacity: 0.7;
+            font-size: 10px;
+            color: #888;
             margin-bottom: 2px;
         }
         
         .stat-value {
-            font-size: clamp(12px, 2.5vw, 16px);
+            font-size: clamp(16px, 3vw, 24px);
+            font-weight: 700;
             color: #fff;
-            text-shadow: 0 0 5px #00ff88;
         }
+        
+        #score { color: #00ff88; text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
+        #highScore { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
         
         #gameOver {
             position: absolute;
@@ -98,616 +103,522 @@
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            color: #00ff88;
-            background: rgba(0, 0, 0, 0.95);
-            padding: clamp(20px, 5vw, 40px);
-            border: 2px solid #00ff88;
-            box-shadow: 
-                0 0 30px #00ff88,
-                inset 0 0 20px rgba(0, 255, 136, 0.1);
+            background: rgba(10, 10, 10, 0.95);
+            padding: 40px;
+            border: 2px solid #333;
+            border-radius: 12px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
             display: none;
+            pointer-events: auto;
             z-index: 20;
-            border-radius: 8px;
             min-width: 300px;
+            backdrop-filter: blur(5px);
         }
         
         #gameOver h2 {
-            font-size: clamp(24px, 6vw, 32px);
-            font-weight: 900;
+            font-size: 36px;
+            color: #ff4757;
             margin-bottom: 20px;
-            text-shadow: 0 0 15px #00ff88;
-            animation: glow 2s ease-in-out infinite alternate;
+            text-transform: uppercase;
+            letter-spacing: 4px;
         }
         
-        .score-display {
-            margin: 15px 0;
-            font-size: clamp(14px, 3vw, 18px);
-        }
-        
-        .high-score {
-            color: #ffd700;
-            text-shadow: 0 0 10px #ffd700;
-        }
-        
-        .restart-hint {
-            margin-top: 20px;
-            font-size: clamp(10px, 2vw, 12px);
-            opacity: 0.8;
-            animation: blink 1.5s ease-in-out infinite;
-        }
-        
-        #instructions {
-            position: absolute;
-            bottom: 3vh;
-            left: 50%;
-            transform: translateX(-50%);
+        .btn-restart {
+            margin-top: 25px;
+            background: transparent;
+            border: 2px solid #00ff88;
             color: #00ff88;
-            text-align: center;
-            font-size: clamp(9px, 1.5vw, 12px);
-            opacity: 0.7;
-            background: rgba(0, 255, 136, 0.1);
-            padding: clamp(6px, 1vh, 10px) clamp(10px, 2vw, 20px);
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            white-space: nowrap;
+            padding: 12px 30px;
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+        
+        .btn-restart:hover {
+            background: #00ff88;
+            color: #000;
+            box-shadow: 0 0 20px #00ff88;
         }
         
         .color-indicator {
             position: absolute;
-            bottom: 15vh;
-            left: 3vw;
+            bottom: 30px;
+            left: 30px;
             display: flex;
-            gap: clamp(6px, 1vw, 12px);
+            gap: 15px;
             z-index: 10;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .color-dot {
-            width: clamp(16px, 3vw, 24px);
-            height: clamp(16px, 3vw, 24px);
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.2s ease;
+            opacity: 0.3;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
         .color-dot.active {
-            border-color: #fff;
+            opacity: 1;
+            transform: scale(1.4);
             box-shadow: 0 0 15px currentColor;
-            transform: scale(1.2);
         }
         
-        @keyframes glow {
-            from { text-shadow: 0 0 15px #00ff88; }
-            to { text-shadow: 0 0 25px #00ff88, 0 0 35px #00ff88; }
+        #instructions {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 1px;
+            pointer-events: none;
+            animation: pulseText 2s infinite;
         }
-        
-        @keyframes blink {
-            0%, 50% { opacity: 0.8; }
-            51%, 100% { opacity: 0.3; }
+
+        @keyframes pulseText {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
         }
-        
-        .new-high-score {
-            animation: celebrate 0.6s ease-out;
-        }
-        
-        @keyframes celebrate {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        
-        /* Retro scanlines effect */
-        #gameContainer::before {
-            content: '';
+
+        /* Scanline Effect */
+        .scanlines {
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
             background: linear-gradient(
-                transparent 50%, 
-                rgba(0, 255, 136, 0.03) 50%
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
             );
             background-size: 100% 4px;
             pointer-events: none;
-            z-index: 15;
+            z-index: 5;
         }
 
-        /* Mobile optimizations */
-        @media (max-width: 768px) {
-            #gameStats {
-                gap: clamp(10px, 2vw, 20px);
-            }
-            
-            #gameOver {
-                margin: 0 5vw;
-                max-width: 90vw;
-            }
-            
-            .color-indicator {
-                bottom: 12vh;
-                left: 50%;
-                transform: translateX(-50%);
-            }
-            
-            #instructions {
-                font-size: clamp(8px, 2vw, 10px);
-                padding: 8px 12px;
-                bottom: 2vh;
-            }
-        }
-
-        /* Landscape mobile */
-        @media (max-height: 500px) and (orientation: landscape) {
-            #gameHeader {
-                height: 15vh;
-            }
-            
-            .color-indicator {
-                bottom: 8vh;
-            }
-            
-            #instructions {
-                bottom: 1vh;
-                font-size: 10px;
-            }
+        @media (max-width: 600px) {
+            #gameTitle { display: none; }
+            .color-indicator { bottom: 20px; left: 50%; transform: translateX(-50%); }
+            #instructions { bottom: 80px; }
+            #gameHeader { height: 60px; }
         }
     </style>
 </head>
 <body>
     <div id="gameContainer">
-        <div id="gameHeader">
-            <div id="gameTitle">COLOR DASH</div>
-            <div id="gameStats">
-                <div class="stat">
-                    <div class="stat-label">SCORE</div>
-                    <div class="stat-value" id="score">00000</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">HI-SCORE</div>
-                    <div class="stat-value high-score" id="highScore">00000</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">SPEED</div>
-                    <div class="stat-value" id="speed">1.0x</div>
-                </div>
-            </div>
-        </div>
-        
         <canvas id="gameCanvas"></canvas>
+        <div class="scanlines"></div>
         
-        <div class="color-indicator">
-            <div class="color-dot active" id="dot0" style="background-color: #ff4757;"></div>
-            <div class="color-dot" id="dot1" style="background-color: #2ed573;"></div>
-            <div class="color-dot" id="dot2" style="background-color: #3742fa;"></div>
-            <div class="color-dot" id="dot3" style="background-color: #ffa502;"></div>
-        </div>
-        
-        <div id="gameOver">
-            <h2>GAME OVER</h2>
-            <div class="score-display">FINAL SCORE: <span id="finalScore">00000</span></div>
-            <div class="score-display" id="highScoreDisplay" style="display: none;">
-                🏆 NEW HIGH SCORE! 🏆
+        <div id="ui-layer">
+            <div id="gameHeader">
+                <div id="gameTitle">COLOR DASH</div>
+                <div id="gameStats">
+                    <div class="stat-box">
+                        <span class="stat-label">SCORE</span>
+                        <span class="stat-value" id="score">00000</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">BEST</span>
+                        <span class="stat-value" id="highScore">00000</span>
+                    </div>
+                </div>
             </div>
-            <div class="score-display">BEST: <span id="bestScore" class="high-score">00000</span></div>
-            <div class="restart-hint">PRESS [SPACE] TO RESTART</div>
+
+            <div class="color-indicator">
+                <div class="color-dot active" id="dot0" style="background-color: #ff3838;"></div>
+                <div class="color-dot" id="dot1" style="background-color: #00ff88;"></div>
+                <div class="color-dot" id="dot2" style="background-color: #2d98da;"></div>
+                <div class="color-dot" id="dot3" style="background-color: #f1c40f;"></div>
+            </div>
+
+            <div id="instructions">TAP, CLICK, OR SPACE TO SWITCH COLORS</div>
         </div>
-        
-        <div id="instructions">
-            PRESS [SPACE] TO CHANGE COLOR • MATCH BARRIER COLOR TO SURVIVE
+
+        <div id="gameOver">
+            <h2>SYSTEM FAILURE</h2>
+            <div style="margin-bottom: 10px; color: #888; font-size: 12px;">FINAL SCORE</div>
+            <div id="finalScore" style="font-size: 32px; color: #fff; font-weight: bold; margin-bottom: 20px;">00000</div>
+            <button class="btn-restart" onclick="restartGame()">REBOOT SYSTEM</button>
         </div>
     </div>
 
     <script>
+        /**
+         * COLOR DASH - OPTIMIZED ENGINE
+         * Uses Delta Time for smooth framerate independence.
+         * Uses 'Fake Glow' rendering for mobile performance.
+         */
+
         const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: false }); // Optimize for no transparency on canvas bg
         
-        // Game state
-        let gameRunning = true;
+        // Configuration
+        const COLORS = ['#ff3838', '#00ff88', '#2d98da', '#f1c40f']; // Red, Green, Blue, Yellow
+        const GAME_SPEED_BASE = 300; // Pixels per second
+        const BARRIER_SPACING = 500; // Pixels between barriers
+        
+        // State
+        let lastTime = 0;
+        let gameState = 'playing'; // playing, gameover
         let score = 0;
-        let highScore = 0;
-        let gameSpeed = 3;
-        let speedMultiplier = 1.0;
+        let highScore = parseInt(localStorage.getItem('colorDashHighScore') || '0');
+        let gameSpeed = GAME_SPEED_BASE;
+        let distanceTraveled = 0;
         
-        // Colors
-        const colors = ['#ff4757', '#2ed573', '#3742fa', '#ffa502'];
-        const colorNames = ['RED', 'GREEN', 'BLUE', 'ORANGE'];
-        
-        // Player
+        // Screen Shake
+        let shakeIntensity = 0;
+        let shakeDecay = 0.9;
+
+        // Entities
         const player = {
-            x: 120,
-            y: 220,
-            width: 35,
-            height: 35,
+            x: 0, y: 0, size: 30,
             colorIndex: 0,
-            get color() { return colors[this.colorIndex]; }
+            trail: [],
+            pulse: 0
         };
         
-        // Barriers
         let barriers = [];
-        let barrierTimer = 0;
-        const barrierInterval = 130; // frames between barriers
-        
-        // Particles for effects
         let particles = [];
-        
-        // Set canvas size to full screen
-        function resizeCanvas() {
+
+        // --- Core Engine ---
+
+        function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             
-            // Update player position and size to be proportional
-            player.x = canvas.width * 0.13; // About 13% from left
-            player.y = canvas.height / 2 - player.height / 2;
-            player.width = Math.max(25, canvas.width * 0.025); // Scale with screen
-            player.height = Math.max(25, canvas.width * 0.025);
+            // Reposition player relative to screen
+            player.x = canvas.width * 0.15;
+            player.y = canvas.height / 2;
+            player.size = Math.min(canvas.width * 0.08, 40); // Cap size
         }
-        
-        // Handle window resize
-        window.addEventListener('resize', resizeCanvas);
-        
-        // Load high score
-        function loadHighScore() {
-            try {
-                const saved = localStorage.getItem('colorDashHighScore');
-                highScore = saved ? parseInt(saved) : 0;
-            } catch (e) {
-                highScore = 0;
-            }
-            updateHighScoreDisplay();
-        }
-        
-        // Save high score
-        function saveHighScore() {
-            try {
-                localStorage.setItem('colorDashHighScore', highScore.toString());
-            } catch (e) {
-                // Storage not available, continue without saving
+        window.addEventListener('resize', resize);
+        resize();
+        updateHighScoreUI();
+
+        function inputAction(e) {
+            if (e && e.type === 'keydown' && e.code !== 'Space') return;
+            if (e) e.preventDefault();
+
+            if (gameState === 'playing') {
+                // Change Color
+                player.colorIndex = (player.colorIndex + 1) % COLORS.length;
+                updateUI();
+                
+                // Add little pop effect
+                player.pulse = 10;
+            } else if (gameState === 'gameover') {
+                // handled by button, but space also works
+                if (e && e.code === 'Space') restartGame();
             }
         }
-        
-        // Update high score display with padding
-        function updateHighScoreDisplay() {
-            document.getElementById('highScore').textContent = highScore.toString().padStart(5, '0');
+
+        // Inputs
+        window.addEventListener('keydown', inputAction);
+        document.addEventListener('touchstart', inputAction, { passive: false });
+        document.addEventListener('mousedown', inputAction);
+
+        function restartGame() {
+            score = 0;
+            gameSpeed = GAME_SPEED_BASE;
+            barriers = [];
+            particles = [];
+            distanceTraveled = 0;
+            player.colorIndex = 0;
+            shakeIntensity = 0;
+            gameState = 'playing';
+            document.getElementById('gameOver').style.display = 'none';
+            updateUI();
+            
+            // Reset loop time
+            lastTime = performance.now();
+            requestAnimationFrame(gameLoop);
         }
-        
-        function formatScore(num) {
-            return num.toString().padStart(5, '0');
+
+        function gameOver() {
+            gameState = 'gameover';
+            shakeIntensity = 20; // Big shake on death
+            
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('colorDashHighScore', highScore);
+                updateHighScoreUI();
+            }
+            
+            document.getElementById('finalScore').textContent = score.toString().padStart(5, '0');
+            document.getElementById('gameOver').style.display = 'block';
         }
-        
-        function updateColorIndicator() {
-            document.querySelectorAll('.color-dot').forEach((dot, index) => {
-                dot.classList.toggle('active', index === player.colorIndex);
-            });
-        }
-        
-        function createBarrier() {
-            const colorIndex = Math.floor(Math.random() * colors.length);
-            const gapHeight = canvas.height * 0.25; // Gap is 25% of screen height
-            const headerHeight = canvas.height * 0.12; // Header is 12% of screen
-            const availableHeight = canvas.height - headerHeight - gapHeight;
-            const gapY = headerHeight + Math.random() * availableHeight;
+
+        // --- Logic ---
+
+        function spawnBarrier() {
+            const gapSize = Math.max(120, canvas.height * 0.25);
+            const centerY = (Math.random() * (canvas.height - gapSize - 100)) + (gapSize/2) + 50;
+            
+            // Weighted random color: 70% chance to be different from previous
+            let colorIndex = Math.floor(Math.random() * COLORS.length);
             
             barriers.push({
-                x: canvas.width,
-                topY: headerHeight,
-                topHeight: gapY - headerHeight,
-                bottomY: gapY + gapHeight,
-                bottomHeight: canvas.height - (gapY + gapHeight),
-                width: Math.max(20, canvas.width * 0.028), // Width scales with screen
+                x: canvas.width + 50,
+                y: centerY,
+                gap: gapSize,
+                width: 30,
                 colorIndex: colorIndex,
-                passed: false,
-                get color() { return colors[this.colorIndex]; }
+                passed: false
             });
         }
-        
-        function createParticle(x, y, color) {
-            const particleCount = Math.max(4, Math.min(12, canvas.width / 100)); // Scale particle count
-            for (let i = 0; i < particleCount; i++) {
+
+        function createExplosion(x, y, color) {
+            // Limit particles for performance
+            const count = 15; 
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 200 + 50;
                 particles.push({
-                    x: x,
-                    y: y,
-                    vx: (Math.random() - 0.5) * 12,
-                    vy: (Math.random() - 0.5) * 12,
+                    x: x, y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    life: 1.0,
                     color: color,
-                    life: 40,
-                    maxLife: 40,
-                    size: Math.random() * 3 + 2
+                    size: Math.random() * 4 + 2
                 });
             }
         }
-        
-        function updateParticles() {
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vx *= 0.95;
-                p.vy *= 0.95;
-                p.life--;
-                
-                if (p.life <= 0) {
-                    particles.splice(i, 1);
+
+        function update(dt) {
+            if (gameState !== 'playing') return;
+
+            // Speed scaling
+            gameSpeed = GAME_SPEED_BASE + (score * 2); 
+            
+            // Player Effects
+            if (player.pulse > 0) player.pulse -= dt * 60;
+            
+            // Trail Logic (store last 5 positions)
+            player.trail.push({x: player.x, y: player.y});
+            if (player.trail.length > 10) player.trail.shift();
+
+            // Barrier Spawning logic based on distance
+            distanceTraveled += gameSpeed * dt;
+            if (barriers.length === 0 || (canvas.width - barriers[barriers.length-1].x) > (BARRIER_SPACING * (1 - Math.min(0.4, score/100)))) {
+                spawnBarrier();
+            }
+
+            // Update Barriers
+            for (let i = barriers.length - 1; i >= 0; i--) {
+                let b = barriers[i];
+                b.x -= gameSpeed * dt;
+
+                // Collision Detection (AABB)
+                // Check X overlap
+                if (player.x + player.size/2 > b.x && player.x - player.size/2 < b.x + b.width) {
+                    // Check Y overlap (hitting top or bottom wall)
+                    const topLimit = b.y - b.gap/2;
+                    const bottomLimit = b.y + b.gap/2;
+                    
+                    const hittingTop = (player.y - player.size/2) < topLimit;
+                    const hittingBottom = (player.y + player.size/2) > bottomLimit;
+
+                    if (hittingTop || hittingBottom) {
+                        // Collision occurred
+                        if (player.colorIndex !== b.colorIndex) {
+                            gameOver();
+                            return;
+                        } else if (!b.passed) {
+                            // Correct color match inside the wall
+                            // (Technically we just pass through, scoring happens when we clear it)
+                        }
+                    }
+                }
+
+                // Score point
+                if (!b.passed && player.x > b.x + b.width) {
+                    b.passed = true;
+                    score++;
+                    shakeIntensity = 3; // Small shake on score
+                    document.getElementById('score').textContent = score.toString().padStart(5, '0');
+                    createExplosion(player.x, player.y, COLORS[player.colorIndex]);
+                }
+
+                // Cleanup
+                if (b.x < -100) {
+                    barriers.splice(i, 1);
                 }
             }
+
+            // Update Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.life -= dt * 2; // Fade out speed
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+
+            // Screen Shake Decay
+            if (shakeIntensity > 0) {
+                shakeIntensity *= shakeDecay;
+                if (shakeIntensity < 0.5) shakeIntensity = 0;
+            }
         }
-        
-        function drawParticles() {
-            particles.forEach(p => {
+
+        // --- Rendering ---
+
+        function draw() {
+            // 1. Clear Screen & Background
+            ctx.fillStyle = '#050505';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Apply Screen Shake
+            let dx = 0, dy = 0;
+            if (shakeIntensity > 0) {
+                dx = (Math.random() - 0.5) * shakeIntensity;
+                dy = (Math.random() - 0.5) * shakeIntensity;
                 ctx.save();
-                ctx.globalAlpha = p.life / p.maxLife;
-                ctx.shadowColor = p.color;
-                ctx.shadowBlur = 5;
-                ctx.fillStyle = p.color;
-                ctx.fillRect(p.x, p.y, p.size, p.size);
-                ctx.restore();
-            });
-        }
-        
-        function changePlayerColor() {
-            player.colorIndex = (player.colorIndex + 1) % colors.length;
-            updateColorIndicator();
-            createParticle(player.x + player.width/2, player.y + player.height/2, player.color);
-        }
-        
-        function checkCollision(rect1, rect2) {
-            return rect1.x < rect2.x + rect2.width &&
-                   rect1.x + rect1.width > rect2.x &&
-                   rect1.y < rect2.y + rect2.height &&
-                   rect1.y + rect1.height > rect2.y;
-        }
-        
-        function drawPlayer() {
-            // Draw player with retro glow effect
-            ctx.save();
-            ctx.shadowColor = player.color;
-            ctx.shadowBlur = 15;
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            
-            // Draw inner core
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-            const coreSize = Math.max(6, player.width - 6);
-            const coreOffset = (player.width - coreSize) / 2;
-            ctx.fillRect(player.x + coreOffset, player.y + coreOffset, coreSize, coreSize);
-            
-            // Draw center dot
-            ctx.fillStyle = '#fff';
-            const dotSize = Math.max(2, player.width * 0.12);
-            const dotOffset = (player.width - dotSize) / 2;
-            ctx.fillRect(player.x + dotOffset, player.y + dotOffset, dotSize, dotSize);
-            ctx.restore();
-        }
-        
-        function drawBarriers() {
-            barriers.forEach(barrier => {
-                ctx.save();
-                ctx.shadowColor = barrier.color;
-                ctx.shadowBlur = 10;
-                ctx.fillStyle = barrier.color;
-                
-                // Draw top barrier
-                if (barrier.topHeight > 0) {
-                    ctx.fillRect(barrier.x, barrier.topY, barrier.width, barrier.topHeight);
-                }
-                
-                // Draw bottom barrier
-                if (barrier.bottomHeight > 0) {
-                    ctx.fillRect(barrier.x, barrier.bottomY, barrier.width, barrier.bottomHeight);
-                }
-                
-                // Draw barrier edges
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                const edgeWidth = Math.max(1, barrier.width * 0.1);
-                if (barrier.topHeight > 0) {
-                    ctx.fillRect(barrier.x, barrier.topY, edgeWidth, barrier.topHeight);
-                }
-                if (barrier.bottomHeight > 0) {
-                    ctx.fillRect(barrier.x, barrier.bottomY, edgeWidth, barrier.bottomHeight);
-                }
-                
-                ctx.restore();
-            });
-        }
-        
-        function drawBackground() {
-            // Draw grid pattern
+                ctx.translate(dx, dy);
+            }
+
+            // 2. Draw Dynamic Grid (Parallax)
+            ctx.lineWidth = 1;
             ctx.strokeStyle = 'rgba(0, 255, 136, 0.1)';
-            ctx.lineWidth = 0.5;
+            const gridOffset = (Date.now() * gameSpeed * 0.0005) % 50;
             
-            const gridSize = Math.max(25, canvas.width * 0.028); // Scale grid with screen size
-            const headerHeight = canvas.height * 0.12;
-            const offsetX = (score * gameSpeed * 0.3) % gridSize;
-            
-            for (let x = -offsetX; x < canvas.width; x += gridSize) {
+            // Vertical lines moving
+            for (let x = -gridOffset; x < canvas.width; x += 50) {
+                if (x < 0) continue;
                 ctx.beginPath();
-                ctx.moveTo(x, headerHeight);
+                ctx.moveTo(x, 0);
                 ctx.lineTo(x, canvas.height);
                 ctx.stroke();
             }
-            
-            for (let y = headerHeight; y < canvas.height; y += gridSize) {
+            // Horizontal lines static (floor/ceiling vibe)
+            ctx.strokeStyle = 'rgba(0, 255, 136, 0.05)';
+            for (let y = 0; y < canvas.height; y += 50) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
                 ctx.lineTo(canvas.width, y);
                 ctx.stroke();
             }
-        }
-        
-        function update() {
-            if (!gameRunning) return;
-            
-            // Increase speed gradually
-            speedMultiplier = 1 + (score * 0.0008);
-            gameSpeed = (canvas.width * 0.003) * speedMultiplier; // Scale speed with screen size
-            
-            // Update score
-            score += 1;
-            
-            // Create barriers
-            barrierTimer++;
-            const scaledInterval = barrierInterval - (score * 0.03);
-            if (barrierTimer >= Math.max(scaledInterval, 60)) {
-                createBarrier();
-                barrierTimer = 0;
+
+            // 3. Draw Particles (Behind everything)
+            particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1.0;
+
+            // 4. Draw Barriers
+            barriers.forEach(b => {
+                const color = COLORS[b.colorIndex];
+                const topHeight = b.y - b.gap/2;
+                const bottomY = b.y + b.gap/2;
+                const bottomHeight = canvas.height - bottomY;
+
+                // Optimized "Glow" using strokes and opacity instead of shadowBlur
+                ctx.fillStyle = color;
+                
+                // Top Block
+                ctx.fillRect(b.x, 0, b.width, topHeight);
+                // Bottom Block
+                ctx.fillRect(b.x, bottomY, b.width, bottomHeight);
+
+                // Highlight edge
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.fillRect(b.x, topHeight - 5, b.width, 5);
+                ctx.fillRect(b.x, bottomY, b.width, 5);
+            });
+
+            // 5. Draw Player
+            const pColor = COLORS[player.colorIndex];
+            const pSize = player.size + player.pulse;
+            const halfSize = pSize / 2;
+
+            // Trail
+            if (gameState === 'playing') {
+                for (let i = 0; i < player.trail.length; i++) {
+                    const t = player.trail[i];
+                    const alpha = i / player.trail.length;
+                    ctx.fillStyle = pColor;
+                    ctx.globalAlpha = alpha * 0.3;
+                    const tSize = player.size * (alpha * 0.8);
+                    ctx.fillRect(t.x - tSize/2, t.y - tSize/2, tSize, tSize);
+                }
+                ctx.globalAlpha = 1.0;
             }
+
+            // Main Body (Layered for glow effect without performance cost)
+            // Outer Glow (Fake)
+            ctx.fillStyle = pColor;
+            ctx.globalAlpha = 0.2;
+            ctx.fillRect(player.x - halfSize - 6, player.y - halfSize - 6, pSize + 12, pSize + 12);
             
-            // Update barriers
-            for (let i = barriers.length - 1; i >= 0; i--) {
-                const barrier = barriers[i];
-                barrier.x -= gameSpeed;
-                
-                // Check collision with top barrier
-                if (barrier.topHeight > 0) {
-                    const topBarrier = {
-                        x: barrier.x,
-                        y: barrier.topY,
-                        width: barrier.width,
-                        height: barrier.topHeight
-                    };
-                    if (checkCollision(player, topBarrier)) {
-                        if (player.colorIndex !== barrier.colorIndex) {
-                            gameOver();
-                            return;
-                        }
-                    }
-                }
-                
-                // Check collision with bottom barrier
-                if (barrier.bottomHeight > 0) {
-                    const bottomBarrier = {
-                        x: barrier.x,
-                        y: barrier.bottomY,
-                        width: barrier.width,
-                        height: barrier.bottomHeight
-                    };
-                    if (checkCollision(player, bottomBarrier)) {
-                        if (player.colorIndex !== barrier.colorIndex) {
-                            gameOver();
-                            return;
-                        }
-                    }
-                }
-                
-                // Award points for passing barrier
-                if (!barrier.passed && barrier.x + barrier.width < player.x) {
-                    barrier.passed = true;
-                    score += 50;
-                    createParticle(player.x, player.y + player.height/2, player.color);
-                }
-                
-                // Remove off-screen barriers
-                if (barrier.x + barrier.width < 0) {
-                    barriers.splice(i, 1);
-                }
+            // Mid Glow (Fake)
+            ctx.globalAlpha = 0.5;
+            ctx.fillRect(player.x - halfSize - 3, player.y - halfSize - 3, pSize + 6, pSize + 6);
+            
+            // Core
+            ctx.globalAlpha = 1.0;
+            ctx.fillRect(player.x - halfSize, player.y - halfSize, pSize, pSize);
+            
+            // Center White Dot
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(player.x - 4, player.y - 4, 8, 8);
+
+            // Restore shake context
+            if (shakeIntensity > 0) {
+                ctx.restore();
             }
-            
-            updateParticles();
         }
-        
-        function draw() {
-            // Clear canvas
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            drawBackground();
-            drawPlayer();
-            drawBarriers();
-            drawParticles();
-            
-            // Update UI
-            document.getElementById('score').textContent = formatScore(score);
-            document.getElementById('speed').textContent = speedMultiplier.toFixed(1) + 'x';
-        }
-        
-        function gameOver() {
-            gameRunning = false;
-            
-            // Check for new high score
-            let isNewHighScore = false;
-            if (score > highScore) {
-                highScore = score;
-                isNewHighScore = true;
-                saveHighScore();
-                updateHighScoreDisplay();
-                document.getElementById('highScoreDisplay').style.display = 'block';
-                document.getElementById('gameOver').classList.add('new-high-score');
-            } else {
-                document.getElementById('highScoreDisplay').style.display = 'none';
-                document.getElementById('gameOver').classList.remove('new-high-score');
+
+        // --- Loop ---
+
+        function gameLoop(timestamp) {
+            // Calculate Delta Time (in seconds)
+            const dt = (timestamp - lastTime) / 1000;
+            lastTime = timestamp;
+
+            // Cap dt to prevent huge jumps (e.g., tab switching)
+            if (dt < 0.1) {
+                update(dt);
+                draw();
             }
-            
-            document.getElementById('finalScore').textContent = formatScore(score);
-            document.getElementById('bestScore').textContent = formatScore(highScore);
-            document.getElementById('gameOver').style.display = 'block';
+
+            if (gameState === 'playing' || shakeIntensity > 0) {
+                requestAnimationFrame(gameLoop);
+            }
         }
-        
-        function restart() {
-            gameRunning = true;
-            score = 0;
-            gameSpeed = canvas.width * 0.003;
-            speedMultiplier = 1.0;
-            barriers = [];
-            particles = [];
-            barrierTimer = 0;
-            player.colorIndex = 0;
-            
-            // Reset player position
-            player.x = canvas.width * 0.13;
-            player.y = canvas.height / 2 - player.height / 2;
-            
-            updateColorIndicator();
-            document.getElementById('gameOver').style.display = 'none';
-            document.getElementById('gameOver').classList.remove('new-high-score');
-        }
-        
-        function gameLoop() {
-            update();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-        
-        // Input handling
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                if (gameRunning) {
-                    changePlayerColor();
+
+        // --- UI Helpers ---
+        function updateUI() {
+            document.querySelectorAll('.color-dot').forEach((dot, index) => {
+                if (index === player.colorIndex) {
+                    dot.classList.add('active');
                 } else {
-                    restart();
+                    dot.classList.remove('active');
                 }
-            }
-        });
+            });
+        }
 
-        // Touch controls for mobile
-        let touchStartTime = 0;
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            touchStartTime = Date.now();
-        });
+        function updateHighScoreUI() {
+            document.getElementById('highScore').textContent = highScore.toString().padStart(5, '0');
+        }
 
-        canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            const touchDuration = Date.now() - touchStartTime;
-            if (touchDuration < 500) { // Quick tap
-                if (gameRunning) {
-                    changePlayerColor();
-                } else {
-                    restart();
-                }
-            }
-        });
+        // Start
+        lastTime = performance.now();
+        requestAnimationFrame(gameLoop);
 
-        // Prevent default touch behaviors
-        document.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-        }, { passive: false });
-
-        // Initialize game
-        resizeCanvas();
-        loadHighScore();
-        updateColorIndicator();
-        gameLoop();
     </script>
 </body>
 </html>
