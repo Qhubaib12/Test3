@@ -2,814 +2,565 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Color Chain Reaction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neon Chain Reaction: Overcharge</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg-dark: #050505;
+            --accent: #00ff88;
+            --grid-gap: 8px;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
         
         body {
-            background: #0a0a0a;
+            background: var(--bg-dark);
             font-family: 'Orbitron', monospace;
-            overflow: hidden;
             height: 100vh;
             width: 100vw;
-            color: #00ff88;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        #gameContainer {
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-            position: relative;
             overflow: hidden;
-            box-shadow: inset 0 0 30px rgba(0, 255, 136, 0.1);
-        }
-        
-        #gameHeader {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 12vh;
-            background: linear-gradient(to bottom, rgba(0, 255, 136, 0.2), transparent);
-            border-bottom: 1px solid #00ff88;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 3vw;
-            z-index: 10;
-        }
-        
-        #gameTitle {
-            font-size: clamp(16px, 3.5vw, 28px);
-            font-weight: 900;
-            color: #00ff88;
-            text-shadow: 0 0 10px #00ff88;
-            letter-spacing: 2px;
-        }
-        
-        #gameStats {
-            display: flex;
-            gap: clamp(15px, 3vw, 30px);
-            font-size: clamp(10px, 2vw, 14px);
-            font-weight: 700;
-        }
-        
-        .stat {
+            touch-action: none;
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-        
-        .stat-label {
-            font-size: clamp(8px, 1.5vw, 10px);
-            opacity: 0.7;
-            margin-bottom: 2px;
-        }
-        
-        .stat-value {
-            font-size: clamp(12px, 2.5vw, 16px);
             color: #fff;
-            text-shadow: 0 0 5px #00ff88;
         }
-        
-        .stat-value.warning {
-            color: #ff4757;
-            text-shadow: 0 0 10px #ff4757;
-            animation: pulse 0.5s ease-in-out infinite;
+
+        /* Background Grid Effect */
+        .bg-scanlines {
+            position: absolute; inset: 0; pointer-events: none; z-index: 0;
+            background: linear-gradient(transparent 50%, rgba(0, 255, 136, 0.02) 50%);
+            background-size: 100% 4px;
         }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.15); }
+
+        /* UI Layer */
+        #ui-layer {
+            width: 100%;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+            z-index: 10;
+            height: 80px;
         }
-        
-        #gridContainer {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: grid;
-            gap: clamp(8px, 1.2vw, 12px);
-            padding: 20px;
-        }
-        
-        .cell {
-            aspect-ratio: 1;
-            border: 3px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            cursor: pointer;
+
+        .stat-box { text-align: center; }
+        .stat-label { font-size: 10px; color: #888; letter-spacing: 1px; }
+        .stat-val { font-size: 24px; font-weight: 900; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+        .moves-warn { color: #ff4757; animation: pulse 0.5s infinite alternate; }
+
+        /* Game Area */
+        #game-stage {
             position: relative;
-            transition: all 0.15s ease;
+            flex: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+        }
+
+        #grid {
+            display: grid;
+            gap: var(--grid-gap);
+            position: relative;
+            z-index: 5;
+            padding: 10px;
+            transition: transform 0.1s;
+        }
+
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+
+        /* Canvas Overlay for Particles */
+        #fx-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        /* Cell Styling */
+        .cell {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.1s, border-color 0.2s;
+            border: 2px solid transparent;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: clamp(18px, 3vw, 28px);
-            font-weight: 900;
-            color: rgba(255, 255, 255, 0.9);
-            text-shadow: 0 0 8px currentColor;
-            user-select: none;
         }
-        
-        .cell:hover:not(.exploding) {
-            transform: scale(1.08);
-            border-color: rgba(255, 255, 255, 0.6);
-            box-shadow: 0 0 25px currentColor;
+
+        .cell-inner {
+            width: 100%; height: 100%;
+            border-radius: 10px;
+            transition: all 0.3s ease-out;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
         }
-        
-        .cell.charge1 {
-            border-color: rgba(255, 255, 255, 0.5);
-            transform: scale(1.05);
-        }
-        
-        .cell.charge2 {
-            border-color: rgba(255, 255, 255, 0.8);
-            transform: scale(1.1);
-            animation: readyPulse 0.3s ease-in-out;
-        }
-        
-        .cell.exploding {
-            animation: explode 0.5s ease-out forwards;
-            pointer-events: none;
-        }
-        
-        .cell.falling {
-            animation: fall 0.4s ease-in;
-        }
-        
-        .cell.spawning {
-            animation: spawn 0.3s ease-out;
-        }
-        
-        .cell::before {
-            content: '';
-            position: absolute;
-            inset: -3px;
-            border-radius: 12px;
-            padding: 3px;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        
-        .cell:hover::before {
-            opacity: 1;
-        }
-        
-        @keyframes readyPulse {
-            0%, 100% { box-shadow: 0 0 20px currentColor; }
-            50% { box-shadow: 0 0 40px currentColor, 0 0 60px currentColor; }
-        }
-        
-        @keyframes explode {
-            0% { 
-                transform: scale(1); 
-                opacity: 1;
-                filter: brightness(1);
-            }
-            40% { 
-                transform: scale(1.4); 
-                opacity: 1;
-                filter: brightness(2);
-            }
-            100% { 
-                transform: scale(0.3); 
-                opacity: 0;
-                filter: brightness(3);
-            }
-        }
-        
-        @keyframes fall {
-            from { transform: translateY(-100px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        @keyframes spawn {
-            from { transform: scale(0) rotate(180deg); opacity: 0; }
-            to { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-        
-        .particle {
-            position: absolute;
-            width: 6px;
-            height: 6px;
+
+        /* Charges (Dots) */
+        .charge-indicator {
+            width: 12px; height: 12px;
+            background: #fff;
             border-radius: 50%;
-            pointer-events: none;
-            z-index: 100;
-        }
-        
-        #comboDisplay {
+            box-shadow: 0 0 10px #fff;
             position: absolute;
-            top: 18vh;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: clamp(24px, 5vw, 48px);
-            font-weight: 900;
-            color: #ffd700;
-            text-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 20;
-            white-space: nowrap;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: scale(0);
         }
-        
-        #comboDisplay.show {
-            animation: comboShow 1.2s ease-out;
+
+        /* Charge Positions */
+        .c1 .dot-1 { transform: scale(1); }
+        .c2 .dot-1 { transform: translate(-8px, 0) scale(1); }
+        .c2 .dot-2 { transform: translate(8px, 0) scale(1); }
+        .c3 .dot-1 { transform: translate(0, -8px) scale(1); }
+        .c3 .dot-2 { transform: translate(8px, 6px) scale(1); }
+        .c3 .dot-3 { transform: translate(-8px, 6px) scale(1); }
+
+        /* Wildcard Styling */
+        .cell.wildcard .cell-inner {
+            background: conic-gradient(from 0deg, #ff0000, #00ff00, #0000ff, #ff0000);
+            animation: spin 2s linear infinite;
         }
-        
-        @keyframes comboShow {
-            0% { 
-                opacity: 0; 
-                transform: translateX(-50%) translateY(30px) scale(0.3);
-            }
-            15% { 
-                opacity: 1; 
-                transform: translateX(-50%) translateY(0) scale(1.3);
-            }
-            85% { 
-                opacity: 1; 
-                transform: translateX(-50%) translateY(0) scale(1);
-            }
-            100% { 
-                opacity: 0; 
-                transform: translateX(-50%) translateY(-30px) scale(0.5);
-            }
+        .cell.wildcard::after {
+            content: '★'; font-size: 20px; position: absolute; z-index: 2; color: white;
         }
-        
-        #floatingText {
-            position: absolute;
-            font-size: clamp(16px, 3vw, 24px);
-            font-weight: 900;
-            pointer-events: none;
-            z-index: 25;
-            opacity: 0;
+
+        /* Modals */
+        .modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 50;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(5px);
         }
-        
-        #floatingText.show {
-            animation: floatUp 1s ease-out;
+        .modal.active { opacity: 1; pointer-events: all; }
+
+        .btn {
+            background: var(--accent); border: none; padding: 15px 40px;
+            font-family: 'Orbitron'; font-weight: 900; font-size: 18px;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+            cursor: pointer; margin-top: 20px;
+            transition: transform 0.1s, filter 0.1s;
         }
-        
-        @keyframes floatUp {
-            0% { opacity: 0; transform: translateY(0) scale(0.5); }
-            20% { opacity: 1; transform: translateY(-10px) scale(1.2); }
-            100% { opacity: 0; transform: translateY(-60px) scale(0.8); }
-        }
-        
-        #gameOver {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: #00ff88;
-            background: rgba(0, 0, 0, 0.95);
-            padding: clamp(30px, 5vw, 50px);
-            border: 2px solid #00ff88;
-            box-shadow: 0 0 40px #00ff88, inset 0 0 30px rgba(0, 255, 136, 0.1);
-            display: none;
-            z-index: 30;
-            border-radius: 12px;
-            min-width: 320px;
-            max-width: 90vw;
-        }
-        
-        #gameOver h2 {
-            font-size: clamp(28px, 6vw, 42px);
-            font-weight: 900;
-            margin-bottom: 20px;
-            text-shadow: 0 0 20px #00ff88;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-        
-        .score-display {
-            margin: 15px 0;
-            font-size: clamp(16px, 3vw, 20px);
-        }
-        
-        .high-score {
-            color: #ffd700;
-            text-shadow: 0 0 10px #ffd700;
-        }
-        
-        .restart-btn {
-            margin-top: 25px;
-            padding: 15px 40px;
-            font-size: clamp(14px, 2.5vw, 18px);
-            font-weight: 900;
-            font-family: 'Orbitron', monospace;
-            background: linear-gradient(135deg, #00ff88, #00cc6a);
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-shadow: none;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
-        }
-        
-        .restart-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.8);
-        }
-        
-        #instructions {
-            position: absolute;
-            bottom: 2vh;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #00ff88;
-            text-align: center;
-            font-size: clamp(10px, 1.8vw, 13px);
-            opacity: 0.8;
+        .btn:active { transform: scale(0.95); filter: brightness(0.8); }
+
+        /* Tutorial Box */
+        #tutorial-box {
+            position: absolute; bottom: 20px;
             background: rgba(0, 255, 136, 0.1);
-            padding: clamp(10px, 1.5vh, 14px) clamp(20px, 2.5vw, 30px);
-            border: 1px solid rgba(0, 255, 136, 0.3);
+            border: 1px solid var(--accent);
+            padding: 10px 20px;
             border-radius: 8px;
-            max-width: 90vw;
-            line-height: 1.5;
-        }
-        
-        .tutorial {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
-            padding: 30px;
-            border: 2px solid #00ff88;
-            border-radius: 12px;
-            z-index: 40;
-            max-width: 90vw;
-            box-shadow: 0 0 40px rgba(0, 255, 136, 0.5);
-        }
-        
-        .tutorial h3 {
-            font-size: clamp(20px, 4vw, 28px);
-            color: #00ff88;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .tutorial-step {
-            margin: 15px 0;
-            padding: 12px;
-            background: rgba(0, 255, 136, 0.05);
-            border-left: 3px solid #00ff88;
-            font-size: clamp(12px, 2vw, 16px);
-        }
-        
-        .tutorial-step strong {
-            color: #ffd700;
-        }
-        
-        @keyframes glow {
-            from { text-shadow: 0 0 20px #00ff88; }
-            to { text-shadow: 0 0 30px #00ff88, 0 0 40px #00ff88; }
-        }
-        
-        #gameContainer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(transparent 50%, rgba(0, 255, 136, 0.02) 50%);
-            background-size: 100% 4px;
+            font-size: 12px; text-align: center;
             pointer-events: none;
-            z-index: 5;
+            z-index: 8;
         }
-        
-        @media (max-width: 768px) {
-            #gridContainer {
-                gap: clamp(6px, 1vw, 10px);
-                padding: 15px;
-            }
-            
-            .cell {
-                font-size: clamp(16px, 4vw, 24px);
-            }
-        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
     </style>
 </head>
 <body>
-    <div id="gameContainer">
-        <div id="gameHeader">
-            <div id="gameTitle">CHAIN REACTION</div>
-            <div id="gameStats">
-                <div class="stat">
-                    <div class="stat-label">SCORE</div>
-                    <div class="stat-value" id="score">00000</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">BEST</div>
-                    <div class="stat-value high-score" id="highScore">00000</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">MOVES</div>
-                    <div class="stat-value" id="moves">25</div>
-                </div>
-            </div>
+
+    <canvas id="fx-canvas"></canvas>
+    <div class="bg-scanlines"></div>
+
+    <div id="ui-layer">
+        <div class="stat-box">
+            <div class="stat-label">SCORE</div>
+            <div class="stat-val" id="score-el">0</div>
         </div>
-        
-        <div id="gridContainer"></div>
-        
-        <div id="comboDisplay"></div>
-        <div id="floatingText"></div>
-        
-        <div id="gameOver">
-            <h2>GAME OVER</h2>
-            <div class="score-display">FINAL SCORE: <span id="finalScore">00000</span></div>
-            <div class="score-display" id="highScoreDisplay" style="display: none;">
-                🏆 NEW HIGH SCORE! 🏆
-            </div>
-            <div class="score-display">BEST: <span id="bestScore" class="high-score">00000</span></div>
-            <button class="restart-btn" onclick="restart()">PLAY AGAIN</button>
-        </div>
-        
-        <div id="instructions">
-            <strong>CLICK A SQUARE 3 TIMES</strong> to make it explode<br>
-            Match colors with neighbors for <strong>CHAIN REACTIONS</strong> • Big chains give <strong>BONUS MOVES!</strong>
+        <div class="stat-box">
+            <div class="stat-label">MOVES</div>
+            <div class="stat-val" id="moves-el">20</div>
         </div>
     </div>
 
+    <div id="game-stage">
+        <div id="grid"></div>
+    </div>
+
+    <div id="tutorial-box">
+        TAP to Charge • Max Charge = EXPLODE<br>
+        Explosions charge neighbors • Same Colors Chain Instantly
+    </div>
+
+    <!-- Game Over Modal -->
+    <div id="modal-gameover" class="modal">
+        <h1 style="font-size: 40px; color: #ff4757; margin-bottom: 10px;">OUT OF MOVES</h1>
+        <div style="font-size: 14px; color: #888;">FINAL SCORE</div>
+        <div id="final-score" style="font-size: 50px; color: #fff; margin-bottom: 20px;">0</div>
+        <button class="btn" onclick="Game.restart()">RETRY SYSTEM</button>
+    </div>
+
     <script>
-        const colors = ['#ff4757', '#2ed573', '#3742fa', '#ffa502', '#ff6348', '#a29bfe'];
-        const gridSize = window.innerWidth < 768 ? 6 : 7;
-        let grid = [];
-        let score = 0;
-        let highScore = 0;
-        let moves = 25;
-        let gameRunning = true;
-        let isAnimating = false;
-        let currentCombo = 0;
-        
-        const gridContainer = document.getElementById('gridContainer');
-        gridContainer.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
-        gridContainer.style.maxWidth = window.innerWidth < 768 ? '95vw' : 'min(70vh, 80vw)';
-        gridContainer.style.maxHeight = window.innerWidth < 768 ? '95vw' : 'min(70vh, 80vw)';
-        
-        function loadHighScore() {
-            const saved = localStorage.getItem('chainReactionHighScore');
-            highScore = saved ? parseInt(saved) : 0;
-            updateHighScoreDisplay();
-        }
-        
-        function saveHighScore() {
-            localStorage.setItem('chainReactionHighScore', highScore.toString());
-        }
-        
-        function updateHighScoreDisplay() {
-            document.getElementById('highScore').textContent = highScore.toString().padStart(5, '0');
-        }
-        
-        function formatScore(num) {
-            return num.toString().padStart(5, '0');
-        }
-        
-        function initGrid() {
-            grid = [];
-            gridContainer.innerHTML = '';
-            
-            for (let i = 0; i < gridSize * gridSize; i++) {
-                const cell = {
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    charge: 0,
-                    element: null
-                };
+        // --- Audio Engine (Web Audio API) ---
+        const AudioSys = {
+            ctx: null,
+            init() {
+                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            },
+            playTone(freq, type, dur, vol = 0.1) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(freq * 0.5, this.ctx.currentTime + dur);
                 
-                const cellElement = document.createElement('div');
-                cellElement.className = 'cell';
-                cellElement.style.backgroundColor = cell.color;
-                cellElement.style.boxShadow = `0 0 20px ${cell.color}`;
-                cellElement.addEventListener('click', () => handleCellClick(i));
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur);
                 
-                cell.element = cellElement;
-                gridContainer.appendChild(cellElement);
-                grid.push(cell);
-            }
-        }
-        
-        function handleCellClick(index) {
-            if (!gameRunning || isAnimating || moves <= 0) return;
-            
-            const cell = grid[index];
-            cell.charge++;
-            
-            // Visual feedback
-            cell.element.classList.remove('charge1', 'charge2');
-            
-            if (cell.charge === 1) {
-                cell.element.textContent = '●';
-                cell.element.classList.add('charge1');
-            } else if (cell.charge === 2) {
-                cell.element.textContent = '●●';
-                cell.element.classList.add('charge2');
-            } else if (cell.charge >= 3) {
-                cell.element.textContent = '●●●';
-                isAnimating = true;
-                moves--;
-                updateUI();
-                
-                setTimeout(() => {
-                    explodeCell(index);
-                }, 150);
-            }
-        }
-        
-        function explodeCell(index) {
-            const cell = grid[index];
-            const color = cell.color;
-            
-            createExplosion(cell.element, color);
-            
-            cell.element.classList.add('exploding');
-            cell.charge = 0;
-            
-            setTimeout(() => {
-                cell.element.textContent = '';
-                const matches = findMatches(index, color);
-                
-                if (matches.length >= 1) {
-                    const chainSize = matches.length + 1;
-                    currentCombo++;
-                    
-                    // Scoring
-                    const basePoints = chainSize * 150;
-                    const comboBonus = currentCombo > 1 ? (currentCombo - 1) * 100 : 0;
-                    const totalPoints = basePoints + comboBonus;
-                    
-                    score += totalPoints;
-                    
-                    // Show points
-                    showFloatingText(`+${totalPoints}`, cell.element, '#ffd700');
-                    
-                    // Bonus moves
-                    if (chainSize >= 6) {
-                        moves += 4;
-                        showCombo(`🔥 MEGA x${chainSize}! +4 MOVES 🔥`);
-                    } else if (chainSize >= 4) {
-                        moves += 2;
-                        showCombo(`⚡ SUPER x${chainSize}! +2 MOVES ⚡`);
-                    } else if (chainSize >= 2) {
-                        moves += 1;
-                        showCombo(`💥 CHAIN x${chainSize}! +1 MOVE 💥`);
-                    }
-                    
-                    // Chain explosion
-                    matches.forEach((matchIndex, i) => {
-                        setTimeout(() => {
-                            explodeMatch(matchIndex);
-                        }, i * 80);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + dur);
+            },
+            playPop() { this.playTone(600 + Math.random()*200, 'sine', 0.1, 0.1); },
+            playExplode() { this.playTone(100 + Math.random()*50, 'square', 0.3, 0.2); },
+            playChain() { this.playTone(800 + Math.random()*400, 'triangle', 0.15, 0.1); }
+        };
+
+        // --- Particle System (Canvas) ---
+        const FX = {
+            canvas: document.getElementById('fx-canvas'),
+            ctx: document.getElementById('fx-canvas').getContext('2d'),
+            particles: [],
+            texts: [],
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            },
+            spawnExplosion(x, y, color) {
+                for(let i=0; i<12; i++) {
+                    const angle = (Math.PI * 2 / 12) * i;
+                    const speed = 2 + Math.random() * 4;
+                    this.particles.push({
+                        x, y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        life: 1.0,
+                        color: color,
+                        size: 4 + Math.random() * 4
                     });
+                }
+            },
+            spawnText(x, y, text, color) {
+                this.texts.push({ x, y, text, color, life: 1.0, dy: 0 });
+            },
+            loop() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Particles
+                for(let i=this.particles.length-1; i>=0; i--) {
+                    const p = this.particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life -= 0.02;
+                    p.size *= 0.95;
                     
-                    setTimeout(() => {
-                        applyGravity();
-                    }, matches.length * 80 + 400);
+                    this.ctx.globalAlpha = p.life;
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                    this.ctx.fill();
+                    
+                    if(p.life <= 0) this.particles.splice(i, 1);
+                }
+
+                // Floating Text
+                this.ctx.font = "bold 24px Orbitron";
+                this.ctx.textAlign = "center";
+                for(let i=this.texts.length-1; i>=0; i--) {
+                    const t = this.texts[i];
+                    t.dy -= 1;
+                    t.life -= 0.015;
+                    
+                    this.ctx.globalAlpha = t.life;
+                    this.ctx.fillStyle = t.color;
+                    this.ctx.shadowBlur = 10;
+                    this.ctx.shadowColor = t.color;
+                    this.ctx.fillText(t.text, t.x, t.y + t.dy);
+                    this.ctx.shadowBlur = 0;
+
+                    if(t.life <= 0) this.texts.splice(i, 1);
+                }
+                this.ctx.globalAlpha = 1;
+                requestAnimationFrame(() => this.loop());
+            }
+        };
+
+        // --- Game Logic ---
+        const Game = {
+            cols: 6,
+            rows: 6,
+            colors: ['#ff4757', '#2ed573', '#3742fa', '#ffa502', '#a29bfe'],
+            grid: [],
+            moves: 20,
+            score: 0,
+            isProcessing: false,
+            combo: 0,
+
+            init() {
+                AudioSys.init();
+                FX.resize();
+                FX.loop();
+                window.addEventListener('resize', () => FX.resize());
+                
+                // Setup Grid Layout
+                const gridEl = document.getElementById('grid');
+                const size = Math.min(window.innerWidth - 40, 500);
+                const cellSize = (size - (this.cols-1)*8) / this.cols;
+                
+                gridEl.style.gridTemplateColumns = `repeat(${this.cols}, ${cellSize}px)`;
+                gridEl.style.width = `${size}px`;
+                gridEl.style.height = `${size}px`;
+
+                // Generate Cells
+                gridEl.innerHTML = '';
+                this.grid = [];
+                for(let i=0; i<this.cols * this.rows; i++) {
+                    const el = document.createElement('div');
+                    el.className = 'cell c0';
+                    el.innerHTML = `
+                        <div class="cell-inner">
+                            <div class="charge-indicator dot-1"></div>
+                            <div class="charge-indicator dot-2"></div>
+                            <div class="charge-indicator dot-3"></div>
+                        </div>
+                    `;
+                    el.onclick = () => this.clickCell(i);
+                    gridEl.appendChild(el);
+                    
+                    this.grid.push({
+                        idx: i,
+                        el: el,
+                        inner: el.querySelector('.cell-inner'),
+                        colorIdx: -1,
+                        charge: 0,
+                        type: 'normal' // or 'wildcard'
+                    });
+                }
+                this.restart();
+            },
+
+            restart() {
+                this.score = 0;
+                this.moves = 25;
+                this.combo = 0;
+                this.isProcessing = false;
+                document.getElementById('modal-gameover').classList.remove('active');
+                
+                this.grid.forEach(cell => {
+                    this.resetCell(cell);
+                    this.setCellColor(cell, Math.floor(Math.random() * this.colors.length));
+                });
+                this.updateUI();
+            },
+
+            resetCell(cell) {
+                cell.charge = 0;
+                cell.type = Math.random() < 0.02 ? 'wildcard' : 'normal'; // 2% chance for wildcard
+                this.updateCellVisuals(cell);
+            },
+
+            setCellColor(cell, colorIdx) {
+                cell.colorIdx = colorIdx;
+                const color = this.colors[colorIdx];
+                cell.inner.style.backgroundColor = color;
+                cell.inner.style.boxShadow = `0 0 15px ${color}80`; // Hex opacity
+                if(cell.type === 'wildcard') {
+                    cell.el.classList.add('wildcard');
+                    cell.inner.style.backgroundColor = 'transparent';
                 } else {
-                    currentCombo = 0;
-                    score += 50;
-                    showFloatingText('+50', cell.element, '#00ff88');
-                    applyGravity();
+                    cell.el.classList.remove('wildcard');
                 }
+            },
+
+            updateCellVisuals(cell) {
+                cell.el.className = `cell c${cell.charge} ${cell.type === 'wildcard' ? 'wildcard' : ''}`;
+            },
+
+            clickCell(idx) {
+                if(this.isProcessing || this.moves <= 0) return;
                 
-                updateUI();
-            }, 200);
-        }
-        
-        function explodeMatch(index) {
-            const cell = grid[index];
-            createExplosion(cell.element, cell.color);
-            cell.element.classList.add('exploding');
-            cell.charge = 0;
-            cell.element.textContent = '';
-            cell.element.classList.remove('charge1', 'charge2');
-        }
-        
-        function findMatches(index, color) {
-            const matches = [];
-            const neighbors = getNeighbors(index);
-            
-            for (const neighbor of neighbors) {
-                if (grid[neighbor].color === color && !grid[neighbor].element.classList.contains('exploding')) {
-                    matches.push(neighbor);
+                AudioSys.init(); // Ensure context started
+                this.moves--;
+                this.updateUI();
+                
+                this.addCharge(this.grid[idx], true);
+            },
+
+            addCharge(cell, isUserClick) {
+                if(cell.charge < 3) {
+                    cell.charge++;
+                    this.updateCellVisuals(cell);
+                    AudioSys.playPop();
+                } else {
+                    // Explode!
+                    this.processExplosion(cell, isUserClick);
                 }
-            }
-            
-            return matches;
-        }
-        
-        function getNeighbors(index) {
-            const neighbors = [];
-            const row = Math.floor(index / gridSize);
-            const col = index % gridSize;
-            
-            if (col > 0) neighbors.push(index - 1);
-            if (col < gridSize - 1) neighbors.push(index + 1);
-            if (row > 0) neighbors.push(index - gridSize);
-            if (row < gridSize - 1) neighbors.push(index + gridSize);
-            
-            return neighbors;
-        }
-        
-        function applyGravity() {
-            const emptyColumns = [];
-            
-            for (let col = 0; col < gridSize; col++) {
-                const explodingCells = [];
-                const normalCells = [];
-                
-                for (let row = 0; row < gridSize; row++) {
-                    const index = row * gridSize + col;
-                    if (grid[index].element.classList.contains('exploding')) {
-                        explodingCells.push(index);
-                    } else {
-                        normalCells.push(index);
+            },
+
+            async processExplosion(startCell, isTrigger) {
+                this.isProcessing = true;
+                const queue = [startCell];
+                const explodedIndices = new Set();
+                let chainCount = 0;
+
+                while(queue.length > 0) {
+                    const cell = queue.shift();
+                    if(explodedIndices.has(cell.idx)) continue;
+                    explodedIndices.add(cell.idx);
+
+                    // Visual FX
+                    const rect = cell.el.getBoundingClientRect();
+                    const color = cell.type === 'wildcard' ? '#ffffff' : this.colors[cell.colorIdx];
+                    FX.spawnExplosion(rect.left + rect.width/2, rect.top + rect.height/2, color);
+                    AudioSys.playExplode();
+                    
+                    if(chainCount > 0) {
+                        this.score += (chainCount * 50);
+                        FX.spawnText(rect.left + rect.width/2, rect.top, `+${chainCount*50}`, '#fff');
                     }
+
+                    // Logic: Get neighbors
+                    const neighbors = this.getNeighbors(cell.idx);
+                    
+                    // 1. Damage neighbors
+                    // 2. If neighbor matches color (or wild), add to queue immediately (chain)
+                    // 3. If neighbor diff color, add charge (tactical)
+                    
+                    for(let nIdx of neighbors) {
+                        const nCell = this.grid[nIdx];
+                        if(explodedIndices.has(nIdx)) continue;
+
+                        const match = cell.type === 'wildcard' || nCell.type === 'wildcard' || cell.colorIdx === nCell.colorIdx;
+
+                        if(match) {
+                            // Instant Chain
+                            AudioSys.playChain();
+                            queue.push(nCell);
+                        } else {
+                            // Shockwave Charge
+                            if(nCell.charge < 3) {
+                                nCell.charge++;
+                                this.updateCellVisuals(nCell);
+                            } else {
+                                // Overload!
+                                queue.push(nCell); 
+                            }
+                        }
+                    }
+
+                    // Clear the exploded cell
+                    this.resetCell(cell);
+                    
+                    // Small delay for chain visualization
+                    chainCount++;
+                    if(chainCount % 3 === 0) {
+                        document.getElementById('grid').classList.add('shake');
+                        setTimeout(()=>document.getElementById('grid').classList.remove('shake'), 200);
+                    }
+                    await new Promise(r => setTimeout(r, 80)); 
                 }
-                
-                if (explodingCells.length > 0) {
-                    emptyColumns.push({ col, explodingCells, normalCells });
-                }
-            }
-            
-            if (emptyColumns.length === 0) {
-                isAnimating = false;
-                checkGameOver();
-                return;
-            }
-            
-            // Apply gravity
-            emptyColumns.forEach(({ col, explodingCells, normalCells }) => {
-                normalCells.forEach((cellIndex, i) => {
-                    const targetIndex = (gridSize - normalCells.length + i) * gridSize + col;
-                    if (cellIndex !== targetIndex) {
-                        const sourceCell = grid[cellIndex];
-                        const targetCell = grid[targetIndex];
+
+                // Refill Grid
+                this.refillGrid(explodedIndices);
+            },
+
+            async refillGrid(explodedSet) {
+                // Drop logic
+                for(let col=0; col<this.cols; col++) {
+                    let writePos = this.rows - 1;
+                    // Iterate bottom up
+                    for(let row=this.rows-1; row>=0; row--) {
+                        const idx = row * this.cols + col;
+                        const cell = this.grid[idx];
                         
-                        targetCell.color = sourceCell.color;
-                        targetCell.charge = sourceCell.charge;
-                        targetCell.element.style.backgroundColor = sourceCell.color;
-                        targetCell.element.style.boxShadow = `0 0 20px ${sourceCell.color}`;
-                        targetCell.element.textContent = sourceCell.element.textContent;
-                        targetCell.element.className = 'cell falling ' + sourceCell.element.className.replace('cell', '').trim();
-                    }
-                });
-                
-                // Spawn new cells
-                for (let i = 0; i < explodingCells.length; i++) {
-                    const targetIndex = i * gridSize + col;
-                    const cell = grid[targetIndex];
-                    cell.color = colors[Math.floor(Math.random() * colors.length)];
-                    cell.charge = 0;
-                    cell.element.style.backgroundColor = cell.color;
-                    cell.element.style.boxShadow = `0 0 20px ${cell.color}`;
-                    cell.element.textContent = '';
-                    cell.element.className = 'cell spawning';
-                }
-            });
-            
-            setTimeout(() => {
-                grid.forEach(cell => {
-                    cell.element.classList.remove('exploding', 'falling', 'spawning', 'charge1', 'charge2');
-                });
-                isAnimating = false;
-                checkGameOver();
-            }, 450);
-        }
-        
-        function createExplosion(element, color) {
-            const rect = element.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            
-            for (let i = 0; i < 16; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.backgroundColor = color;
-                particle.style.boxShadow = `0 0 15px ${color}`;
-                particle.style.left = centerX + 'px';
-                particle.style.top = centerY + 'px';
-                
-                document.body.appendChild(particle);
-                
-                const angle = (Math.PI * 2 * i) / 16;
-                const speed = 4 + Math.random() * 3;
-                const vx = Math.cos(angle) * speed;
-                const vy = Math.sin(angle) * speed;
-                
-                animateParticle(particle, vx, vy);
-            }
-        }
-        
-        function animateParticle(particle, vx, vy) {
-            let x = parseFloat(particle.style.left);
-            let y = parseFloat(particle.style.top);
-            let opacity = 1;
-            let life = 40;
-            
-            function update() {
-                x += vx;
-                y += vy;
-                opacity -= 0.025;
-                life--;
-                
-                particle.style.left = x + 'px';
-                particle.style.top = y + 'px';
-                particle.style.opacity = opacity;
-                
-                if (life > 0) {
-                    requestAnimationFrame(update);
-                } else {
-                    particle.remove();
-                }
-            }
-            
-            update();
-        }
-        
-        function showCombo(text) {
-            const display = document.getElementById('comboDisplay');
-            display.textContent = text;
-            display.classList.remove('show');
-            void display.offsetWidth;
-            display.classList.add('show');
-        }
-        
-        function showFloatingText(text, element, color) {
-            const floater = document.getElementById('floatingText');
-            const rect = element.getBoundingClientRect();
-            
-            floater.textContent = text;
-            floater.style.color = color;
-            floater.style.textShadow = `0 0 20px ${color}`;
-            floater.style.left = (rect.left + rect.width / 2) + 'px';
-            floater.style.top = rect.top + 'px';
-            floater.classList.remove('show');
-            void floater.offsetWidth;
-            floater.classList.add('show');
-        }
-        
-        function updateUI() {
-            document.getElementById('score').textContent = formatScore(score);
-            const movesElement = document.getElementById('moves');
-            movesElement.textContent = moves.toString();
-            
-            if (moves <= 5) {
-                movesElement.classList.add('warning');
-            } else {
-                movesElement.classList.remove('warning');
-            }
-        }
-        
-        function checkGameOver() {
-            if (moves <= 0) {
-                gameRunning = false;
-                
-                setTimeout(() => {
-                    if (score > highScore) {
-                        highScore = score;
-                        saveHighScore();
-                        updateHighScoreDisplay();
-                        document.getElementById('highScoreDisplay').style.display = 'block';
-                    } else {
-                        document.getElementById('highScoreDisplay').style.display = 'none';
+                        if(!explodedSet.has(idx)) {
+                            // This cell is valid, move it to writePos
+                            if(row !== writePos) {
+                                const targetIdx = writePos * this.cols + col;
+                                this.copyCellData(this.grid[idx], this.grid[targetIdx]);
+                                explodedSet.add(idx); // Mark old position as empty effectively
+                            }
+                            writePos--;
+                        }
                     }
                     
-                    document.getElementById('finalScore').textContent = formatScore(score);
-                    document.getElementById('bestScore').textContent = formatScore(highScore);
-                    document.getElementById('gameOver').style.display = 'block';
-                }, 300);
+                    // Fill top with new
+                    while(writePos >= 0) {
+                        const idx = writePos * this.cols + col;
+                        this.resetCell(this.grid[idx]);
+                        this.setCellColor(this.grid[idx], Math.floor(Math.random() * this.colors.length));
+                        writePos--;
+                    }
+                }
+
+                // Bonus Moves for big chains
+                if(explodedSet.size > 6) {
+                    this.moves += 2;
+                    FX.spawnText(window.innerWidth/2, window.innerHeight/2, "BONUS MOVES!", "#00ff88");
+                }
+
+                this.updateUI();
+                this.isProcessing = false;
+                
+                if(this.moves <= 0) {
+                    setTimeout(() => this.gameOver(), 500);
+                }
+            },
+
+            copyCellData(src, dest) {
+                dest.colorIdx = src.colorIdx;
+                dest.charge = src.charge;
+                dest.type = src.type;
+                this.updateCellVisuals(dest);
+                this.setCellColor(dest, dest.colorIdx);
+            },
+
+            getNeighbors(idx) {
+                const n = [];
+                const c = idx % this.cols;
+                const r = Math.floor(idx / this.cols);
+                if(c > 0) n.push(idx - 1);
+                if(c < this.cols - 1) n.push(idx + 1);
+                if(r > 0) n.push(idx - this.cols);
+                if(r < this.rows - 1) n.push(idx + this.cols);
+                return n;
+            },
+
+            updateUI() {
+                document.getElementById('score-el').innerText = this.score;
+                const movesEl = document.getElementById('moves-el');
+                movesEl.innerText = this.moves;
+                if(this.moves <= 5) movesEl.classList.add('moves-warn');
+                else movesEl.classList.remove('moves-warn');
+            },
+
+            gameOver() {
+                document.getElementById('final-score').innerText = this.score;
+                document.getElementById('modal-gameover').classList.add('active');
             }
-        }
-        
-        function restart() {
-            gameRunning = true;
-            score = 0;
-            moves = 25;
-            currentCombo = 0;
-            isAnimating = false;
-            
-            document.getElementById('gameOver').style.display = 'none';
-            initGrid();
-            updateUI();
-        }
-        
-        loadHighScore();
-        initGrid();
-        updateUI();
+        };
+
+        Game.init();
+
     </script>
 </body>
 </html>
