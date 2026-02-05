@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="assets/styles/main.css">
     <script src="assets/scripts/main.js" defer></script>
 </head>
-<body class="page">
+<body class="page page--premium">
     <a class="sr-only" href="#main-content">Skip to content</a>
     <header>
         <div class="container site-header">
@@ -55,7 +55,7 @@
                         <h2 class="section__title">Choose the lane that fits your arcade obsession</h2>
                         <p class="section__description">What you see in the free library is only 0.1% of the full PixelAddict vault. These plans unlock early builds, cosmetics, merch drops, and more once the premium wave opens.</p>
                     </div>
-                    <div class="pricing-grid premium-plan-grid">
+                    <div class="pricing-grid premium-plan-grid" data-stagger-group>
                         <article class="pricing-card premium-plan">
                             <span class="premium-plan__shine" aria-hidden="true"></span>
                             <div class="premium-plan__header">
@@ -104,6 +104,41 @@
                 </div>
             </section>
 
+
+
+            <section class="section section--premium-meta">
+                <div class="container">
+                    <div class="trust-strip" role="list" aria-label="Premium trust highlights">
+                        <p class="trust-strip__item" role="listitem">🔐 Secure checkout & encrypted billing</p>
+                        <p class="trust-strip__item" role="listitem">🗓️ Cancel anytime from your account</p>
+                        <p class="trust-strip__item" role="listitem">💸 7-day refund guarantee</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section section--premium-meta">
+                <div class="container faq">
+                    <div class="section__heading">
+                        <p class="section__eyebrow">FAQ</p>
+                        <h2 class="section__title">Everything before you subscribe</h2>
+                    </div>
+                    <div class="faq__list" data-stagger-group>
+                        <details class="faq__item">
+                            <summary>Can I cancel at any time?</summary>
+                            <p>Yes. Premium is fully self-serve and you can cancel instantly from your account settings.</p>
+                        </details>
+                        <details class="faq__item">
+                            <summary>When do Coming Soon games unlock?</summary>
+                            <p>Locked games release in waves. Premium members get earliest access windows and launch notifications.</p>
+                        </details>
+                        <details class="faq__item">
+                            <summary>Do I keep access on mobile and desktop?</summary>
+                            <p>Absolutely. Your subscription and progress sync across supported devices.</p>
+                        </details>
+                    </div>
+                </div>
+            </section>
+
             <section class="section">
                 <div class="container page-cta">
                     <h2 class="section__title">We build this with you</h2>
@@ -124,7 +159,7 @@
                     <h2 class="section__title">Perks we are polishing right now</h2>
                     <p class="section__description">Our internal roadmap is packed with extras that respect the free-first philosophy while rewarding the players who keep the signal strong.</p>
                 </div>
-                <div class="info-grid">
+                <div class="info-grid" data-stagger-group>
                     <article class="info-card">
                         <h3 class="info-card__title">Early access builds</h3>
                         <p class="info-card__description">Playtest upcoming cabinets, give feedback directly to the dev team, and help balance before global launch.</p>
