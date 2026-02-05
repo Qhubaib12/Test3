@@ -26,6 +26,10 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     margin: 0;
     font-family: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -37,6 +41,7 @@ body {
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
+    animation: page-fade-in 0.7s ease-out;
 }
 
 main,
@@ -88,6 +93,29 @@ img {
     max-width: var(--max-content-width);
     margin: 0 auto;
     padding: 0 1.75rem;
+}
+
+.motion-reveal {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.99);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+}
+
+.motion-reveal.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+}
+
+.game-card,
+.feature-card,
+.update-card,
+.info-card,
+.pricing-card,
+.auth-card,
+.contact-card {
+    transform-origin: center;
+    backface-visibility: hidden;
 }
 
 .sr-only {
@@ -786,6 +814,55 @@ header {
     --logo-glow: rgba(99, 255, 245, 0.58);
     --card-halo: rgba(169, 128, 255, 0.18);
     --card-halo-strong: rgba(99, 255, 245, 0.48);
+}
+
+
+.game-card__emoji {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.games-section-heading {
+    margin-top: 3rem;
+    display: grid;
+    gap: 0.8rem;
+    justify-items: start;
+}
+
+.games__title--sub {
+    font-size: clamp(1.3rem, 2vw, 1.8rem);
+}
+
+.games-grid--paid {
+    margin-top: 1.5rem;
+}
+
+
+.game-card--locked {
+    border-color: rgba(255, 200, 90, 0.3);
+    background: linear-gradient(160deg, rgba(30, 22, 10, 0.92) 0%, rgba(14, 10, 6, 0.98) 100%);
+}
+
+.game-card--locked:hover,
+.game-card--locked:focus-visible {
+    transform: translateY(-4px);
+    border-color: rgba(255, 210, 120, 0.62);
+}
+
+.game-card--locked .game-card__media {
+    filter: blur(3px) saturate(0.65);
+}
+
+.game-card--locked .game-card__title {
+    color: #ffd98f;
+}
+
+.game-card--paid {
+    position: relative;
+}
+
+.games-grid--paid .game-card__media {
+    filter: blur(6px) saturate(0.7);
 }
 
 .game-logo {
@@ -2839,6 +2916,18 @@ footer::before {
 .footer__links a:focus-visible {
     color: var(--accent-primary);
     text-shadow: 0 0 12px rgba(57, 255, 156, 0.55);
+}
+
+@keyframes page-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @media (max-width: 900px) {
