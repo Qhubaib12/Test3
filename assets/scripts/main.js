@@ -47,6 +47,35 @@
             });
         }
 
+        var revealTargets = Array.prototype.slice.call(document.querySelectorAll('.hero, .games, .features, .updates, .page-hero, .section, .game-card, .feature-card, .update-card, .info-card, .pricing-card, .auth-card, .contact-card'));
+        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        for (var revealIndex = 0; revealIndex < revealTargets.length; revealIndex += 1) {
+            revealTargets[revealIndex].classList.add('motion-reveal');
+        }
+
+        if (reduceMotion || typeof window.IntersectionObserver === 'undefined') {
+            for (var revealFallbackIndex = 0; revealFallbackIndex < revealTargets.length; revealFallbackIndex += 1) {
+                revealTargets[revealFallbackIndex].classList.add('is-visible');
+            }
+        } else {
+            var revealObserver = new IntersectionObserver(function (entries) {
+                for (var entryIndex = 0; entryIndex < entries.length; entryIndex += 1) {
+                    if (entries[entryIndex].isIntersecting) {
+                        entries[entryIndex].target.classList.add('is-visible');
+                        revealObserver.unobserve(entries[entryIndex].target);
+                    }
+                }
+            }, {
+                threshold: 0.12,
+                rootMargin: '0px 0px -8% 0px'
+            });
+
+            for (var observerIndex = 0; observerIndex < revealTargets.length; observerIndex += 1) {
+                revealObserver.observe(revealTargets[observerIndex]);
+            }
+        }
+
         var gameGrid = document.querySelector('[data-game-grid]');
         if (gameGrid) {
             var filterButtons = Array.prototype.slice.call(document.querySelectorAll('.filter-button'));

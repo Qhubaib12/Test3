@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metro Builder - PixelAddict</title>
+  <style>
+    :root { --accent: #8ad4ff; --bg: #070d18; --text:#e8f3ff; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family: 'Segoe UI', system-ui, sans-serif; color:var(--text); background:radial-gradient(circle at 30% 0%, #142445 0%, var(--bg) 55%); min-height:100vh; display:grid; place-items:center; padding:1rem; }
+    .wrap { width:min(900px, 100%); background:rgba(15,26,47,.9); border:1px solid rgba(255,255,255,.12); border-radius:20px; padding:1.2rem; box-shadow:0 25px 50px rgba(0,0,0,.35); }
+    .top { display:flex; justify-content:space-between; align-items:center; gap:.7rem; margin-bottom:.8rem; }
+    a { color:var(--accent); text-decoration:none; font-weight:700; }
+    h1 { margin:.2rem 0; font-size:clamp(1.2rem,2vw,1.8rem); }
+    p { margin:.2rem 0 1rem; color:#b9cae8; }
+    #game { width:100%; height:420px; border-radius:14px; border:1px solid rgba(255,255,255,.18); background:#050b16; display:block; }
+    .hud { display:flex; flex-wrap:wrap; gap:.7rem 1rem; margin:.8rem 0; }
+    .chip { background:#0a1324; border:1px solid rgba(255,255,255,.12); padding:.35rem .6rem; border-radius:999px; font-size:.92rem; }
+    .btn { background:var(--accent); color:#041020; border:0; border-radius:10px; padding:.55rem .85rem; font-weight:800; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top">
+      <a href="/">← Back to library</a>
+      <button class="btn" id="restart">Restart</button>
+    </div>
+    <h1>🏙️ Metro Builder</h1>
+    <p>Connect moving stations by activating links before city demand spikes.</p>
+    <canvas id="game" width="860" height="420" aria-label="Metro Builder game area"></canvas>
+    <div class="hud">
+      <div class="chip">Score: <strong id="score">0</strong></div>
+      <div class="chip">Lives: <strong id="lives">3</strong></div>
+      <div class="chip">Time: <strong id="time">45</strong>s</div>
+      <div class="chip">Click or tap the glowing targets.</div>
+    </div>
+  </main>
+  <script>
+    const c=document.getElementById('game'),x=c.getContext('2d');
+    const scoreEl=document.getElementById('score'),livesEl=document.getElementById('lives'),timeEl=document.getElementById('time');
+    let targets=[],score=0,lives=3,time=45,running=true,last=0;
+    function spawn(){targets.push({x:40+Math.random()*(c.width-80),y:50+Math.random()*(c.height-100),r:14+Math.random()*16,t:2.5+Math.random()*2.5});}
+    function reset(){targets=[];score=0;lives=3;time=45;running=true;for(let i=0;i<4;i++)spawn();}
+    function tick(ts){if(!running) return; const dt=(ts-last)/1000||0; last=ts; time=Math.max(0,time-dt/1.1); if(time===0) running=false;
+      x.clearRect(0,0,c.width,c.height);
+      x.fillStyle='rgba(255,255,255,.03)'; for(let i=0;i<60;i++) x.fillRect((i*37)%c.width,(i*83)%c.height,2,2);
+      targets.forEach(t=>{t.t-=dt; x.beginPath(); x.arc(t.x,t.y,t.r,0,Math.PI*2); x.fillStyle='rgba(255,255,255,.06)'; x.fill(); x.beginPath(); x.arc(t.x,t.y,Math.max(4,t.r*0.45),0,Math.PI*2); x.fillStyle='#8ad4ff'; x.fill(); });
+      for(let i=targets.length-1;i>=0;i--) if(targets[i].t<=0){targets.splice(i,1); lives=Math.max(0,lives-1); spawn(); if(lives===0) running=false;}
+      while(targets.length<4) spawn();
+      scoreEl.textContent=score; livesEl.textContent=lives; timeEl.textContent=Math.ceil(time);
+      x.fillStyle='rgba(255,255,255,.9)'; x.font='600 18px Segoe UI'; x.fillText(running?'Keep hitting targets!':'Game Over - press Restart',20,28);
+      requestAnimationFrame(tick);
+    }
+    c.addEventListener('click',e=>{if(!running) return; const r=c.getBoundingClientRect(),sx=c.width/r.width,sy=c.height/r.height,mx=(e.clientX-r.left)*sx,my=(e.clientY-r.top)*sy;
+      for(let i=targets.length-1;i>=0;i--){const t=targets[i]; if((mx-t.x)**2+(my-t.y)**2<=t.r**2){score+=10; targets.splice(i,1); spawn(); break;}}
+    });
+    document.getElementById('restart').addEventListener('click',()=>{last=performance.now(); reset(); requestAnimationFrame(tick);});
+    last=performance.now(); reset(); requestAnimationFrame(tick);
+  </script>
+</body>
+</html>
