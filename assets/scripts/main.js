@@ -47,6 +47,71 @@
             });
         }
 
+        var revealTargets = Array.prototype.slice.call(document.querySelectorAll('.hero, .games, .features, .updates, .testimonials, .page-hero, .section'));
+        var staggerGroups = Array.prototype.slice.call(document.querySelectorAll('[data-stagger-group]'));
+        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        for (var revealIndex = 0; revealIndex < revealTargets.length; revealIndex += 1) {
+            revealTargets[revealIndex].classList.add('motion-reveal');
+        }
+
+
+        for (var staggerInitIndex = 0; staggerInitIndex < staggerGroups.length; staggerInitIndex += 1) {
+            var staggerChildren = Array.prototype.slice.call(staggerGroups[staggerInitIndex].children || []);
+            for (var staggerChildIndex = 0; staggerChildIndex < staggerChildren.length; staggerChildIndex += 1) {
+                staggerChildren[staggerChildIndex].classList.add('motion-reveal');
+            }
+        }
+
+        function revealStaggerGroup(group) {
+            var children = Array.prototype.slice.call(group.children || []);
+            for (var childIndex = 0; childIndex < children.length; childIndex += 1) {
+                children[childIndex].classList.add('motion-reveal');
+                children[childIndex].style.transitionDelay = (childIndex * 70) + 'ms';
+                children[childIndex].classList.add('is-visible');
+            }
+        }
+
+        if (reduceMotion || typeof window.IntersectionObserver === 'undefined') {
+            for (var revealFallbackIndex = 0; revealFallbackIndex < revealTargets.length; revealFallbackIndex += 1) {
+                revealTargets[revealFallbackIndex].classList.add('is-visible');
+            }
+            for (var staggerFallbackIndex = 0; staggerFallbackIndex < staggerGroups.length; staggerFallbackIndex += 1) {
+                revealStaggerGroup(staggerGroups[staggerFallbackIndex]);
+            }
+        } else {
+            var revealObserver = new IntersectionObserver(function (entries) {
+                for (var entryIndex = 0; entryIndex < entries.length; entryIndex += 1) {
+                    if (entries[entryIndex].isIntersecting) {
+                        entries[entryIndex].target.classList.add('is-visible');
+                        revealObserver.unobserve(entries[entryIndex].target);
+                    }
+                }
+            }, {
+                threshold: 0.16,
+                rootMargin: '0px 0px -10% 0px'
+            });
+
+            var staggerObserver = new IntersectionObserver(function (entries) {
+                for (var staggerEntryIndex = 0; staggerEntryIndex < entries.length; staggerEntryIndex += 1) {
+                    if (entries[staggerEntryIndex].isIntersecting) {
+                        revealStaggerGroup(entries[staggerEntryIndex].target);
+                        staggerObserver.unobserve(entries[staggerEntryIndex].target);
+                    }
+                }
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -8% 0px'
+            });
+
+            for (var observerIndex = 0; observerIndex < revealTargets.length; observerIndex += 1) {
+                revealObserver.observe(revealTargets[observerIndex]);
+            }
+            for (var groupIndex = 0; groupIndex < staggerGroups.length; groupIndex += 1) {
+                staggerObserver.observe(staggerGroups[groupIndex]);
+            }
+        }
+
         var gameGrid = document.querySelector('[data-game-grid]');
         if (gameGrid) {
             var filterButtons = Array.prototype.slice.call(document.querySelectorAll('.filter-button'));
