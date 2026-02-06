@@ -218,6 +218,106 @@
             applyFilters();
         }
 
+        var shopCards = Array.prototype.slice.call(document.querySelectorAll('.shop-card'));
+        var shopModal = document.getElementById('shop-modal');
+
+        if (shopModal && shopCards.length) {
+            var modalTitle = document.getElementById('shop-modal-title');
+            var modalCategory = document.getElementById('shop-modal-category');
+            var modalDescription = document.getElementById('shop-modal-description');
+            var modalPrice = document.getElementById('shop-modal-price');
+            var modalSku = document.getElementById('shop-modal-sku');
+            var modalIncludes = document.getElementById('shop-modal-includes');
+            var modalCloseButtons = Array.prototype.slice.call(shopModal.querySelectorAll('[data-shop-close]'));
+
+            function clearModalVariant() {
+                shopModal.classList.remove('shop-modal--keyboard', 'shop-modal--monitor', 'shop-modal--controller', 'shop-modal--disc', 'shop-modal--pixel');
+            }
+
+            function applyModalVariant(card) {
+                clearModalVariant();
+                if (card.classList.contains('shop-card--keyboard')) {
+                    shopModal.classList.add('shop-modal--keyboard');
+                } else if (card.classList.contains('shop-card--monitor')) {
+                    shopModal.classList.add('shop-modal--monitor');
+                } else if (card.classList.contains('shop-card--controller')) {
+                    shopModal.classList.add('shop-modal--controller');
+                } else if (card.classList.contains('shop-card--disc')) {
+                    shopModal.classList.add('shop-modal--disc');
+                } else if (card.classList.contains('shop-card--pixel')) {
+                    shopModal.classList.add('shop-modal--pixel');
+                }
+            }
+
+            function openShopModal(card) {
+                var title = card.getAttribute('data-name') || '';
+                var category = card.getAttribute('data-category') || '';
+                var description = card.getAttribute('data-description') || '';
+                var price = card.getAttribute('data-price') || '';
+                var sku = card.getAttribute('data-sku') || '';
+                var includes = card.getAttribute('data-includes') || '';
+
+                if (modalTitle) {
+                    modalTitle.textContent = title || (card.querySelector('.shop-card__title') || {}).textContent || 'Product details';
+                }
+                if (modalCategory) {
+                    modalCategory.textContent = category || 'Merch';
+                }
+                if (modalDescription) {
+                    modalDescription.textContent = description || '';
+                }
+                if (modalPrice) {
+                    modalPrice.textContent = price || '—';
+                }
+                if (modalSku) {
+                    modalSku.textContent = sku || '—';
+                }
+                if (modalIncludes) {
+                    modalIncludes.textContent = includes || '—';
+                }
+
+                applyModalVariant(card);
+                toggleDisplay(shopModal, true, 'grid');
+                document.body.classList.add('is-modal-open');
+                var closeButton = shopModal.querySelector('[data-shop-close]');
+                if (closeButton) {
+                    closeButton.focus();
+                }
+            }
+
+            function closeShopModal() {
+                toggleDisplay(shopModal, false);
+                document.body.classList.remove('is-modal-open');
+                clearModalVariant();
+            }
+
+            for (var shopIndex = 0; shopIndex < shopCards.length; shopIndex += 1) {
+                (function (card) {
+                    card.addEventListener('click', function () {
+                        openShopModal(card);
+                    });
+                    card.addEventListener('keydown', function (event) {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            openShopModal(card);
+                        }
+                    });
+                })(shopCards[shopIndex]);
+            }
+
+            for (var closeIndex = 0; closeIndex < modalCloseButtons.length; closeIndex += 1) {
+                modalCloseButtons[closeIndex].addEventListener('click', function () {
+                    closeShopModal();
+                });
+            }
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && !shopModal.hidden) {
+                    closeShopModal();
+                }
+            });
+        }
+
         var loginForm = document.getElementById('loginForm');
         var loadingMsg = document.getElementById('loadingMsg');
         var errorMsg = document.getElementById('errorMsg');
