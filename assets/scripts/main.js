@@ -66,9 +66,16 @@
 
         function revealStaggerGroup(group) {
             var children = Array.prototype.slice.call(group.children || []);
+            var isHeavyGroup = children.length > 12;
             for (var childIndex = 0; childIndex < children.length; childIndex += 1) {
                 children[childIndex].classList.add('motion-reveal');
-                children[childIndex].style.transitionDelay = (childIndex * 70) + 'ms';
+                if (isHeavyGroup) {
+                    children[childIndex].classList.add('motion-reveal--instant');
+                    children[childIndex].style.transitionDelay = '';
+                } else {
+                    children[childIndex].classList.remove('motion-reveal--instant');
+                    children[childIndex].style.transitionDelay = (childIndex * 70) + 'ms';
+                }
                 children[childIndex].classList.add('is-visible');
             }
         }

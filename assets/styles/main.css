@@ -119,6 +119,13 @@ img {
     transform: translate3d(0, 0, 0) scale(1);
 }
 
+.motion-reveal--instant {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+}
+
 .game-card,
 .feature-card,
 .update-card,
