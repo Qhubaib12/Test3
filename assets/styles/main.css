@@ -1581,8 +1581,41 @@ header {
     letter-spacing: 0.08em;
 }
 
-.game-card__footer span:last-child {
+.game-card__footer span:not(.tag):not(.game-card__play) {
     color: rgba(141, 252, 204, 0.75);
+}
+
+.game-card__play {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-left: auto;
+    padding: 0.5rem 1.25rem;
+    border-radius: 999px;
+    border: 1px solid rgba(57, 255, 156, 0.85);
+    background: linear-gradient(120deg, rgba(57, 255, 156, 0.5), rgba(19, 246, 255, 0.22));
+    color: #04140c;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    box-shadow: 0 0 20px rgba(57, 255, 156, 0.35);
+    text-shadow: 0 1px 6px rgba(6, 24, 15, 0.45);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.game-card__play::before {
+    content: '▶';
+    font-size: 0.65rem;
+    color: rgba(7, 32, 20, 0.8);
+}
+
+.game-card:hover .game-card__play,
+.game-card:focus-visible .game-card__play {
+    border-color: rgba(57, 255, 156, 1);
+    background: linear-gradient(120deg, rgba(57, 255, 156, 0.68), rgba(19, 246, 255, 0.3));
+    box-shadow: 0 0 24px rgba(57, 255, 156, 0.5);
+    transform: translateY(-2px);
 }
 
 .tag {
