@@ -50,6 +50,7 @@
         var revealTargets = Array.prototype.slice.call(document.querySelectorAll('.hero, .games, .features, .updates, .testimonials, .page-hero, .section'));
         var staggerGroups = Array.prototype.slice.call(document.querySelectorAll('[data-stagger-group]'));
         var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var isNarrowScreen = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
 
         for (var revealIndex = 0; revealIndex < revealTargets.length; revealIndex += 1) {
             revealTargets[revealIndex].classList.add('motion-reveal');
@@ -72,7 +73,35 @@
             }
         }
 
-        if (reduceMotion || typeof window.IntersectionObserver === 'undefined') {
+        function isInViewport(element, offset) {
+            if (!element) {
+                return false;
+            }
+            var rect = element.getBoundingClientRect();
+            var viewHeight = window.innerHeight || document.documentElement.clientHeight;
+            var viewWidth = window.innerWidth || document.documentElement.clientWidth;
+            var threshold = offset || 0;
+            return rect.bottom >= -threshold &&
+                rect.top <= viewHeight + threshold &&
+                rect.right >= 0 &&
+                rect.left <= viewWidth;
+        }
+
+        function revealInitialTargets() {
+            var threshold = window.innerHeight ? window.innerHeight * 0.15 : 120;
+            for (var targetIndex = 0; targetIndex < revealTargets.length; targetIndex += 1) {
+                if (isInViewport(revealTargets[targetIndex], threshold)) {
+                    revealTargets[targetIndex].classList.add('is-visible');
+                }
+            }
+            for (var groupIndex = 0; groupIndex < staggerGroups.length; groupIndex += 1) {
+                if (isInViewport(staggerGroups[groupIndex], threshold)) {
+                    revealStaggerGroup(staggerGroups[groupIndex]);
+                }
+            }
+        }
+
+        if (reduceMotion || isNarrowScreen || typeof window.IntersectionObserver === 'undefined') {
             for (var revealFallbackIndex = 0; revealFallbackIndex < revealTargets.length; revealFallbackIndex += 1) {
                 revealTargets[revealFallbackIndex].classList.add('is-visible');
             }
@@ -110,6 +139,7 @@
             for (var groupIndex = 0; groupIndex < staggerGroups.length; groupIndex += 1) {
                 staggerObserver.observe(staggerGroups[groupIndex]);
             }
+            window.requestAnimationFrame(revealInitialTargets);
         }
 
         var gameGrid = document.querySelector('[data-game-grid]');
@@ -416,6 +446,9 @@
         function showPaymentPage() {
             toggleDisplay(premiumPage, false);
             toggleDisplay(paymentPage, true, 'block');
+            if (paymentPage) {
+                paymentPage.classList.add('is-visible');
+            }
             if (errorMessage) {
                 toggleDisplay(errorMessage, false);
             }
@@ -516,6 +549,9 @@
         function showPremiumPage() {
             toggleDisplay(paymentPage, false);
             toggleDisplay(premiumPage, true, '');
+            if (premiumPage) {
+                premiumPage.classList.add('is-visible');
+            }
             if (errorMessage) {
                 toggleDisplay(errorMessage, false);
             }
