@@ -2145,17 +2145,19 @@ header {
     border-radius: 18px;
     height: 170px;
     overflow: hidden;
-    background: linear-gradient(140deg, rgba(10, 30, 22, 0.95), rgba(4, 12, 9, 0.85));
-    border: 1px solid rgba(57, 255, 156, 0.14);
+    background: linear-gradient(140deg, rgba(12, 38, 28, 0.98), rgba(6, 18, 12, 0.9));
+    border: 1px solid rgba(57, 255, 156, 0.22);
     perspective: 900px;
+    box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.45);
 }
 
 .shop-card__mockup {
     position: absolute;
     inset: 14px;
     border-radius: 16px;
-    background: linear-gradient(135deg, rgba(57, 255, 156, 0.25), rgba(19, 246, 255, 0.08));
-    box-shadow: inset 0 0 18px rgba(19, 246, 255, 0.18);
+    background: linear-gradient(135deg, rgba(57, 255, 156, 0.45), rgba(19, 246, 255, 0.18));
+    border: 1px solid rgba(57, 255, 156, 0.35);
+    box-shadow: inset 0 0 18px rgba(19, 246, 255, 0.28), 0 12px 20px rgba(0, 16, 10, 0.45);
     transform: rotateX(14deg) rotateY(-18deg) translateY(0);
     transform-style: preserve-3d;
     animation: shop-float 7s ease-in-out infinite;
@@ -2174,9 +2176,9 @@ header {
 
 .shop-card__mockup::after {
     inset: 12%;
-    background: linear-gradient(120deg, rgba(0, 0, 0, 0.2), rgba(19, 246, 255, 0.25));
+    background: linear-gradient(120deg, rgba(6, 22, 14, 0.2), rgba(19, 246, 255, 0.35));
     transform: translateZ(36px);
-    opacity: 0.6;
+    opacity: 0.7;
 }
 
 .shop-card__glow {
