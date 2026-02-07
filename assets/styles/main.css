@@ -2147,6 +2147,8 @@ header {
     background: linear-gradient(140deg, rgba(10, 30, 22, 0.95), rgba(4, 12, 9, 0.85));
     border: 1px solid rgba(57, 255, 156, 0.14);
     perspective: 900px;
+    background-size: cover;
+    background-position: center;
 }
 
 .shop-card__mockup {
@@ -2192,20 +2194,40 @@ header {
     background: linear-gradient(135deg, rgba(57, 255, 156, 0.35), rgba(19, 246, 255, 0.15));
 }
 
+.shop-card--keyboard .shop-card__media {
+    background-image: linear-gradient(140deg, rgba(10, 30, 22, 0.7), rgba(4, 12, 9, 0.55)), url('../images/shop-keyboard.svg');
+}
+
 .shop-card--monitor .shop-card__mockup {
     background: linear-gradient(135deg, rgba(19, 246, 255, 0.3), rgba(10, 38, 32, 0.15));
+}
+
+.shop-card--monitor .shop-card__media {
+    background-image: linear-gradient(140deg, rgba(6, 20, 26, 0.65), rgba(4, 12, 14, 0.55)), url('../images/shop-monitor.svg');
 }
 
 .shop-card--controller .shop-card__mockup {
     background: linear-gradient(135deg, rgba(154, 255, 45, 0.28), rgba(19, 246, 255, 0.1));
 }
 
+.shop-card--controller .shop-card__media {
+    background-image: linear-gradient(140deg, rgba(10, 24, 16, 0.65), rgba(4, 12, 9, 0.55)), url('../images/shop-controller.svg');
+}
+
 .shop-card--disc .shop-card__mockup {
     background: radial-gradient(circle at 30% 30%, rgba(57, 255, 156, 0.35), rgba(4, 16, 10, 0.15));
 }
 
+.shop-card--disc .shop-card__media {
+    background-image: linear-gradient(140deg, rgba(8, 14, 20, 0.7), rgba(4, 12, 12, 0.6)), url('../images/shop-disc.svg');
+}
+
 .shop-card--pixel .shop-card__mockup {
     background: linear-gradient(135deg, rgba(255, 109, 109, 0.3), rgba(57, 255, 156, 0.12));
+}
+
+.shop-card--pixel .shop-card__media {
+    background-image: linear-gradient(140deg, rgba(20, 10, 16, 0.7), rgba(6, 18, 14, 0.6)), url('../images/shop-pixel.svg');
 }
 
 .shop-offer {
@@ -2307,6 +2329,8 @@ header {
     border: 1px solid rgba(57, 255, 156, 0.16);
     position: relative;
     overflow: hidden;
+    background-size: cover;
+    background-position: center;
 }
 
 .shop-modal__mockup {
@@ -2341,20 +2365,40 @@ header {
     background: linear-gradient(135deg, rgba(57, 255, 156, 0.45), rgba(19, 246, 255, 0.18));
 }
 
+.shop-modal--keyboard .shop-modal__media {
+    background-image: linear-gradient(140deg, rgba(10, 30, 22, 0.7), rgba(4, 12, 9, 0.55)), url('../images/shop-keyboard.svg');
+}
+
 .shop-modal--monitor .shop-modal__mockup {
     background: linear-gradient(135deg, rgba(19, 246, 255, 0.4), rgba(10, 40, 32, 0.18));
+}
+
+.shop-modal--monitor .shop-modal__media {
+    background-image: linear-gradient(140deg, rgba(6, 20, 26, 0.65), rgba(4, 12, 14, 0.55)), url('../images/shop-monitor.svg');
 }
 
 .shop-modal--controller .shop-modal__mockup {
     background: linear-gradient(135deg, rgba(154, 255, 45, 0.35), rgba(19, 246, 255, 0.12));
 }
 
+.shop-modal--controller .shop-modal__media {
+    background-image: linear-gradient(140deg, rgba(10, 24, 16, 0.65), rgba(4, 12, 9, 0.55)), url('../images/shop-controller.svg');
+}
+
 .shop-modal--disc .shop-modal__mockup {
     background: radial-gradient(circle at 30% 30%, rgba(57, 255, 156, 0.45), rgba(4, 16, 10, 0.18));
 }
 
+.shop-modal--disc .shop-modal__media {
+    background-image: linear-gradient(140deg, rgba(8, 14, 20, 0.7), rgba(4, 12, 12, 0.6)), url('../images/shop-disc.svg');
+}
+
 .shop-modal--pixel .shop-modal__mockup {
     background: linear-gradient(135deg, rgba(255, 109, 109, 0.4), rgba(57, 255, 156, 0.18));
+}
+
+.shop-modal--pixel .shop-modal__media {
+    background-image: linear-gradient(140deg, rgba(20, 10, 16, 0.7), rgba(6, 18, 14, 0.6)), url('../images/shop-pixel.svg');
 }
 
 .shop-modal__details {
