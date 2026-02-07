@@ -1544,6 +1544,12 @@ header {
     flex: 1;
 }
 
+.game-card__header > div {
+    display: grid;
+    gap: 0.35rem;
+    flex: 1;
+}
+
 .game-card__title {
     font-size: 1.1rem;
     margin: 0;
