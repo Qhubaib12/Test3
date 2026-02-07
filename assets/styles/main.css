@@ -1535,6 +1535,13 @@ header {
     justify-content: space-between;
     align-items: flex-start;
     gap: 1rem;
+    min-height: 86px;
+}
+
+.game-card__header > div {
+    display: grid;
+    gap: 0.35rem;
+    flex: 1;
 }
 
 .game-card__header > div {
@@ -1575,6 +1582,10 @@ header {
     line-height: 1.7;
     text-shadow: 0 0 14px rgba(0, 255, 170, 0.2);
     flex: 1;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
 }
 
 .game-card__footer {
