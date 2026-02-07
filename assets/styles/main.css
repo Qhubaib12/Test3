@@ -631,6 +631,7 @@ header {
     flex-direction: column;
     gap: 1.25rem;
     padding: 1.65rem;
+    min-height: 360px;
     border-radius: var(--radius-lg);
     border: 1px solid rgba(57, 255, 156, 0.18);
     background: linear-gradient(160deg, rgba(6, 24, 15, 0.94) 0%, rgba(4, 12, 9, 0.98) 65%, rgba(2, 10, 6, 0.96) 100%);
@@ -1532,8 +1533,14 @@ header {
 .game-card__header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: 1rem;
+}
+
+.game-card__header > div {
+    display: grid;
+    gap: 0.35rem;
+    flex: 1;
 }
 
 .game-card__title {
@@ -1567,6 +1574,7 @@ header {
     font-size: 0.95rem;
     line-height: 1.7;
     text-shadow: 0 0 14px rgba(0, 255, 170, 0.2);
+    flex: 1;
 }
 
 .game-card__footer {
@@ -1579,6 +1587,7 @@ header {
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    margin-top: auto;
 }
 
 .game-card__footer span:not(.tag):not(.game-card__play) {
