@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title id="title">Pixel boss founder</title>
+  <desc id="desc">A pixel-style boss character with a neon crown and cape.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10241a" />
+      <stop offset="1" stop-color="#061b12" />
+    </linearGradient>
+    <linearGradient id="crown" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#39ff9c" />
+      <stop offset="1" stop-color="#13f6ff" />
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="24" fill="url(#bg)" />
+  <rect x="42" y="32" width="76" height="14" rx="6" fill="url(#crown)" />
+  <polygon points="50,32 60,18 70,32" fill="#39ff9c" />
+  <polygon points="70,32 80,14 90,32" fill="#13f6ff" />
+  <polygon points="90,32 100,18 110,32" fill="#39ff9c" />
+  <rect x="48" y="50" width="64" height="64" rx="12" fill="#0f2a20" stroke="#39ff9c" stroke-width="3" />
+  <rect x="62" y="68" width="12" height="12" rx="3" fill="#13f6ff" />
+  <rect x="86" y="68" width="12" height="12" rx="3" fill="#13f6ff" />
+  <rect x="70" y="90" width="20" height="8" rx="4" fill="#39ff9c" />
+  <path d="M40 118h80l-12 26H52z" fill="#102f24" stroke="#13f6ff" stroke-width="2" />
+</svg>
