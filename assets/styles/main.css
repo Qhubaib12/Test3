@@ -1717,6 +1717,14 @@ header {
     font-size: 0.95rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
+    overflow: hidden;
+}
+
+.team-card__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .team-card__meta {
