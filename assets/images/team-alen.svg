@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="title desc">
+  <title id="title">Pixel interface designer</title>
+  <desc id="desc">A pixel character with a neon visor and UI panel.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b201a" />
+      <stop offset="1" stop-color="#051510" />
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#13f6ff" />
+      <stop offset="1" stop-color="#39ff9c" />
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="24" fill="url(#bg)" />
+  <rect x="40" y="46" width="80" height="72" rx="18" fill="#0d2a20" stroke="#13f6ff" stroke-width="3" />
+  <rect x="52" y="68" width="56" height="16" rx="8" fill="url(#panel)" opacity="0.85" />
+  <rect x="58" y="94" width="44" height="8" rx="4" fill="#39ff9c" />
+  <rect x="56" y="110" width="48" height="16" rx="6" fill="#102f24" stroke="#39ff9c" stroke-width="2" />
+</svg>
