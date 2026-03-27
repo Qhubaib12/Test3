@@ -54,6 +54,8 @@
         var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         var isNarrowScreen = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
         var supportsFinePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+        var hardwareThreads = navigator.hardwareConcurrency || 8;
+        var enableAdvancedEffects = !reduceMotion && supportsFinePointer && !isNarrowScreen && hardwareThreads >= 6;
 
         function clamp(value, min, max) {
             return Math.max(min, Math.min(max, value));
@@ -83,21 +85,42 @@
         window.addEventListener('resize', onScrollOrResize);
         updateScrollExperience();
 
-        if (!reduceMotion) {
-            var aurora = document.createElement('div');
-            aurora.className = 'ui-aurora';
-            document.body.insertBefore(aurora, document.body.firstChild);
-        }
-
-        if (!reduceMotion && supportsFinePointer) {
+        if (enableAdvancedEffects) {
             var latestPointerX = 50;
             var latestPointerY = 20;
             var pointerTicking = false;
+            var aurora = null;
+            var tiltCards = Array.prototype.slice.call(document.querySelectorAll('.game-card, .feature-card, .pricing-card, .info-card, .shop-card, .team-card, .contact-card'));
+            var activeTiltCard = null;
+            var tiltTicking = false;
+            var tiltRotateX = 0;
+            var tiltRotateY = 0;
 
             function commitPointerPosition() {
+                if (!aurora) {
+                    aurora = document.createElement('div');
+                    aurora.className = 'ui-aurora';
+                    document.body.insertBefore(aurora, document.body.firstChild);
+                }
                 document.body.style.setProperty('--pointer-x', latestPointerX.toFixed(2) + '%');
                 document.body.style.setProperty('--pointer-y', latestPointerY.toFixed(2) + '%');
                 pointerTicking = false;
+            }
+
+            function commitTilt() {
+                if (!activeTiltCard) {
+                    tiltTicking = false;
+                    return;
+                }
+                activeTiltCard.style.transform = 'perspective(900px) rotateX(' + tiltRotateX.toFixed(2) + 'deg) rotateY(' + tiltRotateY.toFixed(2) + 'deg) translateY(-2px)';
+                tiltTicking = false;
+            }
+
+            function resetTiltCard(card) {
+                if (!card) {
+                    return;
+                }
+                card.style.transform = '';
             }
 
             document.addEventListener('pointermove', function (event) {
@@ -107,28 +130,40 @@
                     pointerTicking = true;
                     window.requestAnimationFrame(commitPointerPosition);
                 }
+                var hoveredCard = event.target && event.target.closest ? event.target.closest('.game-card, .feature-card, .pricing-card, .info-card, .shop-card, .team-card, .contact-card') : null;
+                if (hoveredCard && tiltCards.indexOf(hoveredCard) === -1) {
+                    hoveredCard = null;
+                }
+                if (activeTiltCard !== hoveredCard) {
+                    resetTiltCard(activeTiltCard);
+                    activeTiltCard = hoveredCard;
+                }
+                if (!activeTiltCard) {
+                    return;
+                }
+                var rect = activeTiltCard.getBoundingClientRect();
+                if (!rect.width || !rect.height) {
+                    return;
+                }
+                var relativeX = (event.clientX - rect.left) / rect.width;
+                var relativeY = (event.clientY - rect.top) / rect.height;
+                tiltRotateY = (relativeX - 0.5) * 2.4;
+                tiltRotateX = (0.5 - relativeY) * 1.9;
+                if (!tiltTicking) {
+                    tiltTicking = true;
+                    window.requestAnimationFrame(commitTilt);
+                }
             }, { passive: true });
 
-            var tiltCards = Array.prototype.slice.call(document.querySelectorAll('.game-card, .feature-card, .pricing-card, .info-card, .shop-card, .team-card, .contact-card'));
-            for (var tiltIndex = 0; tiltIndex < tiltCards.length; tiltIndex += 1) {
-                (function (card) {
-                    card.addEventListener('pointermove', function (event) {
-                        var rect = card.getBoundingClientRect();
-                        if (!rect.width || !rect.height) {
-                            return;
-                        }
-                        var relativeX = (event.clientX - rect.left) / rect.width;
-                        var relativeY = (event.clientY - rect.top) / rect.height;
-                        var rotateY = (relativeX - 0.5) * 3;
-                        var rotateX = (0.5 - relativeY) * 2.4;
-                        card.style.transform = 'perspective(900px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateY(-2px)';
-                    });
+            document.addEventListener('pointerleave', function () {
+                resetTiltCard(activeTiltCard);
+                activeTiltCard = null;
+            });
 
-                    card.addEventListener('pointerleave', function () {
-                        card.style.transform = '';
-                    });
-                })(tiltCards[tiltIndex]);
-            }
+            window.addEventListener('pagehide', function () {
+                resetTiltCard(activeTiltCard);
+                activeTiltCard = null;
+            });
         }
 
         for (var revealIndex = 0; revealIndex < revealTargets.length; revealIndex += 1) {

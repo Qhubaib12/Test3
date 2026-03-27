@@ -100,7 +100,7 @@ body::before {
             rgba(57, 255, 156, 0.04) 4px
         );
     mix-blend-mode: screen;
-    opacity: 0.55;
+    opacity: 0.4;
     z-index: 0;
 }
 
@@ -189,11 +189,18 @@ header {
     position: sticky;
     top: 0;
     z-index: 50;
-    backdrop-filter: blur(18px);
-    background: rgba(5, 14, 9, 0.88);
+    background: rgba(5, 14, 9, 0.94);
     border-bottom: 1px solid var(--border-subtle);
     box-shadow: 0 14px 30px rgba(0, 20, 10, 0.6);
     transition: background 0.35s var(--easing-smooth), box-shadow 0.35s var(--easing-smooth), border-color 0.35s var(--easing-smooth);
+}
+
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    header {
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        background: rgba(5, 14, 9, 0.88);
+    }
 }
 
 body.is-scrolled header {
@@ -2133,6 +2140,8 @@ select:focus-visible {
 .testimonials,
 .section {
     border-top: 1px solid rgba(57, 255, 156, 0.1);
+    content-visibility: auto;
+    contain-intrinsic-size: 800px;
 }
 
 .features::after,
