@@ -90,11 +90,23 @@
         }
 
         if (!reduceMotion && supportsFinePointer) {
+            var latestPointerX = 50;
+            var latestPointerY = 20;
+            var pointerTicking = false;
+
+            function commitPointerPosition() {
+                document.body.style.setProperty('--pointer-x', latestPointerX.toFixed(2) + '%');
+                document.body.style.setProperty('--pointer-y', latestPointerY.toFixed(2) + '%');
+                pointerTicking = false;
+            }
+
             document.addEventListener('pointermove', function (event) {
-                var xPercent = (event.clientX / Math.max(window.innerWidth, 1)) * 100;
-                var yPercent = (event.clientY / Math.max(window.innerHeight, 1)) * 100;
-                document.body.style.setProperty('--pointer-x', xPercent.toFixed(2) + '%');
-                document.body.style.setProperty('--pointer-y', yPercent.toFixed(2) + '%');
+                latestPointerX = (event.clientX / Math.max(window.innerWidth, 1)) * 100;
+                latestPointerY = (event.clientY / Math.max(window.innerHeight, 1)) * 100;
+                if (!pointerTicking) {
+                    pointerTicking = true;
+                    window.requestAnimationFrame(commitPointerPosition);
+                }
             }, { passive: true });
 
             var tiltCards = Array.prototype.slice.call(document.querySelectorAll('.game-card, .feature-card, .pricing-card, .info-card, .shop-card, .team-card, .contact-card'));
@@ -107,9 +119,9 @@
                         }
                         var relativeX = (event.clientX - rect.left) / rect.width;
                         var relativeY = (event.clientY - rect.top) / rect.height;
-                        var rotateY = (relativeX - 0.5) * 7;
-                        var rotateX = (0.5 - relativeY) * 6;
-                        card.style.transform = 'perspective(900px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateY(-4px)';
+                        var rotateY = (relativeX - 0.5) * 3;
+                        var rotateX = (0.5 - relativeY) * 2.4;
+                        card.style.transform = 'perspective(900px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateY(-2px)';
                     });
 
                     card.addEventListener('pointerleave', function () {

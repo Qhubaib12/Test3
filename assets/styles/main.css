@@ -20,6 +20,8 @@
     --radius-sm: 10px;
     --max-content-width: 1140px;
     --easing-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+    --space-section-xl: clamp(3.8rem, 6vw, 5.4rem);
+    --space-section-lg: clamp(3.1rem, 5vw, 4.6rem);
     font-family: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
@@ -54,7 +56,7 @@ body::after {
     top: 0;
     left: 0;
     width: calc(var(--scroll-progress) * 100%);
-    height: 3px;
+    height: 2px;
     pointer-events: none;
     z-index: 120;
     background: linear-gradient(90deg, rgba(57, 255, 156, 0.95), rgba(19, 246, 255, 0.9));
@@ -70,10 +72,10 @@ body::after {
     background:
         radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(19, 246, 255, 0.2), transparent 32%),
         radial-gradient(circle at calc(100% - var(--pointer-x)) calc(100% - var(--pointer-y)), rgba(57, 255, 156, 0.17), transparent 34%);
-    filter: blur(28px) saturate(130%);
-    opacity: 0.65;
+    filter: blur(34px) saturate(112%);
+    opacity: 0.3;
     transform: translate3d(0, 0, 0) scale(1);
-    animation: aurora-drift 14s var(--easing-smooth) infinite alternate;
+    animation: aurora-drift 24s var(--easing-smooth) infinite alternate;
 }
 
 main,
@@ -347,7 +349,7 @@ select:focus-visible {
 
 .hero {
     position: relative;
-    padding: 5.5rem 0 4.5rem;
+    padding: var(--space-section-xl) 0 var(--space-section-lg);
     overflow: hidden;
 }
 
@@ -462,7 +464,7 @@ select:focus-visible {
 
 
 .games {
-    padding: 5.5rem 0 4.5rem;
+    padding: var(--space-section-xl) 0 var(--space-section-lg);
     position: relative;
     overflow: hidden;
 }
@@ -1652,6 +1654,7 @@ select:focus-visible {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    min-height: 5.1em;
     overflow: hidden;
 }
 
@@ -1665,6 +1668,7 @@ select:focus-visible {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     margin-top: auto;
+    min-height: 2.2rem;
 }
 
 .game-card__footer span:not(.tag):not(.game-card__play) {
@@ -1744,7 +1748,8 @@ select:focus-visible {
 }
 
 .features {
-    padding: 4.5rem 0;
+    padding: var(--space-section-lg) 0;
+    position: relative;
 }
 
 .features__grid {
@@ -1944,7 +1949,7 @@ select:focus-visible {
 }
 
 .updates {
-    padding: 4.5rem 0;
+    padding: var(--space-section-lg) 0;
     background: rgba(5, 16, 11, 0.85);
     position: relative;
 }
@@ -1988,7 +1993,7 @@ select:focus-visible {
 }
 
 .testimonials {
-    padding: 4.5rem 0 5rem;
+    padding: var(--space-section-lg) 0 calc(var(--space-section-lg) + 0.4rem);
     position: relative;
 }
 
@@ -2048,7 +2053,7 @@ select:focus-visible {
 
 .page-hero {
     position: relative;
-    padding: 4.5rem 0 3.5rem;
+    padding: var(--space-section-lg) 0 calc(var(--space-section-lg) - 0.8rem);
     overflow: hidden;
     text-align: center;
 }
@@ -2120,7 +2125,28 @@ select:focus-visible {
 
 .section {
     position: relative;
-    padding: 3.75rem 0;
+    padding: var(--space-section-lg) 0;
+}
+
+.features,
+.updates,
+.testimonials,
+.section {
+    border-top: 1px solid rgba(57, 255, 156, 0.1);
+}
+
+.features::after,
+.updates::after,
+.testimonials::after,
+.section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(57, 255, 156, 0.3) 22%, rgba(19, 246, 255, 0.28) 50%, rgba(57, 255, 156, 0.3) 78%, transparent);
 }
 
 .section::before {
