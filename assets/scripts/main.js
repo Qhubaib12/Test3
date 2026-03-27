@@ -47,10 +47,89 @@
             });
         }
 
+        document.body.classList.add('js-enhanced');
+
         var revealTargets = Array.prototype.slice.call(document.querySelectorAll('.hero, .games, .features, .updates, .testimonials, .page-hero, .section'));
         var staggerGroups = Array.prototype.slice.call(document.querySelectorAll('[data-stagger-group]'));
         var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         var isNarrowScreen = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+        var supportsFinePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        function updateScrollExperience() {
+            var scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+            var scrollHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - (window.innerHeight || 1);
+            var progress = scrollHeight > 0 ? clamp(scrollTop / scrollHeight, 0, 1) : 0;
+            document.body.style.setProperty('--scroll-progress', progress.toFixed(4));
+            document.body.classList.toggle('is-scrolled', scrollTop > 16);
+        }
+
+        var scrollTicking = false;
+        function onScrollOrResize() {
+            if (scrollTicking) {
+                return;
+            }
+            scrollTicking = true;
+            window.requestAnimationFrame(function () {
+                updateScrollExperience();
+                scrollTicking = false;
+            });
+        }
+
+        window.addEventListener('scroll', onScrollOrResize, { passive: true });
+        window.addEventListener('resize', onScrollOrResize);
+        updateScrollExperience();
+
+        if (!reduceMotion) {
+            var aurora = document.createElement('div');
+            aurora.className = 'ui-aurora';
+            document.body.insertBefore(aurora, document.body.firstChild);
+        }
+
+        if (!reduceMotion && supportsFinePointer) {
+            var latestPointerX = 50;
+            var latestPointerY = 20;
+            var pointerTicking = false;
+
+            function commitPointerPosition() {
+                document.body.style.setProperty('--pointer-x', latestPointerX.toFixed(2) + '%');
+                document.body.style.setProperty('--pointer-y', latestPointerY.toFixed(2) + '%');
+                pointerTicking = false;
+            }
+
+            document.addEventListener('pointermove', function (event) {
+                latestPointerX = (event.clientX / Math.max(window.innerWidth, 1)) * 100;
+                latestPointerY = (event.clientY / Math.max(window.innerHeight, 1)) * 100;
+                if (!pointerTicking) {
+                    pointerTicking = true;
+                    window.requestAnimationFrame(commitPointerPosition);
+                }
+            }, { passive: true });
+
+            var tiltCards = Array.prototype.slice.call(document.querySelectorAll('.game-card, .feature-card, .pricing-card, .info-card, .shop-card, .team-card, .contact-card'));
+            for (var tiltIndex = 0; tiltIndex < tiltCards.length; tiltIndex += 1) {
+                (function (card) {
+                    card.addEventListener('pointermove', function (event) {
+                        var rect = card.getBoundingClientRect();
+                        if (!rect.width || !rect.height) {
+                            return;
+                        }
+                        var relativeX = (event.clientX - rect.left) / rect.width;
+                        var relativeY = (event.clientY - rect.top) / rect.height;
+                        var rotateY = (relativeX - 0.5) * 3;
+                        var rotateX = (0.5 - relativeY) * 2.4;
+                        card.style.transform = 'perspective(900px) rotateX(' + rotateX.toFixed(2) + 'deg) rotateY(' + rotateY.toFixed(2) + 'deg) translateY(-2px)';
+                    });
+
+                    card.addEventListener('pointerleave', function () {
+                        card.style.transform = '';
+                    });
+                })(tiltCards[tiltIndex]);
+            }
+        }
 
         for (var revealIndex = 0; revealIndex < revealTargets.length; revealIndex += 1) {
             revealTargets[revealIndex].classList.add('motion-reveal');
