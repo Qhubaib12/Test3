@@ -630,6 +630,17 @@ select:focus-visible {
     justify-content: center;
 }
 
+.games-toolbar__status {
+    width: 100%;
+    margin: 0;
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: 0.88rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+
 .filter-button {
     background: rgba(8, 32, 22, 0.85);
     border: 1px solid rgba(57, 255, 156, 0.18);
