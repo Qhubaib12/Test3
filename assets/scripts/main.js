@@ -388,9 +388,15 @@
                 toggleDisplay(emptyState, visibleCount === 0, 'block');
                 if (resultsStatus) {
                     var filterLabel = activeFilter === 'all' ? 'all genres' : activeFilter.replace('-', ' ');
-                    var searchLabel = searchTerm ? ' for "' + searchTerm + '"' : '';
                     var gameLabel = visibleCount === 1 ? 'game' : 'games';
-                    resultsStatus.textContent = visibleCount + ' ' + gameLabel + ' shown in ' + filterLabel + searchLabel + '.';
+                    var statusParts = [visibleCount + ' ' + gameLabel + ' shown'];
+                    if (activeFilter !== 'all') {
+                        statusParts.push(filterLabel);
+                    }
+                    if (searchTerm) {
+                        statusParts.push('"' + searchTerm + '"');
+                    }
+                    resultsStatus.textContent = statusParts.join(' \u00b7 ');
                 }
             }
 
