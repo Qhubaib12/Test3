@@ -345,6 +345,7 @@
             var filterButtons = Array.prototype.slice.call(document.querySelectorAll('.filter-button'));
             var gameCards = Array.prototype.slice.call(gameGrid.querySelectorAll('.game-card'));
             var searchInput = document.getElementById('game-search');
+            var resultsStatus = document.getElementById('games-results-status');
             var activeFilter = 'all';
             var searchTerm = '';
 
@@ -385,6 +386,12 @@
                     }
                 }
                 toggleDisplay(emptyState, visibleCount === 0, 'block');
+                if (resultsStatus) {
+                    var filterLabel = activeFilter === 'all' ? 'all genres' : activeFilter.replace('-', ' ');
+                    var searchLabel = searchTerm ? ' for "' + searchTerm + '"' : '';
+                    var gameLabel = visibleCount === 1 ? 'game' : 'games';
+                    resultsStatus.textContent = visibleCount + ' ' + gameLabel + ' shown in ' + filterLabel + searchLabel + '.';
+                }
             }
 
             for (var j = 0; j < filterButtons.length; j += 1) {
