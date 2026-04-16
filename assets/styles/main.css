@@ -630,6 +630,26 @@ select:focus-visible {
     justify-content: center;
 }
 
+.games-toolbar__status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    max-width: 100%;
+    margin: 0.2rem auto 0;
+    padding: 0.34rem 0.75rem;
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
+    text-transform: none;
+    border-radius: 999px;
+    border: 1px solid rgba(57, 255, 156, 0.2);
+    background: rgba(6, 26, 17, 0.85);
+    box-shadow: inset 0 0 0 1px rgba(19, 246, 255, 0.08);
+    opacity: 0.92;
+}
+
 .filter-button {
     background: rgba(8, 32, 22, 0.85);
     border: 1px solid rgba(57, 255, 156, 0.18);
