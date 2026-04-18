@@ -64,6 +64,49 @@ body::after {
     transition: width 0.12s linear;
 }
 
+.space-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+#space-bg-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 0.9;
+}
+
+.space-bg__nebula {
+    position: absolute;
+    inset: -10%;
+    background:
+        radial-gradient(circle at 58% 46%, rgba(88, 255, 184, 0.24) 0%, rgba(54, 220, 146, 0.13) 23%, transparent 56%),
+        radial-gradient(circle at 50% 58%, rgba(39, 154, 104, 0.14) 0%, transparent 52%);
+    filter: blur(18px) saturate(118%);
+    opacity: 0.82;
+    animation: home-nebula-breathe 14s ease-in-out infinite alternate;
+}
+
+@keyframes home-nebula-breathe {
+    from {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 0.76;
+    }
+    to {
+        transform: translate3d(-0.8%, 0.6%, 0) scale(1.06);
+        opacity: 0.95;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .space-bg__nebula {
+        animation: none;
+    }
+}
+
 .ui-aurora {
     position: fixed;
     inset: -30vmax;
