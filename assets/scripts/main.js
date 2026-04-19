@@ -90,6 +90,181 @@
         updateParallax();
     }
 
+    function setupSpaceBackground(reduceMotion) {
+        var canvas = document.getElementById('space-bg-canvas');
+        if (!canvas) {
+            return;
+        }
+
+        var ctx = canvas.getContext('2d');
+        if (!ctx) {
+            return;
+        }
+
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var width = 0;
+        var height = 0;
+        var centerX = 0;
+        var centerY = 0;
+        var pointerX = 0.5;
+        var pointerY = 0.5;
+        var pointerTargetX = 0.5;
+        var pointerTargetY = 0.5;
+        var stars = [];
+        var comets = [];
+        var starCount = 0;
+        var cometCount = 96;
+
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function resize() {
+            width = window.innerWidth || document.documentElement.clientWidth || 1;
+            height = window.innerHeight || document.documentElement.clientHeight || 1;
+            centerX = width * 0.58;
+            centerY = height * 0.46;
+            canvas.width = Math.round(width * dpr);
+            canvas.height = Math.round(height * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            seedStars();
+        }
+
+        function makeStar() {
+            var depth = random(0.2, 1);
+            return {
+                x: random(0, width),
+                y: random(0, height),
+                depth: depth,
+                radius: random(0.35, 1.55) * depth,
+                drift: random(0.03, 0.18) * depth,
+                twinkle: random(0, Math.PI * 2),
+                twinkleSpeed: random(0.004, 0.02)
+            };
+        }
+
+        function makeComet(respawn) {
+            var startX = respawn ? random(-width * 0.2, width * 1.15) : random(0, width);
+            var startY = respawn ? random(-height * 1.2, -10) : random(-height, height);
+            var angle = random(0.86, 1.12);
+            var speed = random(1.2, 3.3);
+            return {
+                x: startX,
+                y: startY,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed * 1.35,
+                length: random(20, 52),
+                width: random(0.7, 1.8),
+                alpha: random(0.3, 0.95),
+                drift: random(0.85, 1.15),
+                depth: random(0.45, 1)
+            };
+        }
+
+        function seedStars() {
+            var isSmall = width < 760;
+            starCount = isSmall ? 170 : 280;
+            cometCount = isSmall ? 80 : 104;
+            stars = [];
+            for (var i = 0; i < starCount; i += 1) {
+                stars.push(makeStar());
+            }
+            comets = [];
+            for (var cometIndex = 0; cometIndex < cometCount; cometIndex += 1) {
+                comets.push(makeComet(false));
+            }
+        }
+
+        function drawGalaxy() {
+            var pointerOffsetX = (pointerX - 0.5) * 24;
+            var pointerOffsetY = (pointerY - 0.5) * 18;
+            var gradient = ctx.createRadialGradient(centerX + pointerOffsetX, centerY + pointerOffsetY, 0, centerX + pointerOffsetX, centerY + pointerOffsetY, Math.min(width, height) * 0.36);
+            gradient.addColorStop(0, 'rgba(82, 255, 178, 0.28)');
+            gradient.addColorStop(0.28, 'rgba(32, 150, 104, 0.15)');
+            gradient.addColorStop(0.65, 'rgba(8, 34, 24, 0.06)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+        }
+
+        function drawStars() {
+            var driftBase = reduceMotion ? 0.012 : 0.04;
+            for (var i = 0; i < stars.length; i += 1) {
+                var star = stars[i];
+                star.twinkle += star.twinkleSpeed;
+                star.y += driftBase + star.drift * (reduceMotion ? 0.2 : 1);
+                if (star.y > height + 3) {
+                    star.y = -3;
+                    star.x = random(0, width);
+                }
+                var parallaxX = (pointerX - 0.5) * 30 * star.depth;
+                var parallaxY = (pointerY - 0.5) * 20 * star.depth;
+                var glow = 0.65 + Math.sin(star.twinkle) * 0.35;
+                var alpha = 0.15 + star.depth * 0.5 * glow;
+                ctx.beginPath();
+                ctx.fillStyle = 'rgba(160, 255, 215, ' + alpha.toFixed(3) + ')';
+                ctx.arc(star.x + parallaxX, star.y + parallaxY, star.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawComets() {
+            for (var i = 0; i < comets.length; i += 1) {
+                var comet = comets[i];
+                var speedScale = reduceMotion ? 0.35 : 1;
+                comet.x += comet.vx * speedScale * comet.drift;
+                comet.y += comet.vy * speedScale * comet.drift;
+
+                var parallaxX = (pointerX - 0.5) * 14 * comet.depth;
+                var parallaxY = (pointerY - 0.5) * 8 * comet.depth;
+                var tailX = comet.x - comet.vx * comet.length;
+                var tailY = comet.y - comet.vy * comet.length;
+
+                var cometGradient = ctx.createLinearGradient(comet.x + parallaxX, comet.y + parallaxY, tailX + parallaxX, tailY + parallaxY);
+                cometGradient.addColorStop(0, 'rgba(109, 255, 184, ' + comet.alpha.toFixed(3) + ')');
+                cometGradient.addColorStop(0.2, 'rgba(71, 252, 162, ' + (comet.alpha * 0.72).toFixed(3) + ')');
+                cometGradient.addColorStop(1, 'rgba(33, 148, 92, 0)');
+
+                ctx.strokeStyle = cometGradient;
+                ctx.lineWidth = comet.width;
+                ctx.shadowColor = 'rgba(109, 255, 184, 0.55)';
+                ctx.shadowBlur = 6;
+                ctx.beginPath();
+                ctx.moveTo(comet.x + parallaxX, comet.y + parallaxY);
+                ctx.lineTo(tailX + parallaxX, tailY + parallaxY);
+                ctx.stroke();
+
+                if (comet.y > height + 120 || comet.x > width + 120) {
+                    comets[i] = makeComet(true);
+                }
+            }
+            ctx.shadowBlur = 0;
+        }
+
+        function animate() {
+            pointerX += (pointerTargetX - pointerX) * 0.03;
+            pointerY += (pointerTargetY - pointerY) * 0.03;
+            ctx.clearRect(0, 0, width, height);
+            drawGalaxy();
+            drawStars();
+            drawComets();
+            window.requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resize);
+        document.addEventListener('pointermove', function (event) {
+            pointerTargetX = event.clientX / Math.max(width, 1);
+            pointerTargetY = event.clientY / Math.max(height, 1);
+        }, { passive: true });
+        document.addEventListener('pointerleave', function () {
+            pointerTargetX = 0.5;
+            pointerTargetY = 0.5;
+        });
+
+        resize();
+        window.requestAnimationFrame(animate);
+    }
+
     ready(function () {
         setupPreloader();
 
@@ -133,6 +308,7 @@
         var enableAdvancedEffects = !reduceMotion && supportsFinePointer && !isNarrowScreen && hardwareThreads >= 6;
 
         setupParallaxMotion(reduceMotion);
+        setupSpaceBackground(reduceMotion);
 
         function clamp(value, min, max) {
             return Math.max(min, Math.min(max, value));
@@ -345,6 +521,7 @@
             var filterButtons = Array.prototype.slice.call(document.querySelectorAll('.filter-button'));
             var gameCards = Array.prototype.slice.call(gameGrid.querySelectorAll('.game-card'));
             var searchInput = document.getElementById('game-search');
+            var resultsStatus = document.getElementById('games-results-status');
             var activeFilter = 'all';
             var searchTerm = '';
 
@@ -385,6 +562,18 @@
                     }
                 }
                 toggleDisplay(emptyState, visibleCount === 0, 'block');
+                if (resultsStatus) {
+                    var filterLabel = activeFilter === 'all' ? 'all genres' : activeFilter.replace('-', ' ');
+                    var gameLabel = visibleCount === 1 ? 'game' : 'games';
+                    var statusParts = [visibleCount + ' ' + gameLabel + ' shown'];
+                    if (activeFilter !== 'all') {
+                        statusParts.push(filterLabel);
+                    }
+                    if (searchTerm) {
+                        statusParts.push('"' + searchTerm + '"');
+                    }
+                    resultsStatus.textContent = statusParts.join(' \u00b7 ');
+                }
             }
 
             for (var j = 0; j < filterButtons.length; j += 1) {
