@@ -111,8 +111,9 @@
         var pointerTargetX = 0.5;
         var pointerTargetY = 0.5;
         var stars = [];
-        var streaks = [];
-        var starCount = 260;
+        var comets = [];
+        var starCount = 0;
+        var cometCount = 96;
 
         function random(min, max) {
             return Math.random() * (max - min) + min;
@@ -142,39 +143,45 @@
             };
         }
 
-        function makeStreak() {
-            var startX = random(-width * 0.2, width * 1.1);
-            var startY = random(-height * 0.35, height * 0.3);
-            var angle = random(Math.PI * 0.96, Math.PI * 1.08);
-            var speed = random(3.2, 6.5);
+        function makeComet(respawn) {
+            var startX = respawn ? random(-width * 0.2, width * 1.15) : random(0, width);
+            var startY = respawn ? random(-height * 1.2, -10) : random(-height, height);
+            var angle = random(0.86, 1.12);
+            var speed = random(1.2, 3.3);
             return {
                 x: startX,
                 y: startY,
                 vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                life: random(28, 62),
-                maxLife: 62,
-                length: random(70, 130)
+                vy: Math.sin(angle) * speed * 1.35,
+                length: random(20, 52),
+                width: random(0.7, 1.8),
+                alpha: random(0.3, 0.95),
+                drift: random(0.85, 1.15),
+                depth: random(0.45, 1)
             };
         }
 
         function seedStars() {
             var isSmall = width < 760;
-            starCount = isSmall ? 220 : 340;
+            starCount = isSmall ? 170 : 280;
+            cometCount = isSmall ? 80 : 104;
             stars = [];
             for (var i = 0; i < starCount; i += 1) {
                 stars.push(makeStar());
             }
-            streaks = [];
+            comets = [];
+            for (var cometIndex = 0; cometIndex < cometCount; cometIndex += 1) {
+                comets.push(makeComet(false));
+            }
         }
 
         function drawGalaxy() {
             var pointerOffsetX = (pointerX - 0.5) * 24;
             var pointerOffsetY = (pointerY - 0.5) * 18;
             var gradient = ctx.createRadialGradient(centerX + pointerOffsetX, centerY + pointerOffsetY, 0, centerX + pointerOffsetX, centerY + pointerOffsetY, Math.min(width, height) * 0.36);
-            gradient.addColorStop(0, 'rgba(88, 255, 184, 0.42)');
-            gradient.addColorStop(0.28, 'rgba(44, 186, 126, 0.2)');
-            gradient.addColorStop(0.65, 'rgba(11, 60, 40, 0.08)');
+            gradient.addColorStop(0, 'rgba(82, 255, 178, 0.28)');
+            gradient.addColorStop(0.28, 'rgba(32, 150, 104, 0.15)');
+            gradient.addColorStop(0.65, 'rgba(8, 34, 24, 0.06)');
             gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, width, height);
@@ -193,7 +200,7 @@
                 var parallaxX = (pointerX - 0.5) * 30 * star.depth;
                 var parallaxY = (pointerY - 0.5) * 20 * star.depth;
                 var glow = 0.65 + Math.sin(star.twinkle) * 0.35;
-                var alpha = 0.24 + star.depth * 0.62 * glow;
+                var alpha = 0.15 + star.depth * 0.5 * glow;
                 ctx.beginPath();
                 ctx.fillStyle = 'rgba(160, 255, 215, ' + alpha.toFixed(3) + ')';
                 ctx.arc(star.x + parallaxX, star.y + parallaxY, star.radius, 0, Math.PI * 2);
@@ -201,35 +208,37 @@
             }
         }
 
-        function drawStreaks() {
-            if (reduceMotion) {
-                return;
-            }
-            if (streaks.length < 4 && Math.random() < 0.009) {
-                streaks.push(makeStreak());
-            }
+        function drawComets() {
+            for (var i = 0; i < comets.length; i += 1) {
+                var comet = comets[i];
+                var speedScale = reduceMotion ? 0.35 : 1;
+                comet.x += comet.vx * speedScale * comet.drift;
+                comet.y += comet.vy * speedScale * comet.drift;
 
-            for (var i = streaks.length - 1; i >= 0; i -= 1) {
-                var streak = streaks[i];
-                streak.x += streak.vx;
-                streak.y += streak.vy;
-                streak.life -= 1;
-                var life = Math.max(0, streak.life / streak.maxLife);
-                var tailX = streak.x - streak.vx * (streak.length / 10);
-                var tailY = streak.y - streak.vy * (streak.length / 10);
-                var streakGradient = ctx.createLinearGradient(streak.x, streak.y, tailX, tailY);
-                streakGradient.addColorStop(0, 'rgba(170, 255, 224, ' + (life * 0.8).toFixed(3) + ')');
-                streakGradient.addColorStop(1, 'rgba(170, 255, 224, 0)');
-                ctx.strokeStyle = streakGradient;
-                ctx.lineWidth = 1.2;
+                var parallaxX = (pointerX - 0.5) * 14 * comet.depth;
+                var parallaxY = (pointerY - 0.5) * 8 * comet.depth;
+                var tailX = comet.x - comet.vx * comet.length;
+                var tailY = comet.y - comet.vy * comet.length;
+
+                var cometGradient = ctx.createLinearGradient(comet.x + parallaxX, comet.y + parallaxY, tailX + parallaxX, tailY + parallaxY);
+                cometGradient.addColorStop(0, 'rgba(109, 255, 184, ' + comet.alpha.toFixed(3) + ')');
+                cometGradient.addColorStop(0.2, 'rgba(71, 252, 162, ' + (comet.alpha * 0.72).toFixed(3) + ')');
+                cometGradient.addColorStop(1, 'rgba(33, 148, 92, 0)');
+
+                ctx.strokeStyle = cometGradient;
+                ctx.lineWidth = comet.width;
+                ctx.shadowColor = 'rgba(109, 255, 184, 0.55)';
+                ctx.shadowBlur = 6;
                 ctx.beginPath();
-                ctx.moveTo(streak.x, streak.y);
-                ctx.lineTo(tailX, tailY);
+                ctx.moveTo(comet.x + parallaxX, comet.y + parallaxY);
+                ctx.lineTo(tailX + parallaxX, tailY + parallaxY);
                 ctx.stroke();
-                if (streak.life <= 0 || streak.y > height + 180 || streak.x < -180 || streak.x > width + 180) {
-                    streaks.splice(i, 1);
+
+                if (comet.y > height + 120 || comet.x > width + 120) {
+                    comets[i] = makeComet(true);
                 }
             }
+            ctx.shadowBlur = 0;
         }
 
         function animate() {
@@ -238,7 +247,7 @@
             ctx.clearRect(0, 0, width, height);
             drawGalaxy();
             drawStars();
-            drawStreaks();
+            drawComets();
             window.requestAnimationFrame(animate);
         }
 
