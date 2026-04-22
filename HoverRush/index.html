@@ -1,23 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hover Rush - Coming Soon</title>
-  <style>
-    body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:'Space Grotesk',system-ui,sans-serif;background:radial-gradient(circle at 20% 0%,#1f2d4f,#070b14 55%);color:#e9f2ff;padding:1rem}
-    .panel{width:min(720px,100%);text-align:center;background:rgba(10,15,28,.85);border:1px solid rgba(255,217,143,.35);border-radius:20px;padding:2rem;box-shadow:0 24px 50px rgba(0,0,0,.45)}
-    h1{margin:0 0 .7rem;color:#ffd98f;font-size:clamp(1.3rem,3vw,2rem)}
-    p{margin:.5rem 0;color:#b9c8df;line-height:1.6}
-    a{display:inline-block;margin-top:1rem;text-decoration:none;background:#ffd98f;color:#1b1203;padding:.7rem 1.1rem;border-radius:999px;font-weight:700}
-  </style>
-</head>
-<body>
-  <main class="panel">
-    <h1>Hover Rush is Coming Soon</h1>
-    <p>We're polishing this game for launch. Subscribe to Premium to get notified when it drops.</p>
-    <p><strong>Status:</strong> Coming Soon</p>
-    <a href="/premium">Explore PixelAddict Premium</a>
-  </main>
-</body>
-</html>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>Hover Rush: Rail Breaker</title><style>
+*{box-sizing:border-box}body{margin:0;background:#020403;color:#d8ffe9;font-family:'Space Grotesk',system-ui,sans-serif;overflow:hidden}
+#hud{position:fixed;inset:0 auto auto 0;z-index:3;display:flex;gap:.5rem;flex-wrap:wrap;padding:.75rem}.pill{background:#03120dd1;border:1px solid #2bffb970;padding:.42rem .7rem;border-radius:999px;font-weight:700}
+#help{position:fixed;right:.75rem;top:.75rem;background:#03120dd1;border:1px solid #2bffb955;padding:.5rem .7rem;border-radius:12px;z-index:3;max-width:360px;font-size:.85rem}
+canvas{display:block;width:100vw;height:100vh}#restart{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;border:0;background:linear-gradient(120deg,#39ff9c,#13f6ff);padding:.9rem 1.3rem;border-radius:10px;font-weight:800;display:none;cursor:pointer}
+#back{position:fixed;left:.75rem;bottom:.75rem;z-index:4;color:#8be1c1}
+</style></head><body>
+<div id="hud"><div class="pill">Score <span id="score">0</span></div><div class="pill">Speed <span id="speed">1.0x</span></div><div class="pill">Heat <span id="heat">0</span>%</div><div class="pill">Best <span id="best">0</span></div></div>
+<div id="help">A/D or ←/→ lane shift • Space for boost (adds heat) • overheat locks boost. Survive as speed climbs.</div>
+<canvas id="game"></canvas><button id="restart">REBOOT RUN</button><a id="back" href="/">← Back</a>
+<script>
+const c=document.getElementById('game'),x=c.getContext('2d');let w,h,laneX=[],runnerLane=1,yRunner,best=+localStorage.getItem('pixeladdict-hoverrush-best-v1')||0;
+const scoreEl=id('score'),speedEl=id('speed'),heatEl=id('heat'),bestEl=id('best'),restartBtn=id('restart');bestEl.textContent=best;
+let score,speed,heat,alive,obstacles,coins,trail=[];
+function id(n){return document.getElementById(n)}
+function resize(){w=innerWidth;h=innerHeight;c.width=w;c.height=h;laneX=[w*0.3,w*0.5,w*0.7];yRunner=h*0.8;}addEventListener('resize',resize);resize();
+function reset(){score=0;speed=6;heat=0;alive=true;runnerLane=1;obstacles=[];coins=[];trail=[];restartBtn.style.display='none';}
+function spawn(){if(Math.random()<0.07+speed*0.002)obstacles.push({lane:(Math.random()*3)|0,y:-80,type:Math.random()<0.2?'gate':'block'});if(Math.random()<0.05)coins.push({lane:(Math.random()*3)|0,y:-30});}
+function update(){if(!alive)return;spawn();const boosting=keys[' ']&&heat<100;speed=Math.min(19,speed+0.0025+(boosting?0.035:0));if(boosting)heat=Math.min(100,heat+1.35);else heat=Math.max(0,heat-0.75);
+const vy=speed+(boosting?7:0);
+for(const o of obstacles)o.y+=vy;for(const m of coins)m.y+=vy;obstacles=obstacles.filter(o=>o.y<h+90);coins=coins.filter(m=>m.y<h+40);
+for(const o of obstacles){if(o.lane===runnerLane && Math.abs(o.y-yRunner)<46){if(o.type==='gate'&&boosting){score+=45;o.hit=true;}else{alive=false;restartBtn.style.display='block';best=Math.max(best,Math.floor(score));localStorage.setItem('pixeladdict-hoverrush-best-v1',best);}}}
+obstacles=obstacles.filter(o=>!o.hit);
+for(const m of coins){if(m.lane===runnerLane && Math.abs(m.y-yRunner)<38){m.hit=true;score+=35;heat=Math.max(0,heat-12);}}
+coins=coins.filter(m=>!m.hit);
+score+=speed*0.42;trail.push({x:laneX[runnerLane],y:yRunner,a:1});if(trail.length>35)trail.shift();
+scoreEl.textContent=Math.floor(score);speedEl.textContent=(speed/8).toFixed(1)+'x';heatEl.textContent=Math.floor(heat);bestEl.textContent=best;
+}
+function draw(){x.fillStyle='#020403';x.fillRect(0,0,w,h);
+for(let i=0;i<50;i++){x.fillStyle='rgba(57,255,156,.03)';x.fillRect((i*73+Date.now()/8)%w,0,1,h)}
+for(const lx of laneX){x.strokeStyle='rgba(19,246,255,.25)';x.setLineDash([16,14]);x.lineWidth=2;x.beginPath();x.moveTo(lx,h);x.lineTo(lx,0);x.stroke();}
+x.setLineDash([]);
+for(const t of trail){x.fillStyle=`rgba(57,255,156,${t.a})`;x.beginPath();x.arc(t.x,yRunner+12*(1-t.a),10*(t.a+.2),0,Math.PI*2);x.fill();t.a*=.94;}
+for(const o of obstacles){x.fillStyle=o.type==='gate'?'#13f6ff':'#ff6f91';x.fillRect(laneX[o.lane]-26,o.y,52,o.type==='gate'?18:48)}
+for(const m of coins){x.fillStyle='#f5ff6b';x.beginPath();x.arc(laneX[m.lane],m.y,10,0,Math.PI*2);x.fill();}
+x.fillStyle=heat>=100?'#ff6f91':'#39ff9c';x.fillRect(laneX[runnerLane]-22,yRunner-20,44,44);
+if(!alive){x.fillStyle='rgba(0,0,0,.5)';x.fillRect(0,0,w,h);x.fillStyle='#fff';x.font='bold 42px Space Grotesk';x.textAlign='center';x.fillText('RAIL CRASH',w/2,h/2-70);}
+}
+const keys={};addEventListener('keydown',e=>{keys[e.key]=true;if(['ArrowLeft','a','A'].includes(e.key))runnerLane=Math.max(0,runnerLane-1);if(['ArrowRight','d','D'].includes(e.key))runnerLane=Math.min(2,runnerLane+1)});addEventListener('keyup',e=>keys[e.key]=false);
+restartBtn.onclick=reset;reset();(function loop(){update();draw();requestAnimationFrame(loop)})();
+</script></body></html>
