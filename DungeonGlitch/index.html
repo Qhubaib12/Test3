@@ -1,23 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dungeon Glitch - Coming Soon</title>
-  <style>
-    body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:'Space Grotesk',system-ui,sans-serif;background:radial-gradient(circle at 20% 0%,#1f2d4f,#070b14 55%);color:#e9f2ff;padding:1rem}
-    .panel{width:min(720px,100%);text-align:center;background:rgba(10,15,28,.85);border:1px solid rgba(255,217,143,.35);border-radius:20px;padding:2rem;box-shadow:0 24px 50px rgba(0,0,0,.45)}
-    h1{margin:0 0 .7rem;color:#ffd98f;font-size:clamp(1.3rem,3vw,2rem)}
-    p{margin:.5rem 0;color:#b9c8df;line-height:1.6}
-    a{display:inline-block;margin-top:1rem;text-decoration:none;background:#ffd98f;color:#1b1203;padding:.7rem 1.1rem;border-radius:999px;font-weight:700}
-  </style>
-</head>
-<body>
-  <main class="panel">
-    <h1>Dungeon Glitch is Coming Soon</h1>
-    <p>We're polishing this game for launch. Subscribe to Premium to get notified when it drops.</p>
-    <p><strong>Status:</strong> Coming Soon</p>
-    <a href="/premium">Explore PixelAddict Premium</a>
-  </main>
-</body>
-</html>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dungeon Glitch: Phase Shift</title><style>
+body{margin:0;overflow:hidden;background:#02040a;color:#d8ffe9;font-family:'Space Grotesk',system-ui,sans-serif}canvas{display:block;width:100vw;height:100vh}#ui{position:fixed;top:.8rem;left:.8rem;display:flex;gap:.45rem;flex-wrap:wrap;z-index:2} .p{background:#03120dd0;border:1px solid #35ffbb73;border-radius:999px;padding:.4rem .7rem;font-weight:700}#tip{position:fixed;right:.8rem;top:.8rem;background:#03120dd0;border:1px solid #35ffbb50;border-radius:12px;padding:.5rem .7rem;max-width:370px;font-size:.85rem}#back{position:fixed;left:.8rem;bottom:.8rem;color:#8de0bd}
+</style></head><body><div id="ui"><div class="p">Relics <span id="r">0</span></div><div class="p">HP <span id="hp">5</span></div><div class="p">Phase <span id="ph">SOLID</span></div><div class="p">Best <span id="best">0</span></div></div><div id="tip">Move with WASD/Arrows. Press Shift/Space to phase. In PHASE mode walls open, but phantoms become lethal.</div><a id="back" href="/">← Back</a><canvas id="c"></canvas>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),T=32;let W,H,cols,rows,map,player,phantoms,relics,phase=false,hp=5,score=0,best=+localStorage.getItem('pixeladdict-dungeon-best-v1')||0;id('best').textContent=best;
+function id(x){return document.getElementById(x)}function rs(){W=innerWidth;H=innerHeight;cv.width=W;cv.height=H;cols=Math.floor(W/T);rows=Math.floor(H/T);gen();}addEventListener('resize',rs);
+function gen(){map=[];for(let y=0;y<rows;y++){let row=[];for(let x=0;x<cols;x++){row.push(Math.random()<0.19||x===0||y===0||x===cols-1||y===rows-1?1:0);}map.push(row);}player={x:1,y:1};phantoms=[];relics=[];for(let i=0;i<7;i++)relics.push(randEmpty());for(let i=0;i<4;i++)phantoms.push({...randEmpty(),t:Math.random()*99});}
+function randEmpty(){let x,y;do{x=1+((Math.random()*(cols-2))|0);y=1+((Math.random()*(rows-2))|0);}while(map[y][x]);return{x,y};}
+const keys={};addEventListener('keydown',e=>{keys[e.key]=true;if(e.key===' '||e.key==='Shift')phase=!phase});addEventListener('keyup',e=>keys[e.key]=false);
+let last=0;function loop(ts){const dt=(ts-last)||16;last=ts;update(dt/16);draw();requestAnimationFrame(loop)}
+function move(dx,dy){const nx=player.x+dx,ny=player.y+dy;if(nx<0||ny<0||nx>=cols||ny>=rows)return; if(map[ny][nx]&&!phase)return; player.x=nx;player.y=ny;}
+let cool=0;function update(){cool--;if(cool<=0){if(keys.ArrowLeft||keys.a)move(-1,0);if(keys.ArrowRight||keys.d)move(1,0);if(keys.ArrowUp||keys.w)move(0,-1);if(keys.ArrowDown||keys.s)move(0,1);cool=5;}
+for(const p of phantoms){if(Math.random()<.5)p.x+=Math.sign(player.x-p.x);else p.y+=Math.sign(player.y-p.y);p.x=Math.max(1,Math.min(cols-2,p.x));p.y=Math.max(1,Math.min(rows-2,p.y));if(!phase&&map[p.y][p.x])p.x+=Math.random()<.5?1:-1; if(p.x===player.x&&p.y===player.y){hp-= phase?2:1;player={x:1,y:1};if(hp<=0){best=Math.max(best,score);localStorage.setItem('pixeladdict-dungeon-best-v1',best);id('best').textContent=best;hp=5;score=0;phase=false;gen();}}}
+for(const r of relics){if(r.x===player.x&&r.y===player.y&&!r.got){r.got=true;score++;if(score%4===0)phantoms.push({...randEmpty(),t:0});}}
+if(relics.every(r=>r.got)){relics=[];for(let i=0;i<7;i++)relics.push(randEmpty());}
+id('r').textContent=score;id('hp').textContent=hp;id('ph').textContent=phase?'PHASE':'SOLID';}
+function draw(){ctx.fillStyle=phase?'#15031f':'#02040a';ctx.fillRect(0,0,W,H);for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){if(map[y][x]){ctx.fillStyle=phase?'rgba(110,61,171,.25)':'rgba(57,255,156,.12)';ctx.fillRect(x*T,y*T,T-1,T-1);}}
+for(const r of relics){if(r.got)continue;ctx.fillStyle='#f8ff74';ctx.fillRect(r.x*T+8,r.y*T+8,16,16);}for(const p of phantoms){ctx.fillStyle=phase?'#ff5ca8':'#6dcaff';ctx.beginPath();ctx.arc(p.x*T+16,p.y*T+16,11,0,Math.PI*2);ctx.fill();}
+ctx.fillStyle='#39ff9c';ctx.fillRect(player.x*T+6,player.y*T+6,20,20);}
+rs();requestAnimationFrame(loop);
+</script></body></html>
