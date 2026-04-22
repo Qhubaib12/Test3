@@ -1,27 +1,23 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pixel Mosaic: Quad Twist</title><style>
-body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0,#0d2b24,#04070d 60%);font-family:'Space Grotesk',system-ui,sans-serif;color:#d7ffe9;display:grid;place-items:center;padding:1rem}
-.wrap{width:min(760px,100%);background:#07111dd6;border:1px solid #39ff9c66;border-radius:18px;padding:1rem;box-shadow:0 24px 55px #0008}.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
-.pill{background:#03110ce0;border:1px solid #2dffb160;border-radius:999px;padding:.35rem .7rem;font-weight:700}#board{display:grid;grid-template-columns:repeat(7,1fr);gap:.35rem;margin-top:1rem}.tile{aspect-ratio:1;border-radius:9px;border:1px solid #ffffff2a;cursor:pointer;position:relative}
-.tile.sel{outline:2px solid #fff} .controls{margin-top:.8rem;display:flex;gap:.45rem;flex-wrap:wrap}button{border:0;border-radius:9px;padding:.6rem .9rem;font-weight:800;background:linear-gradient(120deg,#39ff9c,#13f6ff);color:#002018;cursor:pointer}
-.log{min-height:56px;margin-top:.7rem;background:#02070f;border:1px solid #ffffff1a;border-radius:10px;padding:.55rem;color:#9ad8bc}a{color:#8edec0}
-</style></head><body><main class="wrap"><div class="top"><h1>PIXEL MOSAIC // QUAD TWIST</h1><div style="display:flex;gap:.35rem;flex-wrap:wrap"><div class="pill">Score <span id="score">0</span></div><div class="pill">Moves <span id="moves">22</span></div><div class="pill">Chain <span id="chain">0</span></div><div class="pill">Best <span id="best">0</span></div></div></div>
-<div id="board"></div><div class="controls"><button id="rotL">Rotate ↺</button><button id="rotR">Rotate ↻</button><button id="restart">Restart</button><a href="/">← Back</a></div><div class="log" id="log"></div></main>
-<script>
-const size=7,colors=['#39ff9c','#13f6ff','#ff7bb0','#f8ff74','#8d7dff'];let grid=[],sel=null,score=0,moves=22,chain=0,best=+localStorage.getItem('pixeladdict-mosaic-best-v1')||0;id('best').textContent=best;
-function id(x){return document.getElementById(x)}
-function init(){grid=[...Array(size)].map(()=>[...Array(size)].map(()=>randC()));sel=null;score=0;moves=22;chain=0;render('Pick any 2x2 cluster, rotate, and create matches of 3+. Cascades boost chain points.');}
-function randC(){return colors[(Math.random()*colors.length)|0]}
-function draw(){const b=id('board');b.innerHTML='';for(let y=0;y<size;y++)for(let x=0;x<size;x++){const t=document.createElement('button');t.className='tile'+(sel&&sel.x===x&&sel.y===y?' sel':'');t.style.background=grid[y][x];t.onclick=()=>{if(x<size-1&&y<size-1){sel={x,y};draw();}};b.appendChild(t);}id('score').textContent=score;id('moves').textContent=moves;id('chain').textContent=chain;id('best').textContent=best;}
-function rotate(dir){if(moves<=0||!sel)return;const {x,y}=sel;let a=grid[y][x],b=grid[y][x+1],c=grid[y+1][x],d=grid[y+1][x+1];
-if(dir==='R'){grid[y][x]=c;grid[y][x+1]=a;grid[y+1][x+1]=b;grid[y+1][x]=d;}else{grid[y][x]=b;grid[y][x+1]=d;grid[y+1][x+1]=c;grid[y+1][x]=a;}moves--;resolve();if(moves<=0){best=Math.max(best,score);localStorage.setItem('pixeladdict-mosaic-best-v1',best);render('Out of moves. Restart for another run.');}}
-function resolve(){let removed=0,m=[...Array(size)].map(()=>Array(size).fill(false));
-for(let y=0;y<size;y++){let run=1;for(let x=1;x<=size;x++){if(x<size&&grid[y][x]===grid[y][x-1])run++;else{if(run>=3)for(let k=0;k<run;k++)m[y][x-1-k]=true;run=1;}}}
-for(let x=0;x<size;x++){let run=1;for(let y=1;y<=size;y++){if(y<size&&grid[y][x]===grid[y-1][x])run++;else{if(run>=3)for(let k=0;k<run;k++)m[y-1-k][x]=true;run=1;}}}
-for(let y=0;y<size;y++)for(let x=0;x<size;x++)if(m[y][x]){grid[y][x]=null;removed++;}
-if(!removed){chain=0;draw();return;}
-chain++;score+=removed*10*chain;for(let x=0;x<size;x++){let col=[];for(let y=size-1;y>=0;y--)if(grid[y][x])col.push(grid[y][x]);for(let y=size-1;y>=0;y--)grid[y][x]=col[size-1-y]||randC();}
-render(`Cascade x${chain} • cleared ${removed} tiles.`);setTimeout(resolve,120);
-}
-function render(msg){id('log').textContent=msg;draw();}
-id('rotL').onclick=()=>rotate('L');id('rotR').onclick=()=>rotate('R');id('restart').onclick=init;init();
-</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pixel Mosaic - Coming Soon</title>
+  <style>
+    body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:'Space Grotesk',system-ui,sans-serif;background:radial-gradient(circle at 20% 0%,#1f2d4f,#070b14 55%);color:#e9f2ff;padding:1rem}
+    .panel{width:min(720px,100%);text-align:center;background:rgba(10,15,28,.85);border:1px solid rgba(255,217,143,.35);border-radius:20px;padding:2rem;box-shadow:0 24px 50px rgba(0,0,0,.45)}
+    h1{margin:0 0 .7rem;color:#ffd98f;font-size:clamp(1.3rem,3vw,2rem)}
+    p{margin:.5rem 0;color:#b9c8df;line-height:1.6}
+    a{display:inline-block;margin-top:1rem;text-decoration:none;background:#ffd98f;color:#1b1203;padding:.7rem 1.1rem;border-radius:999px;font-weight:700}
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <h1>Pixel Mosaic is Coming Soon</h1>
+    <p>We're polishing this game for launch. Subscribe to Premium to get notified when it drops.</p>
+    <p><strong>Status:</strong> Coming Soon</p>
+    <a href="/premium">Explore PixelAddict Premium</a>
+  </main>
+</body>
+</html>

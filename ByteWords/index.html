@@ -1,149 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Byte Words: Signal Chain</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Byte Words - Coming Soon</title>
   <style>
-    :root{--bg:#05070c;--panel:#0b1220cc;--edge:#39ff9c88;--text:#d7ffe9;--muted:#84d8b2;--warn:#ff6f91;--accent:#39ff9c;--accent2:#13f6ff}
-    *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0,#113226 0,#04070d 52%,#020304 100%);font-family:'Space Grotesk',system-ui,sans-serif;color:var(--text);display:grid;place-items:center;padding:1rem}
-    .shell{width:min(880px,100%);background:var(--panel);border:1px solid var(--edge);border-radius:20px;padding:1rem;box-shadow:0 24px 60px #0009}
-    .top{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center}
-    .title{font-size:clamp(1.2rem,2.6vw,2rem);margin:0;color:var(--accent)}
-    .stats{display:flex;gap:.75rem;flex-wrap:wrap}
-    .pill{padding:.5rem .8rem;border:1px solid #2bf0be50;border-radius:999px;background:#08150fcc;font-weight:600}
-    .arena{margin-top:1rem;border:1px solid #36f7bf40;border-radius:16px;background:linear-gradient(160deg,#091019,#050a12);padding:1.1rem}
-    .prompt{font-size:clamp(1.5rem,5vw,2.8rem);font-weight:700;letter-spacing:.08em;text-align:center;padding:.8rem;border:1px solid #ffffff1e;border-radius:12px;background:#02060c}
-    .hint{text-align:center;color:var(--muted);margin:.8rem 0;font-size:.95rem}
-    .input-row{display:flex;gap:.6rem}
-    input{flex:1;background:#03120f;border:1px solid #2af2b46b;color:var(--text);border-radius:10px;padding:.8rem;font-size:1.05rem}
-    button{background:linear-gradient(110deg,var(--accent),var(--accent2));border:0;color:#00140d;font-weight:700;border-radius:10px;padding:.8rem 1rem;cursor:pointer}
-    .feed{margin-top:.9rem;height:120px;overflow:auto;padding:.7rem;border-radius:10px;background:#02070f;border:1px solid #ffffff17;font-size:.95rem}
-    .ok{color:#8dffc6}.bad{color:#ff9eb6}
-    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:.8rem;gap:.7rem;flex-wrap:wrap}
-    .small{font-size:.86rem;color:#8ec6ac}
-    a{color:var(--accent2)}
-    @media (max-width:640px){.input-row{flex-direction:column}button{width:100%}}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:'Space Grotesk',system-ui,sans-serif;background:radial-gradient(circle at 20% 0%,#1f2d4f,#070b14 55%);color:#e9f2ff;padding:1rem}
+    .panel{width:min(720px,100%);text-align:center;background:rgba(10,15,28,.85);border:1px solid rgba(255,217,143,.35);border-radius:20px;padding:2rem;box-shadow:0 24px 50px rgba(0,0,0,.45)}
+    h1{margin:0 0 .7rem;color:#ffd98f;font-size:clamp(1.3rem,3vw,2rem)}
+    p{margin:.5rem 0;color:#b9c8df;line-height:1.6}
+    a{display:inline-block;margin-top:1rem;text-decoration:none;background:#ffd98f;color:#1b1203;padding:.7rem 1.1rem;border-radius:999px;font-weight:700}
   </style>
 </head>
 <body>
-  <main class="shell">
-    <div class="top">
-      <h1 class="title">BYTE WORDS // SIGNAL CHAIN</h1>
-      <div class="stats">
-        <div class="pill">Score <span id="score">0</span></div>
-        <div class="pill">Combo <span id="combo">x1</span></div>
-        <div class="pill">Time <span id="time">45</span>s</div>
-        <div class="pill">Best <span id="best">0</span></div>
-      </div>
-    </div>
-    <section class="arena">
-      <div id="prompt" class="prompt">READY</div>
-      <p class="hint">Type the highlighted word before the pulse expires. Accurate streaks increase letter speed + score multiplier.</p>
-      <div class="input-row">
-        <input id="answer" autocomplete="off" placeholder="Type and press Enter">
-        <button id="submit" type="button">Transmit</button>
-        <button id="restart" type="button">Restart</button>
-      </div>
-      <div id="feed" class="feed"></div>
-      <div class="footer">
-        <div class="small">Instant restart • escalating pace • streak bonus timing window.</div>
-        <a href="/">← Back to PixelAddict</a>
-      </div>
-    </section>
+  <main class="panel">
+    <h1>Byte Words is Coming Soon</h1>
+    <p>We're polishing this game for launch. Subscribe to Premium to get notified when it drops.</p>
+    <p><strong>Status:</strong> Coming Soon</p>
+    <a href="/premium">Explore PixelAddict Premium</a>
   </main>
-  <script>
-    const words = `alpha bolt cipher delta orbit glitch pixel vector neon pulse quantum turbo ghost synth arcade logic crash drift maze matrix shard reactor plasma codec hyper lucky vault prism byte tidal nimbus nova ghostline signal turret strike ember rift`.split(/\s+/);
-    const scoreEl = document.getElementById('score');
-    const comboEl = document.getElementById('combo');
-    const timeEl = document.getElementById('time');
-    const bestEl = document.getElementById('best');
-    const promptEl = document.getElementById('prompt');
-    const answerEl = document.getElementById('answer');
-    const feed = document.getElementById('feed');
-    const bestKey = 'pixeladdict-bytewords-best-v1';
-    let best = Number(localStorage.getItem(bestKey) || 0);
-    bestEl.textContent = best;
-
-    let score = 0, combo = 1, timeLeft = 45, running = false, current = '', timer = 0, targetWindow = 3000;
-
-    function chooseWord(){
-      current = words[(Math.random() * words.length) | 0];
-      promptEl.textContent = current.toUpperCase();
-      timer = performance.now();
-      targetWindow = Math.max(1200, 3000 - combo * 70);
-      promptEl.style.textShadow = '0 0 18px rgba(57,255,156,.55)';
-    }
-
-    function push(msg, cls){
-      const item = document.createElement('div');
-      item.className = cls;
-      item.textContent = msg;
-      feed.prepend(item);
-      while (feed.children.length > 12) feed.removeChild(feed.lastChild);
-    }
-
-    function submitAnswer(){
-      if (!running) return;
-      const guess = answerEl.value.trim().toLowerCase();
-      answerEl.value = '';
-      if (!guess) return;
-      const elapsed = performance.now() - timer;
-      if (guess === current){
-        const speedBonus = Math.max(0, Math.round((targetWindow - elapsed) / 70));
-        score += 12 * combo + speedBonus;
-        combo = Math.min(12, combo + 1);
-        timeLeft = Math.min(60, timeLeft + 1);
-        push(`LOCKED ${current.toUpperCase()} +${12 * combo + speedBonus}`, 'ok');
-        chooseWord();
-      } else {
-        combo = 1;
-        timeLeft = Math.max(0, timeLeft - 2);
-        push(`PACKET DROP (you typed ${guess})`, 'bad');
-      }
-      render();
-    }
-
-    function tick(){
-      if (!running) return;
-      timeLeft -= 0.1 + combo * 0.008;
-      if (timeLeft <= 0){
-        timeLeft = 0;
-        running = false;
-        promptEl.textContent = 'LINK LOST';
-        push('Round complete. Hit restart for instant reboot.', 'bad');
-        if (score > best){ best = score; localStorage.setItem(bestKey, String(best)); }
-        render();
-        return;
-      }
-      if (performance.now() - timer > targetWindow){
-        combo = 1;
-        timeLeft = Math.max(0, timeLeft - 1.4);
-        push('Timeout! signal decayed.', 'bad');
-        chooseWord();
-      }
-      render();
-    }
-
-    function render(){
-      scoreEl.textContent = Math.floor(score);
-      comboEl.textContent = 'x' + combo;
-      timeEl.textContent = Math.ceil(timeLeft);
-      bestEl.textContent = best;
-    }
-
-    function restart(){
-      score = 0; combo = 1; timeLeft = 45; running = true; feed.innerHTML = '';
-      chooseWord(); render(); answerEl.focus();
-      push('Signal chain live. Type fast.', 'ok');
-    }
-
-    document.getElementById('submit').addEventListener('click', submitAnswer);
-    document.getElementById('restart').addEventListener('click', restart);
-    answerEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submitAnswer(); });
-    setInterval(tick, 100);
-    restart();
-  </script>
 </body>
 </html>

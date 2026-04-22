@@ -1,26 +1,23 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mecha Tactics: Grid Hold</title><style>
-body{margin:0;background:#03060d;color:#d4ffe8;font-family:'Space Grotesk',system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;padding:1rem}
-.wrap{width:min(860px,100%);background:#071020d9;border:1px solid #3cffaf66;border-radius:18px;padding:1rem;box-shadow:0 25px 50px #0008}.top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
-.pill{background:#04130dcc;border:1px solid #2ef0b462;padding:.4rem .7rem;border-radius:999px;font-weight:700}#grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.45rem;margin-top:1rem}
-.cell{aspect-ratio:1;background:#020911;border:1px solid #173b31;border-radius:10px;display:grid;place-items:center;font-size:1.2rem;cursor:pointer;transition:.15s}.cell:hover{border-color:#42ffc2;transform:translateY(-1px)}
-.log{margin-top:.8rem;min-height:72px;background:#02060e;border:1px solid #ffffff1c;border-radius:10px;padding:.7rem;color:#9fd8be}
-.actions{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.7rem}button{border:0;background:linear-gradient(120deg,#39ff9c,#13f6ff);color:#00170f;font-weight:800;padding:.62rem .9rem;border-radius:9px;cursor:pointer}
-a{color:#87d8b7}
-</style></head><body><main class="wrap"><div class="top"><h1>MECHA TACTICS // GRID HOLD</h1><div style="display:flex;gap:.4rem;flex-wrap:wrap"><div class="pill">Wave <span id="wave">1</span></div><div class="pill">Energy <span id="energy">3</span></div><div class="pill">HP <span id="hp">10</span></div><div class="pill">Best <span id="best">1</span></div></div></div>
-<div id="grid"></div><div class="actions"><button id="pulse">Pulse Blast (-2 energy)</button><button id="fortify">Fortify (+2 shield)</button><button id="restart">Restart</button><a href="/">← Back</a></div><div class="log" id="log"></div></main>
-<script>
-const N=6,gridEl=document.getElementById('grid'),waveEl=id('wave'),energyEl=id('energy'),hpEl=id('hp'),logEl=id('log'),bestEl=id('best');function id(x){return document.getElementById(x)}
-let state,best=+localStorage.getItem('pixeladdict-mecha-best-v1')||1;bestEl.textContent=best;
-function init(){state={wave:1,hp:10,energy:3,shield:0,player:{x:2,y:5},enemies:[],ended:false};spawnWave();render('Hold the grid. Click adjacent cells to move/attack.');}
-function spawnWave(){state.enemies=[];let count=Math.min(8,2+state.wave);for(let i=0;i<count;i++){state.enemies.push({x:(Math.random()*N)|0,y:(Math.random()*2)|0,hp:1+Math.floor(state.wave/4)});}state.energy=Math.min(6,state.energy+2);}
-function render(msg=''){waveEl.textContent=state.wave;energyEl.textContent=state.energy;hpEl.textContent=state.hp;gridEl.innerHTML='';
-for(let y=0;y<N;y++)for(let x=0;x<N;x++){const b=document.createElement('button');b.className='cell';b.dataset.x=x;b.dataset.y=y;let txt='';if(state.player.x===x&&state.player.y===y)txt='🤖';const e=state.enemies.find(m=>m.x===x&&m.y===y);if(e)txt='👾';b.textContent=txt;b.onclick=()=>tap(x,y);gridEl.appendChild(b);}if(msg)logEl.textContent=msg;}
-function tap(x,y){if(state.ended)return;const d=Math.abs(x-state.player.x)+Math.abs(y-state.player.y);if(d!==1){render('Move one tile only.');return;}const idx=state.enemies.findIndex(e=>e.x===x&&e.y===y);
-if(idx>=0){state.enemies[idx].hp--;render('Slash strike landed.');if(state.enemies[idx].hp<=0){state.enemies.splice(idx,1);state.energy=Math.min(6,state.energy+1);}}
-else{state.player={x,y};state.energy=Math.min(6,state.energy+0.4);}enemyTurn();}
-function enemyTurn(){for(const e of state.enemies){let dx=Math.sign(state.player.x-e.x),dy=Math.sign(state.player.y-e.y);if(Math.random()<.5)e.x=Math.max(0,Math.min(N-1,e.x+dx));else e.y=Math.max(0,Math.min(N-1,e.y+dy));if(e.x===state.player.x&&e.y===state.player.y){if(state.shield>0)state.shield--;else state.hp--;}}
-if(state.hp<=0){state.ended=true;best=Math.max(best,state.wave);localStorage.setItem('pixeladdict-mecha-best-v1',best);bestEl.textContent=best;render('System down. Restart to try again.');return;}
-if(state.enemies.length===0){state.wave++;spawnWave();render('Wave cleared. Enemy patterns accelerate.');return;}render();}
-id('pulse').onclick=()=>{if(state.ended)return;if(state.energy<2){render('Not enough energy.');return;}state.energy-=2;state.enemies=state.enemies.filter(e=>Math.abs(e.x-state.player.x)+Math.abs(e.y-state.player.y)>2);enemyTurn();};
-id('fortify').onclick=()=>{if(state.ended)return;state.shield=Math.min(3,state.shield+2);state.energy=Math.max(0,state.energy-1);enemyTurn();};id('restart').onclick=init;init();
-</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mecha Tactics - Coming Soon</title>
+  <style>
+    body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:'Space Grotesk',system-ui,sans-serif;background:radial-gradient(circle at 20% 0%,#1f2d4f,#070b14 55%);color:#e9f2ff;padding:1rem}
+    .panel{width:min(720px,100%);text-align:center;background:rgba(10,15,28,.85);border:1px solid rgba(255,217,143,.35);border-radius:20px;padding:2rem;box-shadow:0 24px 50px rgba(0,0,0,.45)}
+    h1{margin:0 0 .7rem;color:#ffd98f;font-size:clamp(1.3rem,3vw,2rem)}
+    p{margin:.5rem 0;color:#b9c8df;line-height:1.6}
+    a{display:inline-block;margin-top:1rem;text-decoration:none;background:#ffd98f;color:#1b1203;padding:.7rem 1.1rem;border-radius:999px;font-weight:700}
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <h1>Mecha Tactics is Coming Soon</h1>
+    <p>We're polishing this game for launch. Subscribe to Premium to get notified when it drops.</p>
+    <p><strong>Status:</strong> Coming Soon</p>
+    <a href="/premium">Explore PixelAddict Premium</a>
+  </main>
+</body>
+</html>
